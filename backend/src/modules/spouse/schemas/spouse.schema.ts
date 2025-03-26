@@ -13,6 +13,12 @@ export class Spouse {
     person2: mongoose.Schema.Types.ObjectId;
 
     @Prop()
+    husbandOrder?: number;
+
+    @Prop()
+    wifeOrder?: number;
+
+    @Prop()
     marriageDate?: Date;
 
     @Prop()
