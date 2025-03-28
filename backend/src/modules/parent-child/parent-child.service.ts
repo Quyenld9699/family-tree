@@ -1,26 +1,93 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateParentChildDto } from './dto/create-parent-child.dto';
 import { UpdateParentChildDto } from './dto/update-parent-child.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { ParentChild } from './schemas/parent-child.schema';
+import { Model, Types } from 'mongoose';
 
 @Injectable()
 export class ParentChildService {
-  create(createParentChildDto: CreateParentChildDto) {
-    return 'This action adds a new parentChild';
-  }
+    constructor(@InjectModel(ParentChild.name) private readonly parentChildModel: Model<ParentChild>) {}
 
-  findAll() {
-    return `This action returns all parentChild`;
-  }
+    async create(createParentChildDto: CreateParentChildDto) {
+        const newParentChild = await this.parentChildModel.create(createParentChildDto);
+        return await newParentChild.populate([{ path: 'parent', populate: ['husband', 'wife'] }, 'child']);
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} parentChild`;
-  }
+    async findAll() {
+        return await this.parentChildModel
+            .find()
+            .populate([{ path: 'parent', populate: ['husband', 'wife'] }, 'child'])
+            .exec();
+    }
 
-  update(id: number, updateParentChildDto: UpdateParentChildDto) {
-    return `This action updates a #${id} parentChild`;
-  }
+    async findOne(id: string) {
+        if (!Types.ObjectId.isValid(id)) {
+            throw new NotFoundException(`Invalid parent-child relationship ID: ${id}`);
+        }
 
-  remove(id: number) {
-    return `This action removes a #${id} parentChild`;
-  }
+        const parentChild = await this.parentChildModel
+            .findById(id)
+            .populate([{ path: 'parent', populate: ['husband', 'wife'] }, 'child'])
+            .exec();
+
+        if (!parentChild) {
+            throw new NotFoundException(`Parent-child relationship with ID ${id} not found`);
+        }
+
+        return parentChild;
+    }
+
+    async findByChild(childId: string) {
+        if (!Types.ObjectId.isValid(childId)) {
+            throw new NotFoundException(`Invalid child ID: ${childId}`);
+        }
+
+        return await this.parentChildModel
+            .find({ child: childId })
+            .populate([{ path: 'parent', populate: ['husband', 'wife'] }, 'child'])
+            .exec();
+    }
+
+    async findByParent(parentId: string) {
+        if (!Types.ObjectId.isValid(parentId)) {
+            throw new NotFoundException(`Invalid parent ID: ${parentId}`);
+        }
+
+        return await this.parentChildModel
+            .find({ parent: parentId })
+            .populate([{ path: 'parent', populate: ['husband', 'wife'] }, 'child'])
+            .exec();
+    }
+
+    async update(id: string, updateParentChildDto: UpdateParentChildDto) {
+        if (!Types.ObjectId.isValid(id)) {
+            throw new NotFoundException(`Invalid parent-child relationship ID: ${id}`);
+        }
+
+        const updatedParentChild = await this.parentChildModel
+            .findByIdAndUpdate(id, updateParentChildDto, { new: true })
+            .populate([{ path: 'parent', populate: ['husband', 'wife'] }, 'child'])
+            .exec();
+
+        if (!updatedParentChild) {
+            throw new NotFoundException(`Parent-child relationship with ID ${id} not found`);
+        }
+
+        return updatedParentChild;
+    }
+
+    async remove(id: string) {
+        if (!Types.ObjectId.isValid(id)) {
+            throw new NotFoundException(`Invalid parent-child relationship ID: ${id}`);
+        }
+
+        const deletedParentChild = await this.parentChildModel.findByIdAndDelete(id).exec();
+
+        if (!deletedParentChild) {
+            throw new NotFoundException(`Parent-child relationship with ID ${id} not found`);
+        }
+
+        return { message: `Parent-child relationship with ID ${id} has been successfully deleted` };
+    }
 }

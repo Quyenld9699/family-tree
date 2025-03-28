@@ -7,10 +7,10 @@ export type SpouseDocument = HydratedDocument<Spouse>;
 @Schema({ timestamps: true })
 export class Spouse {
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Person.name, required: true })
-    person1: mongoose.Schema.Types.ObjectId;
+    husband: mongoose.Schema.Types.ObjectId;
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Person.name, required: true })
-    person2: mongoose.Schema.Types.ObjectId;
+    wife: mongoose.Schema.Types.ObjectId;
 
     @Prop()
     husbandOrder?: number;

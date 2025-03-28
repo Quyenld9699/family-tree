@@ -1,34 +1,52 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsBoolean, IsString, IsDate } from 'class-validator';
+import { Type } from 'class-transformer';
 import { Gender } from 'src/constants';
 
 export class CreatePersonDto {
-    @ApiProperty({ description: 'Citizen id' })
+    @ApiProperty({ required: false, description: 'Citizen id' })
+    @IsOptional()
+    @IsString()
     cccd?: string;
 
     @ApiProperty({ required: true, description: 'The name of the person' })
     @IsNotEmpty({ message: 'Name is required' })
+    @IsString()
     name: string;
 
-    @ApiProperty({ description: 'The avatar of the person' })
+    @ApiProperty({ required: false, description: 'The avatar of the person' })
+    @IsOptional()
+    @IsString()
     avatar?: string;
 
-    @ApiProperty({ required: true, description: 'The gender of the person' })
+    @ApiProperty({ required: true, description: 'The gender of the person', enum: Gender })
     @IsNotEmpty({ message: 'Gender is required' })
     gender: Gender;
 
-    @ApiProperty({ description: 'The date of birth of the person' })
+    @ApiProperty({ required: false, description: 'The date of birth of the person' })
+    @IsOptional()
+    @IsDate()
+    @Type(() => Date)
     birth?: Date;
 
-    @ApiProperty({ description: 'The date of death of the person' })
+    @ApiProperty({ required: false, description: 'The date of death of the person' })
+    @IsOptional()
+    @IsDate()
+    @Type(() => Date)
     death?: Date;
 
-    @ApiProperty({ default: false, description: 'Is the person dead?' })
-    isDead: boolean;
+    @ApiProperty({ required: false, default: false, description: 'Is the person dead?' })
+    @IsOptional()
+    @IsBoolean()
+    isDead?: boolean;
 
-    @ApiProperty({ description: 'The address of the person' })
+    @ApiProperty({ required: false, description: 'The address of the person' })
+    @IsOptional()
+    @IsString()
     address?: string;
 
-    @ApiProperty({ description: 'The description of the person' })
+    @ApiProperty({ required: false, description: 'The description of the person' })
+    @IsOptional()
+    @IsString()
     desc?: string;
 }

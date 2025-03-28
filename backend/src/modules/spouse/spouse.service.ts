@@ -1,26 +1,75 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSpouseDto } from './dto/create-spouse.dto';
 import { UpdateSpouseDto } from './dto/update-spouse.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Spouse } from './schemas/spouse.schema';
+import { Model, Types } from 'mongoose';
 
 @Injectable()
 export class SpouseService {
-  create(createSpouseDto: CreateSpouseDto) {
-    return 'This action adds a new spouse';
-  }
+    constructor(@InjectModel(Spouse.name) private readonly spouseModel: Model<Spouse>) {}
 
-  findAll() {
-    return `This action returns all spouse`;
-  }
+    async create(createSpouseDto: CreateSpouseDto) {
+        const newSpouse = await this.spouseModel.create(createSpouseDto);
+        return await newSpouse.populate(['husband', 'wife']);
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} spouse`;
-  }
+    async findAll() {
+        return await this.spouseModel.find().populate(['husband', 'wife']).exec();
+    }
 
-  update(id: number, updateSpouseDto: UpdateSpouseDto) {
-    return `This action updates a #${id} spouse`;
-  }
+    async findOne(id: string) {
+        if (!Types.ObjectId.isValid(id)) {
+            throw new NotFoundException(`Invalid spouse relationship ID: ${id}`);
+        }
 
-  remove(id: number) {
-    return `This action removes a #${id} spouse`;
-  }
+        const spouse = await this.spouseModel.findById(id).populate(['husband', 'wife']).exec();
+
+        if (!spouse) {
+            throw new NotFoundException(`Spouse relationship with ID ${id} not found`);
+        }
+
+        return spouse;
+    }
+
+    async update(id: string, updateSpouseDto: UpdateSpouseDto) {
+        if (!Types.ObjectId.isValid(id)) {
+            throw new NotFoundException(`Invalid spouse relationship ID: ${id}`);
+        }
+
+        const updatedSpouse = await this.spouseModel.findByIdAndUpdate(id, updateSpouseDto, { new: true }).populate(['husband', 'wife']).exec();
+
+        if (!updatedSpouse) {
+            throw new NotFoundException(`Spouse relationship with ID ${id} not found`);
+        }
+
+        return updatedSpouse;
+    }
+
+    async remove(id: string) {
+        if (!Types.ObjectId.isValid(id)) {
+            throw new NotFoundException(`Invalid spouse relationship ID: ${id}`);
+        }
+
+        const deletedSpouse = await this.spouseModel.findByIdAndDelete(id).exec();
+
+        if (!deletedSpouse) {
+            throw new NotFoundException(`Spouse relationship with ID ${id} not found`);
+        }
+
+        return { message: `Spouse relationship with ID ${id} has been successfully deleted` };
+    }
+
+    async findByPerson(personId: string) {
+        if (!Types.ObjectId.isValid(personId)) {
+            throw new NotFoundException(`Invalid person ID: ${personId}`);
+        }
+
+        return await this.spouseModel
+            .find({
+                $or: [{ husband: personId }, { wife: personId }],
+            })
+            .populate(['husband', 'wife'])
+            .exec();
+    }
 }
