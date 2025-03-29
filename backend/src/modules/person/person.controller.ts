@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, Query } from '@nestjs/common';
 import { PersonService } from './person.service';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { Person } from './schemas/person.schema';
 
 @ApiTags('Person')
@@ -78,5 +78,30 @@ export class PersonController {
     })
     remove(@Param('id') id: string) {
         return this.personService.remove(id);
+    }
+
+    @Get(':id/generations/:generations')
+    @ApiOperation({ summary: 'Get N generations of a person including spouse relationships and children' })
+    @ApiParam({ name: 'id', description: 'Person ID' })
+    @ApiParam({ name: 'generations', required: true, type: Number, description: 'Number of generations to get' })
+    @ApiResponse({
+        status: HttpStatus.OK,
+        description: 'Return N generations of the person',
+        schema: {
+            type: 'object',
+            properties: {
+                person: { type: 'object', $ref: '#/components/schemas/Person' },
+                spouseRelationships: { type: 'array', items: { $ref: '#/components/schemas/Spouse' } },
+                children: { type: 'array', items: { $ref: '#/components/schemas/ParentChild' } },
+            },
+        },
+    })
+    @ApiResponse({
+        status: HttpStatus.NOT_FOUND,
+        description: 'Person not found',
+    })
+    getNGenerations(@Param('id') id: string, @Param('generations') generations: number) {
+        console.log(id, generations);
+        return this.personService.getNGenerations(id, generations);
     }
 }

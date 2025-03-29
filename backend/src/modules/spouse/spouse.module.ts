@@ -8,5 +8,6 @@ import { Spouse, SpouseSchema } from './schemas/spouse.schema';
     imports: [MongooseModule.forFeature([{ name: Spouse.name, schema: SpouseSchema }])],
     controllers: [SpouseController],
     providers: [SpouseService],
+    exports: [SpouseService],
 })
 export class SpouseModule {}

@@ -45,8 +45,16 @@ export class ParentChildService {
 
         return await this.parentChildModel
             .find({ child: childId })
-            .populate([{ path: 'parent', populate: ['husband', 'wife'] }, 'child'])
+            .populate([{ path: 'parent', populate: ['husband', 'wife'] }])
             .exec();
+    }
+
+    async findAllChildIdsByParent(parentId: string) {
+        if (!Types.ObjectId.isValid(parentId)) {
+            throw new NotFoundException(`Invalid parent ID: ${parentId}`);
+        }
+
+        return await this.parentChildModel.find({ parent: parentId }).distinct('child').exec();
     }
 
     async findByParent(parentId: string) {
@@ -54,10 +62,7 @@ export class ParentChildService {
             throw new NotFoundException(`Invalid parent ID: ${parentId}`);
         }
 
-        return await this.parentChildModel
-            .find({ parent: parentId })
-            .populate([{ path: 'parent', populate: ['husband', 'wife'] }, 'child'])
-            .exec();
+        return await this.parentChildModel.find({ parent: parentId }).populate(['child']).exec();
     }
 
     async update(id: string, updateParentChildDto: UpdateParentChildDto) {

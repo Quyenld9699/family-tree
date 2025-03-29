@@ -8,5 +8,6 @@ import { ParentChild, ParentChildSchema } from './schemas/parent-child.schema';
     imports: [MongooseModule.forFeature([{ name: ParentChild.name, schema: ParentChildSchema }])],
     controllers: [ParentChildController],
     providers: [ParentChildService],
+    exports: [ParentChildService],
 })
 export class ParentChildModule {}

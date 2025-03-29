@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { Gender } from 'src/constants';
 
-export type UserDocument = HydratedDocument<Person>;
+export type PersonDocument = HydratedDocument<Person>;
 
 @Schema({ timestamps: true })
 export class Person {

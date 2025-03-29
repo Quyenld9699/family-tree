@@ -65,11 +65,9 @@ export class SpouseService {
             throw new NotFoundException(`Invalid person ID: ${personId}`);
         }
 
-        return await this.spouseModel
-            .find({
-                $or: [{ husband: personId }, { wife: personId }],
-            })
-            .populate(['husband', 'wife'])
-            .exec();
+        const res1 = await this.spouseModel.find({ husband: personId }).populate(['wife']).exec();
+        const res2 = await this.spouseModel.find({ wife: personId }).populate(['husband']).exec();
+
+        return [...res1, ...res2];
     }
 }
