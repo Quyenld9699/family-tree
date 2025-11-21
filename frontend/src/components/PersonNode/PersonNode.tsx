@@ -13,17 +13,33 @@ export type TPersionNode = Omit<Node, 'data' | 'type'> & {
 };
 
 export type PersonNodeProps = Omit<NodeProps, 'data'> & {
-    data: PersonInfo;
+    data: PersonInfo & { _id?: string };
+    onClick?: (personData: PersonInfo & { _id?: string }) => void;
 };
 export default function PersonNode(props: PersonNodeProps) {
+    const handleClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (props.onClick) {
+            props.onClick(props.data);
+        }
+    };
+
+    // Get avatar URL or default based on gender
+    const avatarSrc = props.data.avatar && props.data.avatar.trim() !== '' ? props.data.avatar : props.data.gender === Gender.MALE ? Avatar_Male : Avatar_Female;
+
+    // Format birth date
+    const birthDate = props.data.birth ? (typeof props.data.birth === 'string' ? new Date(props.data.birth) : props.data.birth) : null;
+    const birthStr = birthDate ? birthDate.toLocaleDateString() : '';
+
     return (
         <div
-            className={`border-2 ${props.data.gender === Gender.MALE ? 'border-blue-500' : 'border-pink-500'} bg-white rounded-md p-2 text-center`}
+            className={`border-2 ${props.data.gender === Gender.MALE ? 'border-blue-500' : 'border-pink-500'} bg-white rounded-md p-2 text-center cursor-pointer hover:shadow-lg transition-shadow`}
             style={{ minWidth: PersonNodeWidth, maxWidth: PersonNodeWidth, height: PersonNodeHeight }}
+            onClick={handleClick}
         >
             <Handle type="target" position={Position.Top} id={'tt'} style={{ opacity: 0 }} />
             <Image
-                src={props.data.avatar}
+                src={avatarSrc}
                 alt={props.data.name}
                 width={50}
                 height={50}
@@ -33,7 +49,7 @@ export default function PersonNode(props: PersonNodeProps) {
                 }}
             />
             <p className="text-sm font-bold">{props.data.name}</p>
-            <p className="text-xs text-gray-500">{props.data.birth?.toLocaleDateString() || ''}</p>
+            <p className="text-xs text-gray-500">{birthStr}</p>
             <Handle type="source" position={Position.Bottom} id={'sb'} style={{ opacity: 0 }} />
         </div>
     );
