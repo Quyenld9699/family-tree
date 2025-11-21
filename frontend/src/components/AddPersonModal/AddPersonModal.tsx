@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Modal from '../Modal/Modal';
 import personService, { Person } from 'src/services/personService';
+import { Gender } from 'src/utils/genderUtils';
 
 interface AddPersonModalProps {
     isOpen: boolean;
@@ -15,7 +16,7 @@ export default function AddPersonModal({ isOpen, onClose, onSuccess }: AddPerson
         cccd: '',
         name: '',
         avatar: '',
-        gender: 'MALE',
+        gender: Gender.MALE,
         birth: undefined,
         death: undefined,
         isDead: false,
@@ -47,7 +48,7 @@ export default function AddPersonModal({ isOpen, onClose, onSuccess }: AddPerson
             cccd: '',
             name: '',
             avatar: '',
-            gender: 'MALE',
+            gender: Gender.MALE,
             birth: undefined,
             death: undefined,
             isDead: false,
@@ -109,12 +110,11 @@ export default function AddPersonModal({ isOpen, onClose, onSuccess }: AddPerson
                     <label className="block text-sm font-medium text-gray-700 mb-1">Giới tính</label>
                     <select
                         value={formData.gender}
-                        onChange={(e) => setFormData({ ...formData, gender: e.target.value as 'MALE' | 'FEMALE' | 'OTHER' })}
+                        onChange={(e) => setFormData({ ...formData, gender: parseInt(e.target.value) as 0 | 1 })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     >
-                        <option value="MALE">Nam</option>
-                        <option value="FEMALE">Nữ</option>
-                        <option value="OTHER">Khác</option>
+                        <option value={Gender.MALE}>Nam</option>
+                        <option value={Gender.FEMALE}>Nữ</option>
                     </select>
                 </div>
 

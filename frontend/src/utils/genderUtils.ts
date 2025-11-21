@@ -1,11 +1,10 @@
-// Gender enum from backend: MALE = 0, FEMALE = 1, OTHER = 2
+// Gender enum from backend: MALE = 0, FEMALE = 1
 export const Gender = {
     MALE: 0,
     FEMALE: 1,
-    OTHER: 2,
 } as const;
 
-export type GenderValue = 0 | 1 | 2 | 'MALE' | 'FEMALE' | 'OTHER';
+export type GenderValue = 0 | 1 | 'MALE' | 'FEMALE';
 
 /**
  * Check if gender is MALE (handles both number and string)
@@ -27,5 +26,5 @@ export const isFemale = (gender: GenderValue | undefined): boolean => {
 export const getGenderText = (gender: GenderValue | undefined): string => {
     if (isMale(gender)) return 'Nam';
     if (isFemale(gender)) return 'Nữ';
-    return 'Khác';
+    return 'Không xác định';
 };

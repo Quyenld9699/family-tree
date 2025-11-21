@@ -6,7 +6,7 @@ import { Person } from 'src/services/personService';
 import personService from 'src/services/personService';
 import spouseService, { SpouseWithDetails } from 'src/services/spouseService';
 import parentChildService, { ParentChildWithDetails } from 'src/services/parentChildService';
-import { getGenderText } from 'src/utils/genderUtils';
+import { getGenderText, Gender } from 'src/utils/genderUtils';
 
 interface PersonDetailModalProps {
     isOpen: boolean;
@@ -218,13 +218,12 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                                     Giới tính <span className="text-red-500">*</span>
                                 </label>
                                 <select
-                                    value={editForm.gender || 'MALE'}
-                                    onChange={(e) => setEditForm({ ...editForm, gender: e.target.value as 'MALE' | 'FEMALE' | 'OTHER' })}
+                                    value={editForm.gender ?? Gender.MALE}
+                                    onChange={(e) => setEditForm({ ...editForm, gender: parseInt(e.target.value) as 0 | 1 })}
                                     className="w-full px-3 py-2 border rounded"
                                 >
-                                    <option value="MALE">Nam</option>
-                                    <option value="FEMALE">Nữ</option>
-                                    <option value="OTHER">Khác</option>
+                                    <option value={Gender.MALE}>Nam</option>
+                                    <option value={Gender.FEMALE}>Nữ</option>
                                 </select>
                             </div>
                             <div>

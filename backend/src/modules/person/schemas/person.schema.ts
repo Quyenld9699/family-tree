@@ -15,7 +15,7 @@ export class Person {
     @Prop()
     avatar: string;
 
-    @Prop({ required: true })
+    @Prop({ required: true, type: Number, enum: [Gender.MALE, Gender.FEMALE] })
     gender: Gender;
 
     @Prop({ default: null })

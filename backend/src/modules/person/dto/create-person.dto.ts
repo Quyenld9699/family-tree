@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsBoolean, IsString, IsDate } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsNotEmpty, IsOptional, IsBoolean, IsString, IsDate, IsEnum } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
 import { Gender } from 'src/constants';
 
 export class CreatePersonDto {
@@ -21,6 +21,13 @@ export class CreatePersonDto {
 
     @ApiProperty({ required: true, description: 'The gender of the person', enum: Gender })
     @IsNotEmpty({ message: 'Gender is required' })
+    @Transform(({ value }) => {
+        // Convert string to number if needed
+        if (value === 'MALE' || value === 0) return Gender.MALE;
+        if (value === 'FEMALE' || value === 1) return Gender.FEMALE;
+        return value;
+    })
+    @IsEnum(Gender, { message: 'Gender must be 0 (MALE) or 1 (FEMALE)' })
     gender: Gender;
 
     @ApiProperty({ required: false, description: 'The date of birth of the person' })
