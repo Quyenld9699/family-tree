@@ -95,4 +95,36 @@ export class ParentChildService {
 
         return { message: `Parent-child relationship with ID ${id} has been successfully deleted` };
     }
+
+    /**
+     * Delete all parent-child relationships where person is the child (cascade delete)
+     */
+    async deleteChildRelationships(childId: string) {
+        if (!Types.ObjectId.isValid(childId)) {
+            throw new NotFoundException(`Invalid child ID: ${childId}`);
+        }
+
+        const result = await this.parentChildModel.deleteMany({ child: childId }).exec();
+
+        return {
+            message: `Deleted ${result.deletedCount} parent-child relationship(s) for child`,
+            deletedCount: result.deletedCount,
+        };
+    }
+
+    /**
+     * Delete all parent-child relationships for a spouse relationship (cascade delete)
+     */
+    async deleteByParentId(parentId: string) {
+        if (!Types.ObjectId.isValid(parentId)) {
+            throw new NotFoundException(`Invalid parent ID: ${parentId}`);
+        }
+
+        const result = await this.parentChildModel.deleteMany({ parent: parentId }).exec();
+
+        return {
+            message: `Deleted ${result.deletedCount} parent-child relationship(s) for parent`,
+            deletedCount: result.deletedCount,
+        };
+    }
 }

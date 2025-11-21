@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -17,8 +17,22 @@ export class PersonService {
 
     async create(createPersonDto: CreatePersonDto) {
         console.log(createPersonDto);
-        const newPerson = await this.personModel.create(createPersonDto);
-        return newPerson;
+
+        // Check if CCCD already exists
+        const existingPerson = await this.personModel.findOne({ cccd: createPersonDto.cccd }).exec();
+        if (existingPerson) {
+            throw new ConflictException(`CCCD ${createPersonDto.cccd} đã tồn tại trong hệ thống`);
+        }
+
+        try {
+            const newPerson = await this.personModel.create(createPersonDto);
+            return newPerson;
+        } catch (error) {
+            if (error.code === 11000) {
+                throw new ConflictException(`CCCD ${createPersonDto.cccd} đã tồn tại trong hệ thống`);
+            }
+            throw error;
+        }
     }
 
     async findAll() {
@@ -44,13 +58,34 @@ export class PersonService {
             throw new NotFoundException(`Invalid person ID: ${id}`);
         }
 
-        const updatedPerson = await this.personModel.findByIdAndUpdate(id, updatePersonDto, { new: true }).exec();
+        // Check if CCCD is being updated and if it already exists
+        if (updatePersonDto.cccd) {
+            const existingPerson = await this.personModel
+                .findOne({
+                    cccd: updatePersonDto.cccd,
+                    _id: { $ne: id },
+                })
+                .exec();
 
-        if (!updatedPerson) {
-            throw new NotFoundException(`Person with ID ${id} not found`);
+            if (existingPerson) {
+                throw new ConflictException(`CCCD ${updatePersonDto.cccd} đã tồn tại trong hệ thống`);
+            }
         }
 
-        return updatedPerson;
+        try {
+            const updatedPerson = await this.personModel.findByIdAndUpdate(id, updatePersonDto, { new: true }).exec();
+
+            if (!updatedPerson) {
+                throw new NotFoundException(`Person with ID ${id} not found`);
+            }
+
+            return updatedPerson;
+        } catch (error) {
+            if (error.code === 11000) {
+                throw new ConflictException(`CCCD ${updatePersonDto.cccd} đã tồn tại trong hệ thống`);
+            }
+            throw error;
+        }
     }
 
     async remove(id: string) {
@@ -58,13 +93,23 @@ export class PersonService {
             throw new NotFoundException(`Invalid person ID: ${id}`);
         }
 
-        const deletedPerson = await this.personModel.findByIdAndDelete(id).exec();
-
-        if (!deletedPerson) {
+        const person = await this.personModel.findById(id).exec();
+        if (!person) {
             throw new NotFoundException(`Person with ID ${id} not found`);
         }
 
-        return { message: `Person with ID ${id} has been successfully deleted` };
+        // Delete all spouse relationships where this person is husband or wife
+        await this.spouseService.deleteSpousesByPersonId(id);
+
+        // Delete all parent-child relationships where this person is a child
+        await this.parentChildService.deleteChildRelationships(id);
+
+        // Delete the person
+        await this.personModel.findByIdAndDelete(id).exec();
+
+        return {
+            message: `Person with ID ${id} and all related relationships have been successfully deleted`,
+        };
     }
 
     async getGenerationByPerson(personId: string) {

@@ -4,10 +4,10 @@ import { Type } from 'class-transformer';
 import { Gender } from 'src/constants';
 
 export class CreatePersonDto {
-    @ApiProperty({ required: false, description: 'Citizen id' })
-    @IsOptional()
+    @ApiProperty({ required: true, description: 'Citizen id (unique)' })
+    @IsNotEmpty({ message: 'CCCD is required' })
     @IsString()
-    cccd?: string;
+    cccd: string;
 
     @ApiProperty({ required: true, description: 'The name of the person' })
     @IsNotEmpty({ message: 'Name is required' })
