@@ -6,6 +6,7 @@ import React from 'react';
 import { Gender, PersonNodeHeight, PersonNodeWidth } from 'src/constants';
 import { Avatar_Female, Avatar_Male } from 'src/constants/imagePaths';
 import { PersonInfo } from 'src/schema/PersonInfo';
+import { isMale } from 'src/utils/genderUtils';
 
 export type TPersionNode = Omit<Node, 'data' | 'type'> & {
     data: PersonInfo;
@@ -25,7 +26,7 @@ export default function PersonNode(props: PersonNodeProps) {
     };
 
     // Get avatar URL or default based on gender
-    const avatarSrc = props.data.avatar && props.data.avatar.trim() !== '' ? props.data.avatar : props.data.gender === Gender.MALE ? Avatar_Male : Avatar_Female;
+    const avatarSrc = props.data.avatar && props.data.avatar.trim() !== '' ? props.data.avatar : isMale(props.data.gender) ? Avatar_Male : Avatar_Female;
 
     // Format birth date
     const birthDate = props.data.birth ? (typeof props.data.birth === 'string' ? new Date(props.data.birth) : props.data.birth) : null;
@@ -33,7 +34,7 @@ export default function PersonNode(props: PersonNodeProps) {
 
     return (
         <div
-            className={`border-2 ${props.data.gender === Gender.MALE ? 'border-blue-500' : 'border-pink-500'} bg-white rounded-md p-2 text-center cursor-pointer hover:shadow-lg transition-shadow`}
+            className={`border-2 ${isMale(props.data.gender) ? 'border-blue-500' : 'border-pink-500'} bg-white rounded-md p-2 text-center cursor-pointer hover:shadow-lg transition-shadow`}
             style={{ minWidth: PersonNodeWidth, maxWidth: PersonNodeWidth, height: PersonNodeHeight }}
             onClick={handleClick}
         >
@@ -45,7 +46,7 @@ export default function PersonNode(props: PersonNodeProps) {
                 height={50}
                 className="rounded-full mx-auto"
                 onError={(e) => {
-                    e.currentTarget.src = props.data.gender === Gender.MALE ? Avatar_Male : Avatar_Female;
+                    e.currentTarget.src = isMale(props.data.gender) ? Avatar_Male : Avatar_Female;
                 }}
             />
             <p className="text-sm font-bold">{props.data.name}</p>

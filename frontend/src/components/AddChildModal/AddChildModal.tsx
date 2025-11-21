@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../Modal/Modal';
 import parentChildService, { ParentChild } from 'src/services/parentChildService';
 import personService, { Person } from 'src/services/personService';
+import { getGenderText } from 'src/utils/genderUtils';
 
 interface AddChildModalProps {
     isOpen: boolean;
@@ -95,7 +96,7 @@ export default function AddChildModal({ isOpen, onClose, onSuccess, spouseId }: 
                         <option value="">-- Chọn con --</option>
                         {persons.map((person) => (
                             <option key={person._id} value={person._id}>
-                                {person.name} ({person.gender === 'MALE' ? 'Nam' : 'Nữ'}){person.birth ? ` - ${new Date(person.birth).getFullYear()}` : ''}
+                                {person.name} ({getGenderText(person.gender)}){person.birth ? ` - ${new Date(person.birth).getFullYear()}` : ''}
                             </option>
                         ))}
                     </select>

@@ -1,12 +1,15 @@
 import api from './api';
 
 // Định nghĩa các interface
+// Gender enum from backend: MALE = 0, FEMALE = 1, OTHER = 2
+export type Gender = 0 | 1 | 2 | 'MALE' | 'FEMALE' | 'OTHER';
+
 export interface Person {
     _id?: string;
     cccd?: string;
     name: string;
     avatar?: string;
-    gender: 'MALE' | 'FEMALE' | 'OTHER';
+    gender: Gender;
     birth?: Date;
     death?: Date;
     isDead?: boolean;

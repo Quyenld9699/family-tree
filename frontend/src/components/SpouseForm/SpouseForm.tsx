@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../Modal/Modal';
 import spouseService, { Spouse, SpouseWithDetails } from 'src/services/spouseService';
 import personService, { Person } from 'src/services/personService';
+import { isMale, isFemale } from 'src/utils/genderUtils';
 
 interface SpouseFormProps {
     isOpen: boolean;
@@ -96,8 +97,8 @@ export default function SpouseForm({ isOpen, onClose, onSuccess, spouse }: Spous
         }
     };
 
-    const malePersons = persons.filter((p) => p.gender === 'MALE');
-    const femalePersons = persons.filter((p) => p.gender === 'FEMALE');
+    const malePersons = persons.filter((p) => isMale(p.gender));
+    const femalePersons = persons.filter((p) => isFemale(p.gender));
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={spouse ? 'Cập nhật quan hệ vợ chồng' : 'Thêm quan hệ vợ chồng'}>

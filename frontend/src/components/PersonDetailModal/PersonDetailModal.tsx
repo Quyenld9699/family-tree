@@ -6,6 +6,7 @@ import { Person } from 'src/services/personService';
 import personService from 'src/services/personService';
 import spouseService, { SpouseWithDetails } from 'src/services/spouseService';
 import parentChildService, { ParentChildWithDetails } from 'src/services/parentChildService';
+import { getGenderText } from 'src/utils/genderUtils';
 
 interface PersonDetailModalProps {
     isOpen: boolean;
@@ -268,7 +269,7 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                     ) : (
                         <div className="grid grid-cols-2 gap-3 text-sm">
                             <div>
-                                <span className="text-gray-600">Giới tính:</span> <span className="font-medium">{person.gender === 'MALE' ? 'Nam' : person.gender === 'FEMALE' ? 'Nữ' : 'Khác'}</span>
+                                <span className="text-gray-600">Giới tính:</span> <span className="font-medium">{getGenderText(person.gender)}</span>
                             </div>
                             {person.cccd && (
                                 <div>

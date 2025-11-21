@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject, forwardRef, ConflictException } from '@nestjs/common';
 import { CreateSpouseDto } from './dto/create-spouse.dto';
 import { UpdateSpouseDto } from './dto/update-spouse.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -15,6 +15,34 @@ export class SpouseService {
     ) {}
 
     async create(createSpouseDto: CreateSpouseDto) {
+        // Validate husband order - check if this order already exists for this husband
+        if (createSpouseDto.husbandOrder) {
+            const existingHusbandOrder = await this.spouseModel
+                .findOne({
+                    husband: createSpouseDto.husband,
+                    husbandOrder: createSpouseDto.husbandOrder,
+                })
+                .exec();
+
+            if (existingHusbandOrder) {
+                throw new ConflictException(`Husband already has a spouse with order ${createSpouseDto.husbandOrder}. Please choose a different order.`);
+            }
+        }
+
+        // Validate wife order - check if this order already exists for this wife
+        if (createSpouseDto.wifeOrder) {
+            const existingWifeOrder = await this.spouseModel
+                .findOne({
+                    wife: createSpouseDto.wife,
+                    wifeOrder: createSpouseDto.wifeOrder,
+                })
+                .exec();
+
+            if (existingWifeOrder) {
+                throw new ConflictException(`Wife already has a spouse with order ${createSpouseDto.wifeOrder}. Please choose a different order.`);
+            }
+        }
+
         const newSpouse = await this.spouseModel.create(createSpouseDto);
         return await newSpouse.populate(['husband', 'wife']);
     }
@@ -40,6 +68,42 @@ export class SpouseService {
     async update(id: string, updateSpouseDto: UpdateSpouseDto) {
         if (!Types.ObjectId.isValid(id)) {
             throw new NotFoundException(`Invalid spouse relationship ID: ${id}`);
+        }
+
+        // Get current spouse record
+        const currentSpouse = await this.spouseModel.findById(id).exec();
+        if (!currentSpouse) {
+            throw new NotFoundException(`Spouse relationship with ID ${id} not found`);
+        }
+
+        // Validate husband order if being updated
+        if (updateSpouseDto.husbandOrder !== undefined && updateSpouseDto.husbandOrder !== currentSpouse.husbandOrder) {
+            const existingHusbandOrder = await this.spouseModel
+                .findOne({
+                    husband: updateSpouseDto.husband || currentSpouse.husband,
+                    husbandOrder: updateSpouseDto.husbandOrder,
+                    _id: { $ne: id }, // Exclude current record
+                })
+                .exec();
+
+            if (existingHusbandOrder) {
+                throw new ConflictException(`Husband already has a spouse with order ${updateSpouseDto.husbandOrder}. Please choose a different order.`);
+            }
+        }
+
+        // Validate wife order if being updated
+        if (updateSpouseDto.wifeOrder !== undefined && updateSpouseDto.wifeOrder !== currentSpouse.wifeOrder) {
+            const existingWifeOrder = await this.spouseModel
+                .findOne({
+                    wife: updateSpouseDto.wife || currentSpouse.wife,
+                    wifeOrder: updateSpouseDto.wifeOrder,
+                    _id: { $ne: id }, // Exclude current record
+                })
+                .exec();
+
+            if (existingWifeOrder) {
+                throw new ConflictException(`Wife already has a spouse with order ${updateSpouseDto.wifeOrder}. Please choose a different order.`);
+            }
         }
 
         const updatedSpouse = await this.spouseModel.findByIdAndUpdate(id, updateSpouseDto, { new: true }).populate(['husband', 'wife']).exec();

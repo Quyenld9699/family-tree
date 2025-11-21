@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import personService, { Person } from 'src/services/personService';
+import { getGenderText } from 'src/utils/genderUtils';
 
 interface SearchBarProps {
     onSearch: (personId: string, generations: number) => void;
@@ -121,7 +122,7 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
                             <div key={person._id} onClick={() => handleSelectPerson(person)} className="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b last:border-b-0">
                                 <div className="font-medium">{person.name}</div>
                                 <div className="text-xs text-gray-600">
-                                    CCCD: {person.cccd || 'N/A'} | Giới tính: {person.gender === 'MALE' ? 'Nam' : person.gender === 'FEMALE' ? 'Nữ' : 'Khác'}
+                                    CCCD: {person.cccd || 'N/A'} | Giới tính: {getGenderText(person.gender)}
                                 </div>
                             </div>
                         ))}
