@@ -446,44 +446,6 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {/* Parents Info */}
-                                    {parents.length > 0 && (
-                                        <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                                            <h4 className="font-semibold text-blue-800 mb-2 text-sm flex items-center gap-2">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                                                    />
-                                                </svg>
-                                                Cha mẹ
-                                            </h4>
-                                            {parents.map((pc, index) => {
-                                                const parentSpouse = pc.parent as SpouseWithDetails;
-                                                const father = typeof parentSpouse.husband === 'object' ? (parentSpouse.husband as Person) : null;
-                                                const mother = typeof parentSpouse.wife === 'object' ? (parentSpouse.wife as Person) : null;
-                                                return (
-                                                    <div key={index} className="grid grid-cols-1 gap-2 text-sm">
-                                                        {father && (
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-gray-500 w-10">Cha:</span>
-                                                                <span className="font-medium text-gray-900">{father.name}</span>
-                                                            </div>
-                                                        )}
-                                                        {mother && (
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-gray-500 w-10">Mẹ:</span>
-                                                                <span className="font-medium text-gray-900">{mother.name}</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-
                                     {/* Name & Basic Info */}
                                     <div>
                                         <h2 className="text-2xl font-bold text-gray-900 mb-1">{person.name}</h2>
@@ -556,6 +518,44 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                                         <div>
                                             <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider mb-1">Tiểu sử / Mô tả</p>
                                             <p className="text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-lg text-sm">{person.desc}</p>
+                                        </div>
+                                    )}
+
+                                    {/* Parents Info */}
+                                    {parents.length > 0 && (
+                                        <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                            <h4 className="font-semibold text-blue-800 mb-2 text-sm flex items-center gap-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                                                    />
+                                                </svg>
+                                                Cha mẹ
+                                            </h4>
+                                            {parents.map((pc, index) => {
+                                                const parentSpouse = pc.parent as SpouseWithDetails;
+                                                const father = typeof parentSpouse.husband === 'object' ? (parentSpouse.husband as Person) : null;
+                                                const mother = typeof parentSpouse.wife === 'object' ? (parentSpouse.wife as Person) : null;
+                                                return (
+                                                    <div key={index} className="grid grid-cols-1 gap-2 text-sm">
+                                                        {father && (
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-gray-500 w-10">Cha:</span>
+                                                                <span className="font-medium text-gray-900">{father.name}</span>
+                                                            </div>
+                                                        )}
+                                                        {mother && (
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-gray-500 w-10">Mẹ:</span>
+                                                                <span className="font-medium text-gray-900">{mother.name}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>
