@@ -20,7 +20,14 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 relative">
+            <Link href="/" className="absolute top-4 left-4 flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Quay lại trang chủ
+            </Link>
+
             <div className="bg-white p-8 rounded-lg shadow-md w-96">
                 <h1 className="text-2xl font-bold mb-6 text-center">Đăng nhập Admin</h1>
                 {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
@@ -54,6 +61,23 @@ export default function LoginPage() {
                         Đăng nhập bằng mã khách (Guest)
                     </Link>
                 </div>
+            </div>
+
+            <div className="mt-8 text-center text-gray-600 text-sm">
+                <p className="font-bold mb-2">Thông tin tác giả:</p>
+                <p>Họ tên: Lê Đình Quyền</p>
+                <p>
+                    Gmail:{' '}
+                    <a href="mailto:quyenld9699@gmail.com" className="text-blue-500 hover:underline">
+                        quyenld9699@gmail.com
+                    </a>
+                </p>
+                <p>
+                    SĐT:{' '}
+                    <a href="tel:0941158376" className="text-blue-500 hover:underline">
+                        0941158376
+                    </a>
+                </p>
             </div>
         </div>
     );
