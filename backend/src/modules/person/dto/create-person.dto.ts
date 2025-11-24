@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsBoolean, IsString, IsDate, IsEnum } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
-import { Gender } from 'src/constants';
+import { Gender } from '../../../constants';
 
 export class CreatePersonDto {
     @ApiProperty({ required: true, description: 'Citizen id (unique)' })

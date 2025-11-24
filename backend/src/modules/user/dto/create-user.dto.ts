@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty, IsString, IsOptional, IsEnum } from 'class-validator';
-import { UserRoles, AccountType } from 'src/constants';
+import { UserRoles, AccountType } from '../../../constants';
 
 export class CreateUserDto {
     @IsString()

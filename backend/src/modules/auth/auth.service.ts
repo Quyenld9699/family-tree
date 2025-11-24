@@ -6,7 +6,7 @@ import { Model } from 'mongoose';
 import { GuestCode, GuestCodeDocument } from './schemas/guest-code.schema';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
-import { UserRoles } from 'src/constants';
+import { UserRoles } from '../../constants';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
