@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import authService from '../../services/authService';
 import Modal from '../Modal/Modal';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 interface GuestCode {
     _id: string;
@@ -19,54 +21,56 @@ interface GuestCodeModalProps {
 }
 
 export default function GuestCodeModal({ isOpen, onClose }: GuestCodeModalProps) {
-    const [codes, setCodes] = useState<GuestCode[]>([]);
-    const [loading, setLoading] = useState(false);
+    const queryClient = useQueryClient();
     const [note, setNote] = useState('');
     const [duration, setDuration] = useState(7); // Default 7 days
-    const [generating, setGenerating] = useState(false);
 
-    useEffect(() => {
-        if (isOpen) {
-            fetchCodes();
-        }
-    }, [isOpen]);
-
-    const fetchCodes = async () => {
-        setLoading(true);
-        try {
+    // Query for guest codes
+    const { data: codes = [], isLoading } = useQuery({
+        queryKey: ['guestCodes'],
+        queryFn: async () => {
             const response = await authService.listGuestCodes();
-            setCodes(response.data);
-        } catch (error) {
-            console.error('Failed to fetch guest codes', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+            return response.data;
+        },
+        enabled: isOpen,
+    });
 
-    const handleGenerate = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setGenerating(true);
-        try {
-            await authService.generateGuestCode(duration, note);
+    // Mutation for generating code
+    const generateMutation = useMutation({
+        mutationFn: (data: { duration: number; note: string }) => authService.generateGuestCode(data.duration, data.note),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['guestCodes'] });
+            toast.success('Tạo mã thành công!');
             setNote('');
             setDuration(7);
-            fetchCodes();
-        } catch (error) {
+        },
+        onError: (error) => {
             console.error('Failed to generate code', error);
-            alert('Có lỗi xảy ra khi tạo mã');
-        } finally {
-            setGenerating(false);
-        }
+            toast.error('Có lỗi xảy ra khi tạo mã');
+        },
+    });
+
+    // Mutation for revoking code
+    const revokeMutation = useMutation({
+        mutationFn: (id: string) => authService.revokeGuestCode(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['guestCodes'] });
+            toast.success('Thu hồi mã thành công!');
+        },
+        onError: (error) => {
+            console.error('Failed to revoke code', error);
+            toast.error('Có lỗi xảy ra khi thu hồi mã');
+        },
+    });
+
+    const handleGenerate = (e: React.FormEvent) => {
+        e.preventDefault();
+        generateMutation.mutate({ duration, note });
     };
 
-    const handleRevoke = async (id: string) => {
+    const handleRevoke = (id: string) => {
         if (!confirm('Bạn có chắc chắn muốn hủy mã này?')) return;
-        try {
-            await authService.revokeGuestCode(id);
-            fetchCodes();
-        } catch (error) {
-            console.error('Failed to revoke code', error);
-        }
+        revokeMutation.mutate(id);
     };
 
     const formatDate = (dateString: string) => {
@@ -110,8 +114,12 @@ export default function GuestCodeModal({ isOpen, onClose }: GuestCodeModalProps)
                                 />
                             </div>
                             <div className="flex items-end">
-                                <button type="submit" disabled={generating} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 whitespace-nowrap">
-                                    {generating ? 'Đang tạo...' : 'Tạo mã'}
+                                <button
+                                    type="submit"
+                                    disabled={generateMutation.isPending}
+                                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 whitespace-nowrap"
+                                >
+                                    {generateMutation.isPending ? 'Đang tạo...' : 'Tạo mã'}
                                 </button>
                             </div>
                         </div>
@@ -121,7 +129,7 @@ export default function GuestCodeModal({ isOpen, onClose }: GuestCodeModalProps)
                 {/* Danh sách mã */}
                 <div>
                     <h3 className="text-lg font-semibold mb-4">Danh sách mã đã tạo</h3>
-                    {loading ? (
+                    {isLoading ? (
                         <div className="text-center py-4">Đang tải...</div>
                     ) : (
                         <div className="overflow-x-auto">
@@ -136,7 +144,7 @@ export default function GuestCodeModal({ isOpen, onClose }: GuestCodeModalProps)
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {codes.map((code) => (
+                                    {codes.map((code: GuestCode) => (
                                         <tr key={code._id} className={!code.isActive ? 'bg-gray-50 opacity-60' : ''}>
                                             <td className="px-4 py-3 whitespace-nowrap font-mono font-bold text-blue-600">{code.code}</td>
                                             <td className="px-4 py-3 whitespace-nowrap">{code.note}</td>
@@ -150,8 +158,8 @@ export default function GuestCodeModal({ isOpen, onClose }: GuestCodeModalProps)
                                             </td>
                                             <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                                                 {code.isActive && (
-                                                    <button onClick={() => handleRevoke(code._id)} className="text-red-600 hover:text-red-900">
-                                                        Hủy
+                                                    <button onClick={() => handleRevoke(code._id)} className="text-red-600 hover:text-red-900" disabled={revokeMutation.isPending}>
+                                                        {revokeMutation.isPending ? '...' : 'Hủy'}
                                                     </button>
                                                 )}
                                             </td>

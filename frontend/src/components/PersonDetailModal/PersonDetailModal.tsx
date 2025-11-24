@@ -11,6 +11,8 @@ import parentChildService, { ParentChildWithDetails } from 'src/services/parentC
 import { getGenderText, Gender } from 'src/utils/genderUtils';
 import { Avatar_Male, Avatar_Female } from 'src/constants/imagePaths';
 import { useAuth } from '../../context/AuthContext';
+import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 interface PersonDetailModalProps {
     isOpen: boolean;
@@ -23,19 +25,138 @@ interface PersonDetailModalProps {
 
 export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse, onAddChild, onUpdate }: PersonDetailModalProps) {
     const { isAdmin } = useAuth();
-    const [spouses, setSpouses] = useState<SpouseWithDetails[]>([]);
-    const [children, setChildren] = useState<{ [spouseId: string]: ParentChildWithDetails[] }>({});
-    const [parents, setParents] = useState<ParentChildWithDetails[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [spousePersons, setSpousePersons] = useState<{ [personId: string]: Person }>({});
+    const queryClient = useQueryClient();
+
     const [isEditing, setIsEditing] = useState(false);
     const [editForm, setEditForm] = useState<Partial<Person>>({});
     const avatarInputRef = useRef<HTMLInputElement>(null);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
+    // Queries
+    const { data: spouses = [], isLoading: loadingSpouses } = useQuery({
+        queryKey: ['spouses', person?._id],
+        queryFn: () => spouseService.getSpousesByPersonId(person!._id!),
+        enabled: !!isOpen && !!person?._id,
+        staleTime: 5 * 60 * 1000,
+    });
+
+    const { data: parents = [], isLoading: loadingParents } = useQuery({
+        queryKey: ['parents', person?._id],
+        queryFn: () => parentChildService.getParentsByChildId(person!._id!),
+        enabled: !!isOpen && !!person?._id,
+        staleTime: 5 * 60 * 1000,
+    });
+
+    // Children queries
+    const childrenQueries = useQueries({
+        queries: spouses.map((spouse) => ({
+            queryKey: ['children', spouse._id],
+            queryFn: () => parentChildService.getChildrenByParentId(spouse._id!),
+            enabled: !!isOpen && !!spouse._id,
+            staleTime: 5 * 60 * 1000,
+        })),
+    });
+
+    const children: { [spouseId: string]: ParentChildWithDetails[] } = {};
+    spouses.forEach((spouse, index) => {
+        if (spouse._id && childrenQueries[index].data) {
+            children[spouse._id] = childrenQueries[index].data;
+        }
+    });
+
+    // Spouse Persons Queries (for when husband/wife are strings)
+    const spouseIdsToFetch = spouses.reduce((acc, spouse) => {
+        const husbandId = typeof spouse.husband === 'string' ? spouse.husband : spouse.husband?._id;
+        const wifeId = typeof spouse.wife === 'string' ? spouse.wife : spouse.wife?._id;
+
+        if (typeof spouse.husband === 'string' && husbandId && !acc.includes(husbandId)) acc.push(husbandId);
+        if (typeof spouse.wife === 'string' && wifeId && !acc.includes(wifeId)) acc.push(wifeId);
+        return acc;
+    }, [] as string[]);
+
+    const spousePersonQueries = useQueries({
+        queries: spouseIdsToFetch.map((id) => ({
+            queryKey: ['person', id],
+            queryFn: () => personService.getPersonById(id),
+            staleTime: 5 * 60 * 1000,
+        })),
+    });
+
+    const spousePersons: { [personId: string]: Person } = {};
+    spouseIdsToFetch.forEach((id, index) => {
+        if (spousePersonQueries[index].data) {
+            spousePersons[id] = spousePersonQueries[index].data;
+        }
+    });
+
+    // Mutations
+    const updatePersonMutation = useMutation({
+        mutationFn: (data: Partial<Person>) => personService.updatePerson(person!._id!, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['persons'] });
+            queryClient.invalidateQueries({ queryKey: ['person', person?._id] });
+            toast.success('Cập nhật thành công!');
+            setIsEditing(false);
+            if (onUpdate) onUpdate();
+            onClose();
+        },
+        onError: (error: any) => {
+            console.error('Failed to update person:', error);
+            toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật!');
+        },
+    });
+
+    const deletePersonMutation = useMutation({
+        mutationFn: (id: string) => personService.deletePerson(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['persons'] });
+            toast.success('Xóa thành công!');
+            if (onUpdate) onUpdate();
+            onClose();
+        },
+        onError: (error: any) => {
+            console.error('Failed to delete person:', error);
+            toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi xóa!');
+        },
+    });
+
+    const deleteSpouseMutation = useMutation({
+        mutationFn: (id: string) => spouseService.deleteSpouse(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['spouses', person?._id] });
+            toast.success('Xóa quan hệ vợ chồng thành công!');
+            if (onUpdate) onUpdate();
+        },
+        onError: (error) => {
+            console.error('Failed to delete spouse:', error);
+            toast.error('Xóa thất bại');
+        },
+    });
+
+    const deleteChildMutation = useMutation({
+        mutationFn: (id: string) => parentChildService.deleteParentChild(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['children'] });
+            toast.success('Xóa quan hệ con cái thành công!');
+            if (onUpdate) onUpdate();
+        },
+        onError: (error) => {
+            console.error('Failed to delete child:', error);
+            toast.error('Xóa thất bại');
+        },
+    });
+
+    const loading =
+        loadingSpouses ||
+        loadingParents ||
+        childrenQueries.some((q) => q.isLoading) ||
+        updatePersonMutation.isPending ||
+        deletePersonMutation.isPending ||
+        deleteSpouseMutation.isPending ||
+        deleteChildMutation.isPending;
+
     useEffect(() => {
         if (isOpen && person?._id) {
-            loadRelationships();
             setIsEditing(false);
             setEditForm({
                 name: person.name,
@@ -49,63 +170,6 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
             });
         }
     }, [isOpen, person]);
-
-    const loadRelationships = async () => {
-        if (!person?._id) return;
-
-        setLoading(true);
-        try {
-            // Load spouse relationships
-            const spousesData = await spouseService.getSpousesByPersonId(person._id);
-            setSpouses(spousesData);
-
-            // Load parents
-            const parentsData = await parentChildService.getParentsByChildId(person._id);
-            setParents(parentsData);
-
-            // Load spouse person details if they are IDs
-            const spousePersonMap: { [personId: string]: Person } = {};
-            for (const spouse of spousesData) {
-                const husbandId = typeof spouse.husband === 'string' ? spouse.husband : spouse.husband?._id;
-                const wifeId = typeof spouse.wife === 'string' ? spouse.wife : spouse.wife?._id;
-
-                // Fetch husband details if it's an ID
-                if (typeof spouse.husband === 'string' && husbandId && !spousePersonMap[husbandId]) {
-                    try {
-                        const husbandPerson = await personService.getPersonById(husbandId);
-                        spousePersonMap[husbandId] = husbandPerson;
-                    } catch (e) {
-                        console.error('Failed to load husband:', e);
-                    }
-                }
-
-                // Fetch wife details if it's an ID
-                if (typeof spouse.wife === 'string' && wifeId && !spousePersonMap[wifeId]) {
-                    try {
-                        const wifePerson = await personService.getPersonById(wifeId);
-                        spousePersonMap[wifeId] = wifePerson;
-                    } catch (e) {
-                        console.error('Failed to load wife:', e);
-                    }
-                }
-            }
-            setSpousePersons(spousePersonMap);
-
-            // Load children for each spouse relationship
-            const childrenData: { [key: string]: ParentChildWithDetails[] } = {};
-            for (const spouse of spousesData) {
-                if (spouse._id) {
-                    const kids = await parentChildService.getChildrenByParentId(spouse._id);
-                    childrenData[spouse._id] = kids;
-                }
-            }
-            setChildren(childrenData);
-        } catch (error) {
-            console.error('Failed to load relationships:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     if (!person) return null;
 
@@ -155,9 +219,10 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
 
                 await galleryService.uploadImage(formData);
                 if (onUpdate) onUpdate();
+                toast.success('Cập nhật ảnh đại diện thành công!');
             } catch (error) {
                 console.error('Failed to upload avatar:', error);
-                alert('Upload avatar thất bại');
+                toast.error('Upload avatar thất bại');
             } finally {
                 setUploadingAvatar(false);
             }
@@ -182,66 +247,28 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
         });
     };
 
-    const handleSaveEdit = async () => {
+    const handleSaveEdit = () => {
         if (!person?._id) return;
-
-        try {
-            setLoading(true);
-            await personService.updatePerson(person._id, editForm);
-            alert('Cập nhật thành công!');
-            setIsEditing(false);
-            if (onUpdate) onUpdate();
-            onClose();
-        } catch (error: any) {
-            console.error('Failed to update person:', error);
-            alert(error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật!');
-        } finally {
-            setLoading(false);
-        }
+        updatePersonMutation.mutate(editForm);
     };
 
-    const handleDelete = async () => {
+    const handleDelete = () => {
         if (!person?._id) return;
 
         const confirmed = confirm(`Bạn có chắc chắn muốn xóa ${person.name}?\n\nLưu ý: Tất cả các mối quan hệ (vợ/chồng, con cái) liên quan đến người này cũng sẽ bị xóa.`);
         if (!confirmed) return;
 
-        try {
-            setLoading(true);
-            await personService.deletePerson(person._id);
-            alert('Xóa thành công!');
-            if (onUpdate) onUpdate();
-            onClose();
-        } catch (error: any) {
-            console.error('Failed to delete person:', error);
-            alert(error.response?.data?.message || 'Có lỗi xảy ra khi xóa!');
-        } finally {
-            setLoading(false);
-        }
+        deletePersonMutation.mutate(person._id);
     };
 
-    const handleDeleteSpouse = async (spouseId: string) => {
+    const handleDeleteSpouse = (spouseId: string) => {
         if (!confirm('Bạn có chắc chắn muốn xóa mối quan hệ vợ chồng này? Tất cả con cái chung cũng sẽ bị mất liên kết cha mẹ.')) return;
-        try {
-            await spouseService.deleteSpouse(spouseId);
-            loadRelationships();
-            if (onUpdate) onUpdate();
-        } catch (error) {
-            console.error('Failed to delete spouse:', error);
-            alert('Xóa thất bại');
-        }
+        deleteSpouseMutation.mutate(spouseId);
     };
 
-    const handleDeleteChild = async (childId: string) => {
+    const handleDeleteChild = (childId: string) => {
         if (!confirm('Bạn có chắc chắn muốn xóa mối quan hệ cha mẹ - con cái này?')) return;
-        try {
-            await parentChildService.deleteParentChild(childId);
-            loadRelationships();
-            if (onUpdate) onUpdate();
-        } catch (error) {
-            console.error('Failed to delete child:', error);
-            alert('Xóa thất bại');
-        }
+        deleteChildMutation.mutate(childId);
     };
 
     const getAgeAtDeath = () => {

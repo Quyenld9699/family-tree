@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import personService, { Person } from 'src/services/personService';
 import { getGenderText } from 'src/utils/genderUtils';
+import { toast } from 'react-toastify';
 
 interface SearchBarProps {
     onSearch: (personId: string, generations: number) => void;
@@ -68,11 +69,11 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
 
     const handleSearch = () => {
         if (!selectedPerson) {
-            alert('Vui lòng chọn một người từ danh sách gợi ý!');
+            toast.warning('Vui lòng chọn một người từ danh sách gợi ý!');
             return;
         }
         if (generations < 1 || generations > 10) {
-            alert('Số thế hệ phải từ 1 đến 10!');
+            toast.warning('Số thế hệ phải từ 1 đến 10!');
             return;
         }
         onSearch(selectedPerson._id!, generations);

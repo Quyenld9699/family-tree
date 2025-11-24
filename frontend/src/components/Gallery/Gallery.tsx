@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import galleryService, { GalleryImage } from 'src/services/galleryService';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 interface GalleryProps {
     personId?: string;
@@ -10,72 +12,34 @@ interface GalleryProps {
 }
 
 export default function Gallery({ personId, spouseId, onAvatarUpdate }: GalleryProps) {
-    const [images, setImages] = useState<GalleryImage[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [uploading, setUploading] = useState(false);
+    const queryClient = useQueryClient();
     const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [description, setDescription] = useState('');
     const [eventDate, setEventDate] = useState('');
     const [setAsAvatar, setSetAsAvatar] = useState(false);
-
     const [showUploadModal, setShowUploadModal] = useState(false);
 
-    useEffect(() => {
-        loadImages();
-    }, [personId, spouseId]);
+    // Query for images
+    const { data: images = [], isLoading } = useQuery({
+        queryKey: ['gallery', personId || spouseId],
+        queryFn: async () => {
+            if (personId) return galleryService.getImagesByPerson(personId);
+            if (spouseId) return galleryService.getImagesBySpouse(spouseId);
+            return [];
+        },
+        enabled: !!personId || !!spouseId,
+        staleTime: 5 * 60 * 1000,
+    });
 
-    const loadImages = async () => {
-        setLoading(true);
-        try {
-            let data: GalleryImage[] = [];
-            if (personId) {
-                data = await galleryService.getImagesByPerson(personId);
-            } else if (spouseId) {
-                data = await galleryService.getImagesBySpouse(spouseId);
-            }
-            setImages(data);
-        } catch (error) {
-            console.error('Failed to load images:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Mutation for upload
+    const uploadMutation = useMutation({
+        mutationFn: (formData: FormData) => galleryService.uploadImage(formData),
+        onSuccess: (newImage) => {
+            queryClient.invalidateQueries({ queryKey: ['gallery', personId || spouseId] });
+            toast.success('Upload ảnh thành công!');
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            // Just store the file, don't upload yet?
-            // Or if we want "select file then show desc", we can do that.
-            // But the user said "click icon -> select file -> add desc -> done".
-            // So maybe:
-            // 1. Click "+" icon -> Open Modal
-            // 2. Modal has File Input, Desc Input, Date Input.
-            // 3. User fills and clicks "Upload".
-        }
-    };
-
-    const handleUploadSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!fileInputRef.current?.files?.[0]) {
-            alert('Vui lòng chọn ảnh');
-            return;
-        }
-
-        const file = fileInputRef.current.files[0];
-        setUploading(true);
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
-            if (personId) formData.append('personId', personId);
-            if (spouseId) formData.append('spouseId', spouseId);
-            if (description) formData.append('description', description);
-            if (eventDate) formData.append('eventDate', eventDate);
-            if (setAsAvatar && personId) formData.append('setAsAvatar', 'true');
-
-            const newImage = await galleryService.uploadImage(formData);
-            setImages([newImage, ...images]);
-
-            // Reset form & Close modal
+            // Reset form
             setDescription('');
             setEventDate('');
             setSetAsAvatar(false);
@@ -86,23 +50,49 @@ export default function Gallery({ personId, spouseId, onAvatarUpdate }: GalleryP
             if (setAsAvatar && personId && onAvatarUpdate) {
                 onAvatarUpdate(newImage.url);
             }
-        } catch (error) {
+        },
+        onError: (error) => {
             console.error('Failed to upload image:', error);
-            alert('Upload failed');
-        } finally {
-            setUploading(false);
+            toast.error('Upload failed');
+        },
+    });
+
+    // Mutation for delete
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => galleryService.deleteImage(id),
+        onSuccess: (_, id) => {
+            queryClient.invalidateQueries({ queryKey: ['gallery', personId || spouseId] });
+            toast.success('Xóa ảnh thành công!');
+            if (selectedImage?._id === id) setSelectedImage(null);
+        },
+        onError: (error) => {
+            console.error('Failed to delete image:', error);
+            toast.error('Delete failed');
+        },
+    });
+
+    const handleUploadSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!fileInputRef.current?.files?.[0]) {
+            toast.warning('Vui lòng chọn ảnh');
+            return;
         }
+
+        const file = fileInputRef.current.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        if (personId) formData.append('personId', personId);
+        if (spouseId) formData.append('spouseId', spouseId);
+        if (description) formData.append('description', description);
+        if (eventDate) formData.append('eventDate', eventDate);
+        if (setAsAvatar && personId) formData.append('setAsAvatar', 'true');
+
+        uploadMutation.mutate(formData);
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = (id: string) => {
         if (!confirm('Bạn có chắc chắn muốn xóa ảnh này?')) return;
-        try {
-            await galleryService.deleteImage(id);
-            setImages(images.filter((img) => img._id !== id));
-            if (selectedImage?._id === id) setSelectedImage(null);
-        } catch (error) {
-            console.error('Failed to delete image:', error);
-        }
+        deleteMutation.mutate(id);
     };
 
     return (
@@ -110,7 +100,7 @@ export default function Gallery({ personId, spouseId, onAvatarUpdate }: GalleryP
             <h3 className="text-lg font-semibold mb-4">Thư viện ảnh</h3>
 
             {/* Image Grid */}
-            {loading ? (
+            {isLoading ? (
                 <div className="text-center py-4">Đang tải ảnh...</div>
             ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -201,10 +191,10 @@ export default function Gallery({ personId, spouseId, onAvatarUpdate }: GalleryP
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={uploading}
+                                    disabled={uploadMutation.isPending}
                                     className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium disabled:opacity-50 flex items-center gap-2"
                                 >
-                                    {uploading && (
+                                    {uploadMutation.isPending && (
                                         <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                             <path
@@ -214,7 +204,7 @@ export default function Gallery({ personId, spouseId, onAvatarUpdate }: GalleryP
                                             ></path>
                                         </svg>
                                     )}
-                                    {uploading ? 'Đang tải lên...' : 'Tải lên'}
+                                    {uploadMutation.isPending ? 'Đang tải lên...' : 'Tải lên'}
                                 </button>
                             </div>
                         </form>

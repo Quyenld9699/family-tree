@@ -57,7 +57,7 @@ export default function PersonNode(props: PersonNodeProps) {
                 alt={props.data.name}
                 width={50}
                 height={50}
-                className={`rounded-full mx-auto ${props.data.isDead ? 'grayscale' : ''}`}
+                className={`rounded-full mx-auto w-[50px] h-[50px] object-cover ${props.data.isDead ? 'grayscale' : ''}`}
                 onError={(e) => {
                     e.currentTarget.src = isMale(props.data.gender) ? Avatar_Male : Avatar_Female;
                 }}

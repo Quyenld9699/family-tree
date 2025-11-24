@@ -5,6 +5,8 @@ import Modal from '../Modal/Modal';
 import spouseService, { Spouse, SpouseWithDetails } from 'src/services/spouseService';
 import personService, { Person } from 'src/services/personService';
 import { isMale, Gender } from 'src/utils/genderUtils';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 interface AddSpouseModalProps {
     isOpen: boolean;
@@ -14,30 +16,20 @@ interface AddSpouseModalProps {
 }
 
 export default function AddSpouseModal({ isOpen, onClose, onSuccess, person }: AddSpouseModalProps) {
+    const queryClient = useQueryClient();
     const [searchType, setSearchType] = useState<'name' | 'cccd'>('name');
     const [searchQuery, setSearchQuery] = useState('');
-    const [suggestions, setSuggestions] = useState<Person[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [selectedSpouse, setSelectedSpouse] = useState<Person | null>(null);
     const [order, setOrder] = useState(1);
     const [marriageDate, setMarriageDate] = useState<string>('');
     const [divorceDate, setDivorceDate] = useState<string>('');
-    const [existingSpouses, setExistingSpouses] = useState<SpouseWithDetails[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
 
     // Determine if person is husband or wife
     const isPersonMale = isMale(person?.gender);
     const spouseLabel = isPersonMale ? 'vợ' : 'chồng';
     const spouseGender = isPersonMale ? Gender.FEMALE : Gender.MALE;
-
-    // Debug log
-    useEffect(() => {
-        if (person) {
-            console.log('Person:', person.name, 'Gender:', person.gender, 'isPersonMale:', isPersonMale, 'spouseLabel:', spouseLabel);
-        }
-    }, [person, isPersonMale, spouseLabel]);
 
     // Close suggestions when clicking outside
     useEffect(() => {
@@ -50,23 +42,12 @@ export default function AddSpouseModal({ isOpen, onClose, onSuccess, person }: A
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Load existing spouses when modal opens
+    // Reset form when modal opens
     useEffect(() => {
         if (isOpen && person?._id) {
-            loadExistingSpouses();
             resetForm();
         }
     }, [isOpen, person]);
-
-    const loadExistingSpouses = async () => {
-        if (!person?._id) return;
-        try {
-            const spouses = await spouseService.getSpousesByPersonId(person._id);
-            setExistingSpouses(spouses);
-        } catch (err) {
-            console.error('Failed to load existing spouses:', err);
-        }
-    };
 
     const resetForm = () => {
         setSearchQuery('');
@@ -74,43 +55,52 @@ export default function AddSpouseModal({ isOpen, onClose, onSuccess, person }: A
         setOrder(1);
         setMarriageDate('');
         setDivorceDate('');
-        setError(null);
-        setSuggestions([]);
         setShowSuggestions(false);
     };
 
-    // Search for persons based on query
+    // Query for existing spouses
+    const { data: existingSpouses = [] } = useQuery({
+        queryKey: ['spouses', person?._id],
+        queryFn: () => spouseService.getSpousesByPersonId(person!._id!),
+        enabled: !!isOpen && !!person?._id,
+        staleTime: 5 * 60 * 1000,
+    });
+
+    // Query for all persons (cached)
+    const { data: allPersons = [] } = useQuery({
+        queryKey: ['persons'],
+        queryFn: () => personService.getAllPersons(),
+        staleTime: 5 * 60 * 1000,
+        enabled: isOpen,
+    });
+
+    // Filter suggestions
+    const suggestions = React.useMemo(() => {
+        if (searchQuery.trim().length < 2) return [];
+        return allPersons
+            .filter((p) => {
+                // Filter by gender (opposite of person)
+                if (p.gender !== spouseGender) return false;
+                // Don't show the person themselves
+                if (p._id === person?._id) return false;
+                // Filter by search query
+                if (searchType === 'name') {
+                    return p.name.toLowerCase().includes(searchQuery.toLowerCase());
+                } else {
+                    return p.cccd?.includes(searchQuery);
+                }
+            })
+            .slice(0, 10);
+    }, [allPersons, searchQuery, searchType, spouseGender, person]);
+
+    // Show suggestions when query changes
     useEffect(() => {
-        const searchPersons = async () => {
-            if (searchQuery.trim().length < 2) {
-                setSuggestions([]);
-                return;
-            }
-
-            try {
-                const allPersons = await personService.getAllPersons();
-                const filtered = allPersons.filter((p) => {
-                    // Filter by gender (opposite of person)
-                    if (p.gender !== spouseGender) return false;
-                    // Don't show the person themselves
-                    if (p._id === person?._id) return false;
-                    // Filter by search query
-                    if (searchType === 'name') {
-                        return p.name.toLowerCase().includes(searchQuery.toLowerCase());
-                    } else {
-                        return p.cccd?.includes(searchQuery);
-                    }
-                });
-                setSuggestions(filtered.slice(0, 10));
-                setShowSuggestions(true);
-            } catch (error) {
-                console.error('Failed to search persons:', error);
-            }
-        };
-
-        const debounceTimer = setTimeout(searchPersons, 300);
-        return () => clearTimeout(debounceTimer);
-    }, [searchQuery, searchType, person, spouseGender]);
+        if (searchQuery.trim().length >= 2 && suggestions.length > 0 && !selectedSpouse) {
+            setShowSuggestions(true);
+        } else {
+            setShowSuggestions(false);
+        }
+    }, [searchQuery, suggestions.length, selectedSpouse]);
 
     const handleSelectPerson = (selectedPerson: Person) => {
         setSelectedSpouse(selectedPerson);
@@ -124,8 +114,7 @@ export default function AddSpouseModal({ isOpen, onClose, onSuccess, person }: A
         // Check if this order already exists for this person
         const orderField = isPersonMale ? 'wifeOrder' : 'husbandOrder';
         const existingOrder = existingSpouses.some((spouse) => {
-            const spouseId = isPersonMale ? (typeof spouse.wife === 'string' ? spouse.wife : spouse.wife?._id) : typeof spouse.husband === 'string' ? spouse.husband : spouse.husband?._id;
-
+            // const spouseId = isPersonMale ? (typeof spouse.wife === 'string' ? spouse.wife : spouse.wife?._id) : typeof spouse.husband === 'string' ? spouse.husband : spouse.husband?._id;
             return spouse[orderField] === order;
         });
 
@@ -135,19 +124,33 @@ export default function AddSpouseModal({ isOpen, onClose, onSuccess, person }: A
                 .filter((o): o is number => o !== undefined)
                 .sort((a, b) => a - b);
             const maxOrder = existingOrders.length > 0 ? Math.max(...existingOrders) : 0;
-            setError(`Thứ tự ${order} đã tồn tại. Vui lòng chọn thứ tự từ ${maxOrder + 1} trở lên hoặc số khác chưa sử dụng.`);
+            toast.warning(`Thứ tự ${order} đã tồn tại. Vui lòng chọn thứ tự từ ${maxOrder + 1} trở lên hoặc số khác chưa sử dụng.`);
             return false;
         }
 
         return true;
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    // Mutation for creating spouse
+    const createSpouseMutation = useMutation({
+        mutationFn: (data: Omit<Spouse, '_id'>) => spouseService.createSpouse(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['spouses', person?._id] });
+            toast.success('Thêm vợ/chồng thành công!');
+            onSuccess();
+            onClose();
+        },
+        onError: (err: any) => {
+            console.error('Failed to add spouse:', err);
+            toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi thêm vợ/chồng!');
+        },
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null);
 
         if (!selectedSpouse) {
-            setError('Vui lòng chọn một người từ danh sách gợi ý!');
+            toast.warning('Vui lòng chọn một người từ danh sách gợi ý!');
             return;
         }
 
@@ -155,42 +158,27 @@ export default function AddSpouseModal({ isOpen, onClose, onSuccess, person }: A
             return;
         }
 
-        setLoading(true);
+        const spouseData: Omit<Spouse, '_id'> = {
+            husband: isPersonMale ? person!._id! : selectedSpouse._id!,
+            wife: isPersonMale ? selectedSpouse._id! : person!._id!,
+            husbandOrder: isPersonMale ? order : 1,
+            wifeOrder: isPersonMale ? 1 : order,
+            marriageDate: marriageDate ? new Date(marriageDate) : undefined,
+            divorceDate: divorceDate ? new Date(divorceDate) : undefined,
+        };
 
-        try {
-            const spouseData: Omit<Spouse, '_id'> = {
-                husband: isPersonMale ? person!._id! : selectedSpouse._id!,
-                wife: isPersonMale ? selectedSpouse._id! : person!._id!,
-                // If person is male (husband), order input is for this wife (husbandOrder = which wife is this)
-                // If person is female (wife), order input is for this husband (wifeOrder = which husband is this)
-                husbandOrder: isPersonMale ? order : 1,
-                wifeOrder: isPersonMale ? 1 : order,
-                marriageDate: marriageDate ? new Date(marriageDate) : undefined,
-                divorceDate: divorceDate ? new Date(divorceDate) : undefined,
-            };
-
-            await spouseService.createSpouse(spouseData);
-            onSuccess();
-            onClose();
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Có lỗi xảy ra khi thêm vợ/chồng!');
-        } finally {
-            setLoading(false);
-        }
+        createSpouseMutation.mutate(spouseData);
     };
 
     const handleSearchTypeChange = (type: 'name' | 'cccd') => {
         setSearchType(type);
         setSearchQuery('');
         setSelectedSpouse(null);
-        setSuggestions([]);
     };
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={`Thêm ${spouseLabel} cho ${person?.name}`}>
             <form onSubmit={handleSubmit} className="space-y-4">
-                {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm">{error}</div>}
-
                 {/* Search Type Selector */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm theo</label>
@@ -297,11 +285,11 @@ export default function AddSpouseModal({ isOpen, onClose, onSuccess, person }: A
 
                 {/* Buttons */}
                 <div className="flex justify-end gap-3 pt-4">
-                    <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50" disabled={loading}>
+                    <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50" disabled={createSpouseMutation.isPending}>
                         Hủy
                     </button>
-                    <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50" disabled={loading}>
-                        {loading ? 'Đang xử lý...' : 'Thêm mới'}
+                    <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50" disabled={createSpouseMutation.isPending}>
+                        {createSpouseMutation.isPending ? 'Đang xử lý...' : 'Thêm mới'}
                     </button>
                 </div>
             </form>

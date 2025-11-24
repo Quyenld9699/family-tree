@@ -5,6 +5,8 @@ import Modal from '../Modal/Modal';
 import parentChildService, { ParentChild } from 'src/services/parentChildService';
 import personService, { Person } from 'src/services/personService';
 import { getGenderText } from 'src/utils/genderUtils';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 interface AddChildModalProps {
     isOpen: boolean;
@@ -14,13 +16,12 @@ interface AddChildModalProps {
 }
 
 export default function AddChildModal({ isOpen, onClose, onSuccess, spouseId }: AddChildModalProps) {
+    const queryClient = useQueryClient();
     const [searchType, setSearchType] = useState<'name' | 'cccd'>('name');
     const [searchQuery, setSearchQuery] = useState('');
-    const [suggestions, setSuggestions] = useState<Person[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [selectedChild, setSelectedChild] = useState<Person | null>(null);
     const [isAdopted, setIsAdopted] = useState(false);
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -47,38 +48,39 @@ export default function AddChildModal({ isOpen, onClose, onSuccess, spouseId }: 
         setSelectedChild(null);
         setIsAdopted(false);
         setError(null);
-        setSuggestions([]);
         setShowSuggestions(false);
     };
 
-    // Search for persons based on query
+    // Query for all persons (cached)
+    const { data: allPersons = [] } = useQuery({
+        queryKey: ['persons'],
+        queryFn: () => personService.getAllPersons(),
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        enabled: isOpen, // Only fetch when modal is open
+    });
+
+    // Filter suggestions based on search query
+    const suggestions = React.useMemo(() => {
+        if (searchQuery.trim().length < 2) return [];
+        return allPersons
+            .filter((p) => {
+                if (searchType === 'name') {
+                    return p.name.toLowerCase().includes(searchQuery.toLowerCase());
+                } else {
+                    return p.cccd?.includes(searchQuery);
+                }
+            })
+            .slice(0, 10);
+    }, [allPersons, searchQuery, searchType]);
+
+    // Show suggestions when query changes and has results
     useEffect(() => {
-        const searchPersons = async () => {
-            if (searchQuery.trim().length < 2) {
-                setSuggestions([]);
-                return;
-            }
-
-            try {
-                const allPersons = await personService.getAllPersons();
-                const filtered = allPersons.filter((p) => {
-                    // Filter by search query
-                    if (searchType === 'name') {
-                        return p.name.toLowerCase().includes(searchQuery.toLowerCase());
-                    } else {
-                        return p.cccd?.includes(searchQuery);
-                    }
-                });
-                setSuggestions(filtered.slice(0, 10));
-                setShowSuggestions(true);
-            } catch (error) {
-                console.error('Failed to search persons:', error);
-            }
-        };
-
-        const debounceTimer = setTimeout(searchPersons, 300);
-        return () => clearTimeout(debounceTimer);
-    }, [searchQuery, searchType]);
+        if (searchQuery.trim().length >= 2 && suggestions.length > 0 && !selectedChild) {
+            setShowSuggestions(true);
+        } else {
+            setShowSuggestions(false);
+        }
+    }, [searchQuery, suggestions.length, selectedChild]);
 
     const handleSelectPerson = (person: Person) => {
         setSelectedChild(person);
@@ -86,44 +88,59 @@ export default function AddChildModal({ isOpen, onClose, onSuccess, spouseId }: 
         setShowSuggestions(false);
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    // Mutation for adding child
+    const addChildMutation = useMutation({
+        mutationFn: (data: { spouseId: string; childId: string; isAdopted: boolean }) => {
+            const childData: Omit<ParentChild, '_id'> = {
+                parent: data.spouseId,
+                child: data.childId,
+                isAdopted: data.isAdopted,
+            };
+            return parentChildService.createParentChild(childData);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['children'] });
+            queryClient.invalidateQueries({ queryKey: ['parents'] });
+            toast.success('Thêm con thành công!');
+            onSuccess();
+            onClose();
+        },
+        onError: (err: any) => {
+            console.error('Failed to add child:', err);
+            toast.error(err.response?.data?.message || 'Thêm con thất bại');
+        },
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
 
         if (!selectedChild) {
-            setError('Vui lòng chọn một người từ danh sách gợi ý!');
+            toast.warning('Vui lòng chọn một người từ danh sách gợi ý!');
             return;
         }
 
         if (!spouseId) {
-            setError('Không tìm thấy thông tin quan hệ vợ/chồng!');
+            toast.error('Không tìm thấy thông tin quan hệ vợ/chồng!');
             return;
         }
 
-        setLoading(true);
-
-        try {
-            const childData: Omit<ParentChild, '_id'> = {
-                parent: spouseId,
-                child: selectedChild._id!,
-                isAdopted: isAdopted,
-            };
-
-            await parentChildService.createParentChild(childData);
-            onSuccess();
-            onClose();
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Có lỗi xảy ra khi thêm con cái!');
-        } finally {
-            setLoading(false);
+        if (!selectedChild._id) {
+            toast.error('Thông tin người được chọn không hợp lệ!');
+            return;
         }
+
+        addChildMutation.mutate({
+            spouseId,
+            childId: selectedChild._id,
+            isAdopted,
+        });
     };
 
     const handleSearchTypeChange = (type: 'name' | 'cccd') => {
         setSearchType(type);
         setSearchQuery('');
         setSelectedChild(null);
-        setSuggestions([]);
     };
 
     return (
@@ -199,11 +216,11 @@ export default function AddChildModal({ isOpen, onClose, onSuccess, spouseId }: 
 
                 {/* Buttons */}
                 <div className="flex justify-end gap-3 pt-4">
-                    <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50" disabled={loading}>
+                    <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50" disabled={addChildMutation.isPending}>
                         Hủy
                     </button>
-                    <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50" disabled={loading}>
-                        {loading ? 'Đang xử lý...' : 'Thêm con'}
+                    <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50" disabled={addChildMutation.isPending}>
+                        {addChildMutation.isPending ? 'Đang xử lý...' : 'Thêm con'}
                     </button>
                 </div>
             </form>

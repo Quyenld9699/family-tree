@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../Modal/Modal';
 import personService, { Person } from 'src/services/personService';
 import { Gender } from 'src/constants';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 interface PersonFormProps {
     isOpen: boolean;
@@ -13,6 +15,7 @@ interface PersonFormProps {
 }
 
 export default function PersonForm({ isOpen, onClose, onSuccess, person }: PersonFormProps) {
+    const queryClient = useQueryClient();
     const [formData, setFormData] = useState<Omit<Person, '_id'>>({
         name: '',
         gender: 'MALE',
@@ -24,9 +27,6 @@ export default function PersonForm({ isOpen, onClose, onSuccess, person }: Perso
         address: '',
         desc: '',
     });
-
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (person) {
@@ -54,27 +54,30 @@ export default function PersonForm({ isOpen, onClose, onSuccess, person }: Perso
                 desc: '',
             });
         }
-        setError(null);
     }, [person, isOpen]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
-
-        try {
+    const mutation = useMutation({
+        mutationFn: (data: Omit<Person, '_id'>) => {
             if (person?._id) {
-                await personService.updatePerson(person._id, formData);
+                return personService.updatePerson(person._id, data);
             } else {
-                await personService.createPerson(formData);
+                return personService.createPerson(data);
             }
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['persons'] });
+            toast.success(person ? 'Cập nhật thành công!' : 'Thêm thành công!');
             onSuccess();
             onClose();
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Có lỗi xảy ra');
-        } finally {
-            setLoading(false);
-        }
+        },
+        onError: (err: any) => {
+            toast.error(err.response?.data?.message || 'Có lỗi xảy ra');
+        },
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        mutation.mutate(formData);
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -93,8 +96,6 @@ export default function PersonForm({ isOpen, onClose, onSuccess, person }: Perso
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={person ? 'Cập nhật thông tin người' : 'Thêm người mới'}>
             <form onSubmit={handleSubmit} className="space-y-4">
-                {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>}
-
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Họ và tên <span className="text-red-500">*</span>
@@ -203,11 +204,11 @@ export default function PersonForm({ isOpen, onClose, onSuccess, person }: Perso
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4">
-                    <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50" disabled={loading}>
+                    <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50" disabled={mutation.isPending}>
                         Hủy
                     </button>
-                    <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50" disabled={loading}>
-                        {loading ? 'Đang xử lý...' : person ? 'Cập nhật' : 'Thêm mới'}
+                    <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50" disabled={mutation.isPending}>
+                        {mutation.isPending ? 'Đang xử lý...' : person ? 'Cập nhật' : 'Thêm mới'}
                     </button>
                 </div>
             </form>

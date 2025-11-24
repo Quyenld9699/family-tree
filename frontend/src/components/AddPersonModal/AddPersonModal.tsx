@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import Modal from '../Modal/Modal';
 import personService, { Person } from 'src/services/personService';
 import { Gender } from 'src/utils/genderUtils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 interface AddPersonModalProps {
     isOpen: boolean;
@@ -12,6 +14,7 @@ interface AddPersonModalProps {
 }
 
 export default function AddPersonModal({ isOpen, onClose, onSuccess }: AddPersonModalProps) {
+    const queryClient = useQueryClient();
     const [formData, setFormData] = useState<Omit<Person, '_id'>>({
         cccd: '',
         name: '',
@@ -24,23 +27,22 @@ export default function AddPersonModal({ isOpen, onClose, onSuccess }: AddPerson
         desc: '',
     });
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
-
-        try {
-            await personService.createPerson(formData);
+    const mutation = useMutation({
+        mutationFn: (data: Omit<Person, '_id'>) => personService.createPerson(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['persons'] });
+            toast.success('Thêm thành công!');
             onSuccess();
             resetForm();
-        } catch (err: any) {
-            setError(err.message || 'Failed to create person');
-        } finally {
-            setLoading(false);
-        }
+        },
+        onError: (err: any) => {
+            toast.error(err.message || 'Failed to create person');
+        },
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        mutation.mutate(formData);
     };
 
     const resetForm = () => {
@@ -59,15 +61,12 @@ export default function AddPersonModal({ isOpen, onClose, onSuccess }: AddPerson
 
     const handleClose = () => {
         resetForm();
-        setError(null);
         onClose();
     };
 
     return (
         <Modal isOpen={isOpen} onClose={handleClose} title="Thêm người mới">
             <form onSubmit={handleSubmit} className="space-y-4">
-                {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>}
-
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         CCCD <span className="text-red-500">*</span>
@@ -172,11 +171,11 @@ export default function AddPersonModal({ isOpen, onClose, onSuccess }: AddPerson
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4">
-                    <button type="button" onClick={handleClose} className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50" disabled={loading}>
+                    <button type="button" onClick={handleClose} className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50" disabled={mutation.isPending}>
                         Hủy
                     </button>
-                    <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400" disabled={loading}>
-                        {loading ? 'Đang lưu...' : 'Thêm người'}
+                    <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400" disabled={mutation.isPending}>
+                        {mutation.isPending ? 'Đang lưu...' : 'Thêm người'}
                     </button>
                 </div>
             </form>
