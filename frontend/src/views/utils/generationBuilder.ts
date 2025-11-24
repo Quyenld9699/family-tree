@@ -45,13 +45,39 @@ export const buildGenerations = (
         generations[genIndex] = genPersons;
 
         if (nextGenIds.size > 0) {
-            // Sort nextGen theo birth date trước khi build
-            const sortedNextGenIds = Array.from(nextGenIds).sort((a, b) => {
-                const personA = personMap.get(a);
-                const personB = personMap.get(b);
-                if (!personA?.birth || !personB?.birth) return 0;
-                return new Date(personA.birth).getTime() - new Date(personB.birth).getTime();
+            // Sort nextGen theo thứ tự vợ chồng của TỪNG cha/mẹ, sau đó mới theo birth date trong mỗi nhóm
+            const sortedNextGenIds: string[] = [];
+            const addedChildren = new Set<string>();
+
+            personIds.forEach((pid) => {
+                const personSpouses = spouseMap.get(pid) || [];
+                const sortedSpouses = sortSpouses(personSpouses);
+
+                sortedSpouses.forEach((spouse) => {
+                    const spouseId = spouse._id!;
+                    const children = childrenMap.get(spouseId) || [];
+
+                    // Get child IDs that are in nextGen and not yet added
+                    const childIds = children.map((pc) => getChildId(pc)).filter((id) => id && nextGenIds.has(id) && !addedChildren.has(id)) as string[];
+
+                    if (childIds.length > 0) {
+                        // Sort children by birth date within this spouse relationship
+                        const sortedChildIds = childIds.sort((a, b) => {
+                            const personA = personMap.get(a);
+                            const personB = personMap.get(b);
+                            if (!personA?.birth || !personB?.birth) return 0;
+                            return new Date(personA.birth).getTime() - new Date(personB.birth).getTime();
+                        });
+
+                        // Add to result and mark as added
+                        sortedChildIds.forEach((childId) => {
+                            sortedNextGenIds.push(childId);
+                            addedChildren.add(childId);
+                        });
+                    }
+                });
             });
+
             buildGen(sortedNextGenIds, genIndex + 1);
         }
     };

@@ -12,13 +12,30 @@ export const mapGender = (genderValue: any): Gender => {
 
 /**
  * Sort spouses by order or marriage date
+ * For a husband with multiple wives: sort by wifeOrder (wife 1, wife 2, ...)
+ * For a wife with multiple husbands: sort by husbandOrder (husband 1, husband 2, ...)
  */
 export const sortSpouses = (spouses: SpouseWithDetails[]): SpouseWithDetails[] => {
-    return [...spouses].sort((a, b) => {
-        const orderA = a.husbandOrder || a.wifeOrder || 0;
-        const orderB = b.husbandOrder || b.wifeOrder || 0;
-        if (orderA !== orderB) return orderA - orderB;
+    if (spouses.length === 0) return [];
 
+    return [...spouses].sort((a, b) => {
+        // Check if we're sorting wives (wifeOrder will vary) or husbands (husbandOrder will vary)
+        const aWifeOrder = a.wifeOrder || 1;
+        const bWifeOrder = b.wifeOrder || 1;
+        const aHusbandOrder = a.husbandOrder || 1;
+        const bHusbandOrder = b.husbandOrder || 1;
+
+        // If wifeOrder differs, we're sorting wives of one husband
+        if (aWifeOrder !== bWifeOrder) {
+            return aWifeOrder - bWifeOrder;
+        }
+
+        // If husbandOrder differs, we're sorting husbands of one wife
+        if (aHusbandOrder !== bHusbandOrder) {
+            return aHusbandOrder - bHusbandOrder;
+        }
+
+        // Fall back to marriage date
         if (a.marriageDate && b.marriageDate) {
             return new Date(a.marriageDate).getTime() - new Date(b.marriageDate).getTime();
         }
