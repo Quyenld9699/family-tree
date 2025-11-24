@@ -11,6 +11,7 @@ export type TRelationshipNode = Omit<Node, 'data' | 'type'> & {
 
 export type RelationshipNodeProps = Omit<NodeProps, 'data'> & {
     data: SpouseInfo;
+    onClick?: (data: SpouseInfo) => void;
 };
 export default function RelationshipNode(props: RelationshipNodeProps) {
     // Format marriage date
@@ -23,7 +24,11 @@ export default function RelationshipNode(props: RelationshipNodeProps) {
     const DIAMOND_SIZE = Math.floor(CONTAINER_SIZE * 0.707); // ≈ 85px
 
     return (
-        <div style={{ width: CONTAINER_SIZE, height: CONTAINER_SIZE, position: 'relative' }}>
+        <div
+            style={{ width: CONTAINER_SIZE, height: CONTAINER_SIZE, position: 'relative' }}
+            onClick={() => props.onClick && props.onClick(props.data)}
+            className="cursor-pointer hover:scale-105 transition-transform"
+        >
             {/* Handles - ĐẶT ĐÚNG VỊ TRÍ HÌNH THOI (center container) */}
             <Handle type="target" position={Position.Top} id={'tt'} style={{ opacity: 0, top: 0 }} />
             <Handle type="source" position={Position.Bottom} id={'sb'} style={{ opacity: 0, bottom: 0 }} />

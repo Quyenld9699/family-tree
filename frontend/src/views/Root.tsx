@@ -9,6 +9,7 @@ import AddChildModal from 'src/components/AddChildModal/AddChildModal';
 import AddPersonModal from 'src/components/AddPersonModal/AddPersonModal';
 import AddPersonButton from 'src/components/AddPersonButton/AddPersonButton';
 import SearchBar from 'src/components/SearchBar/SearchBar';
+import RelationshipDetailModal from 'src/components/RelationshipDetailModal/RelationshipDetailModal';
 import personService, { Person } from 'src/services/personService';
 import spouseService, { SpouseWithDetails } from 'src/services/spouseService';
 import parentChildService, { ParentChildWithDetails } from 'src/services/parentChildService';
@@ -21,7 +22,9 @@ export default function Root() {
     const [addSpouseModalOpen, setAddSpouseModalOpen] = useState(false);
     const [addChildModalOpen, setAddChildModalOpen] = useState(false);
     const [addPersonModalOpen, setAddPersonModalOpen] = useState(false);
+    const [relationshipDetailModalOpen, setRelationshipDetailModalOpen] = useState(false);
     const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
+    const [selectedSpouse, setSelectedSpouse] = useState<SpouseWithDetails | null>(null);
     const [selectedSpouseIdForChild, setSelectedSpouseIdForChild] = useState<string | null>(null);
     const [persons, setPersons] = useState<Person[]>([]);
     const [spouses, setSpouses] = useState<SpouseWithDetails[]>([]);
@@ -40,17 +43,38 @@ export default function Root() {
         [persons],
     );
 
+    const handleRelationshipNodeClick = useCallback(
+        (spouseData: any) => {
+            const fullSpouse = spouses.find((s) => s._id === spouseData.id);
+            if (fullSpouse) {
+                setSelectedSpouse(fullSpouse);
+                setRelationshipDetailModalOpen(true);
+            }
+        },
+        [spouses],
+    );
+
     const nodeTypes = useMemo(
         () => ({
-            relationship: RelationshipNode,
+            relationship: (props: any) => <RelationshipNode {...props} onClick={handleRelationshipNodeClick} />,
             person: (props: any) => <PersonNode {...props} onClick={handlePersonNodeClick} />,
         }),
-        [handlePersonNodeClick],
+        [handlePersonNodeClick, handleRelationshipNodeClick],
     );
 
     useEffect(() => {
         loadAllData();
     }, []);
+
+    // Sync selectedPerson with persons list when it updates
+    useEffect(() => {
+        if (selectedPerson) {
+            const updatedPerson = persons.find((p) => p._id === selectedPerson._id);
+            if (updatedPerson && updatedPerson !== selectedPerson) {
+                setSelectedPerson(updatedPerson);
+            }
+        }
+    }, [persons, selectedPerson]);
 
     // Build family tree with memoization
     const { nodes, edges } = useMemo(() => {
@@ -199,6 +223,7 @@ export default function Root() {
             <AddSpouseModal isOpen={addSpouseModalOpen} onClose={() => setAddSpouseModalOpen(false)} onSuccess={handleSpouseModalSuccess} person={selectedPerson} />
             <AddChildModal isOpen={addChildModalOpen} onClose={() => setAddChildModalOpen(false)} onSuccess={handleChildModalSuccess} spouseId={selectedSpouseIdForChild} />
             <AddPersonModal isOpen={addPersonModalOpen} onClose={() => setAddPersonModalOpen(false)} onSuccess={handlePersonModalSuccess} />
+            <RelationshipDetailModal isOpen={relationshipDetailModalOpen} onClose={() => setRelationshipDetailModalOpen(false)} spouse={selectedSpouse} />
         </div>
     );
 }

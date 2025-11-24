@@ -18,22 +18,34 @@ export const mapGender = (genderValue: any): Gender => {
 export const sortSpouses = (spouses: SpouseWithDetails[]): SpouseWithDetails[] => {
     if (spouses.length === 0) return [];
 
-    return [...spouses].sort((a, b) => {
-        // Check if we're sorting wives (wifeOrder will vary) or husbands (husbandOrder will vary)
-        const aWifeOrder = a.wifeOrder || 1;
-        const bWifeOrder = b.wifeOrder || 1;
-        const aHusbandOrder = a.husbandOrder || 1;
-        const bHusbandOrder = b.husbandOrder || 1;
+    // We need to know which person we are sorting for to know whether to use wifeOrder or husbandOrder.
+    // However, this helper function doesn't take the personId.
+    // But usually, a list of spouses for a person will have that person as common.
+    // If the common person is the husband, then wifeOrder varies.
+    // If the common person is the wife, then husbandOrder varies.
 
-        // If wifeOrder differs, we're sorting wives of one husband
-        if (aWifeOrder !== bWifeOrder) {
+    // Let's try to detect which field varies more or just sort by both?
+    // If we sort by wifeOrder first, then husbandOrder.
+
+    return [...spouses].sort((a, b) => {
+        const aWifeOrder = a.wifeOrder || 0;
+        const bWifeOrder = b.wifeOrder || 0;
+        const aHusbandOrder = a.husbandOrder || 0;
+        const bHusbandOrder = b.husbandOrder || 0;
+
+        // If both have wifeOrder > 0 and they differ, use wifeOrder
+        if (aWifeOrder > 0 && bWifeOrder > 0 && aWifeOrder !== bWifeOrder) {
             return aWifeOrder - bWifeOrder;
         }
 
-        // If husbandOrder differs, we're sorting husbands of one wife
-        if (aHusbandOrder !== bHusbandOrder) {
+        // If both have husbandOrder > 0 and they differ, use husbandOrder
+        if (aHusbandOrder > 0 && bHusbandOrder > 0 && aHusbandOrder !== bHusbandOrder) {
             return aHusbandOrder - bHusbandOrder;
         }
+
+        // Fallback: if one has wifeOrder and other doesn't?
+        if (aWifeOrder !== bWifeOrder) return aWifeOrder - bWifeOrder;
+        if (aHusbandOrder !== bHusbandOrder) return aHusbandOrder - bHusbandOrder;
 
         // Fall back to marriage date
         if (a.marriageDate && b.marriageDate) {

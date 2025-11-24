@@ -14,7 +14,7 @@ import {
     DEFAULT_EDGE_STYLE,
     GENERATION_BOX_STYLE,
 } from '../constants/layoutConstants';
-import { mapGender, getChildId, getSpousePersonId } from './treeHelpers';
+import { mapGender, getChildId, getSpousePersonId, sortSpouses } from './treeHelpers';
 export interface RenderResult {
     nodes: Node[];
     edges: Edge[];
@@ -147,8 +147,10 @@ function renderPerson(
     const personSpouses = spouseMap.get(personId) || [];
     if (personSpouses.length === 0) return;
 
+    const sortedSpouses = sortSpouses(personSpouses);
+
     // Render each spouse relationship
-    personSpouses.forEach((spouse, idx) => {
+    sortedSpouses.forEach((spouse, idx) => {
         renderSpouseRelationship(spouse, personId, personGender, genIndex, genY, idx, childrenMap, personGeneration, relationshipXPositions, spouseNodeXPositions, nodes, edges);
     });
 }
@@ -184,6 +186,7 @@ function renderSpouseRelationship(
         type: 'relationship',
         position: { x: spouseX, y: relationshipY },
         data: {
+            id: spouseId,
             top: personGender,
             husbandOrder: spouse.husbandOrder || 1,
             wifeOrder: spouse.wifeOrder || 1,
