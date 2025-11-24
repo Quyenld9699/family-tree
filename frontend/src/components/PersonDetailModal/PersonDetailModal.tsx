@@ -213,6 +213,30 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
         }
     };
 
+    const handleDeleteSpouse = async (spouseId: string) => {
+        if (!confirm('Bạn có chắc chắn muốn xóa mối quan hệ vợ chồng này? Tất cả con cái chung cũng sẽ bị mất liên kết cha mẹ.')) return;
+        try {
+            await spouseService.deleteSpouse(spouseId);
+            loadRelationships();
+            if (onUpdate) onUpdate();
+        } catch (error) {
+            console.error('Failed to delete spouse:', error);
+            alert('Xóa thất bại');
+        }
+    };
+
+    const handleDeleteChild = async (childId: string) => {
+        if (!confirm('Bạn có chắc chắn muốn xóa mối quan hệ cha mẹ - con cái này?')) return;
+        try {
+            await parentChildService.deleteParentChild(childId);
+            loadRelationships();
+            if (onUpdate) onUpdate();
+        } catch (error) {
+            console.error('Failed to delete child:', error);
+            alert('Xóa thất bại');
+        }
+    };
+
     const getAgeAtDeath = () => {
         if (person.isDead && person.birth && person.death) {
             const birth = new Date(person.birth);
@@ -518,9 +542,18 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                                             {spouse.marriageDate && <p className="text-xs text-gray-600">Cưới: {new Date(spouse.marriageDate).toLocaleDateString('vi-VN')}</p>}
                                             {spouse.divorceDate && <p className="text-xs text-red-600">Ly hôn: {new Date(spouse.divorceDate).toLocaleDateString('vi-VN')}</p>}
                                         </div>
-                                        <button onClick={() => spouse._id && onAddChild(spouse._id)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">
-                                            + Thêm con
-                                        </button>
+                                        <div className="flex gap-2">
+                                            <button onClick={() => spouse._id && onAddChild(spouse._id)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">
+                                                + Thêm con
+                                            </button>
+                                            <button
+                                                onClick={() => spouse._id && handleDeleteSpouse(spouse._id)}
+                                                className="bg-red-50 text-red-600 px-2 py-1 rounded text-xs hover:bg-red-100 border border-red-100"
+                                                title="Xóa mối quan hệ vợ chồng"
+                                            >
+                                                Xóa
+                                            </button>
+                                        </div>
                                     </div>
 
                                     {/* Children of this spouse */}
@@ -529,9 +562,20 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                                             <p className="text-xs text-gray-600 mb-1">Con cái:</p>
                                             <div className="space-y-1">
                                                 {children[spouse._id].map((child) => (
-                                                    <div key={child._id} className="text-sm">
-                                                        • {typeof child.child !== 'string' && child.child?.name}
-                                                        {child.isAdopted && <span className="text-xs text-gray-500"> (nuôi)</span>}
+                                                    <div key={child._id} className="text-sm flex justify-between items-center group hover:bg-gray-50 rounded px-1 -mx-1">
+                                                        <span>
+                                                            • {typeof child.child !== 'string' && child.child?.name}
+                                                            {child.isAdopted && <span className="text-xs text-gray-500"> (nuôi)</span>}
+                                                        </span>
+                                                        <button
+                                                            onClick={() => child._id && handleDeleteChild(child._id)}
+                                                            className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                                                            title="Xóa quan hệ con cái"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        </button>
                                                     </div>
                                                 ))}
                                             </div>
