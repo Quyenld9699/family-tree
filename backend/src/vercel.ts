@@ -5,35 +5,38 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import express from 'express';
 
-const server = express();
+let app;
 
-const createNestServer = async (expressInstance) => {
-    const app = await NestFactory.create(AppModule, new ExpressAdapter(expressInstance));
+const bootstrap = async () => {
+    if (!app) {
+        const expressApp = express();
+        app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
 
-    app.useGlobalPipes(
-        new ValidationPipe({
-            whitelist: true,
-            forbidNonWhitelisted: true,
-        }),
-    );
-    app.setGlobalPrefix('api/v1', { exclude: [''] });
+        app.useGlobalPipes(
+            new ValidationPipe({
+                whitelist: true,
+                forbidNonWhitelisted: true,
+            }),
+        );
+        app.setGlobalPrefix('api/v1', { exclude: [''] });
 
-    app.enableCors({
-        origin: '*',
-        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-        preflightContinue: false,
-        credentials: true,
-    });
+        app.enableCors({
+            origin: ['https://dong-ho-le-dinh.vercel.app', 'http://localhost:3000'],
+            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+            credentials: true,
+        });
 
-    const config = new DocumentBuilder().setTitle('API Documentation').setDescription('Documentation for the API').setVersion('1.0').build();
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api', app, document);
+        const config = new DocumentBuilder().setTitle('API Documentation').setDescription('Documentation for the API').setVersion('1.0').build();
+        const document = SwaggerModule.createDocument(app, config);
+        SwaggerModule.setup('api', app, document);
 
-    await app.init();
+        await app.init();
+        return expressApp;
+    }
+    return app.getHttpAdapter().getInstance();
 };
 
-createNestServer(server)
-    .then(() => console.log('Nest Ready'))
-    .catch((err) => console.error('Nest broken', err));
-
-export default server;
+export default async (req, res) => {
+    const instance = await bootstrap();
+    return instance(req, res);
+};

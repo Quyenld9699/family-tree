@@ -20,9 +20,8 @@ async function bootstrap() {
 
     //Config Cors
     app.enableCors({
-        origin: '*',
-        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-        preflightContinue: false,
+        origin: ['https://dong-ho-le-dinh.vercel.app', 'http://localhost:3000'],
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
     });
 
