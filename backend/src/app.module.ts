@@ -7,6 +7,7 @@ import { UserModule } from './modules/user/user.module';
 import { PersonModule } from './modules/person/person.module';
 import { SpouseModule } from './modules/spouse/spouse.module';
 import { ParentChildModule } from './modules/parent-child/parent-child.module';
+import { GalleryModule } from './modules/gallery/gallery.module';
 
 @Module({
     imports: [
@@ -14,6 +15,7 @@ import { ParentChildModule } from './modules/parent-child/parent-child.module';
         PersonModule,
         SpouseModule,
         ParentChildModule,
+        GalleryModule,
         ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '.env.local'] }),
         MongooseModule.forRootAsync({
             imports: [ConfigModule],
