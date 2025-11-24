@@ -1,16 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, Query, UseGuards } from '@nestjs/common';
 import { PersonService } from './person.service';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { Person } from './schemas/person.schema';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRoles } from '../../constants';
 
 @ApiTags('Person')
+@ApiBearerAuth()
 @Controller('person')
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class PersonController {
     constructor(private readonly personService: PersonService) {}
 
     @Post()
+    @Roles(UserRoles.ADMIN)
     @ApiOperation({ summary: 'Create a new person' })
     @ApiResponse({
         status: HttpStatus.CREATED,
@@ -50,6 +57,7 @@ export class PersonController {
     }
 
     @Patch(':id')
+    @Roles(UserRoles.ADMIN)
     @ApiOperation({ summary: 'Update a person' })
     @ApiParam({ name: 'id', description: 'Person ID' })
     @ApiResponse({
@@ -66,6 +74,7 @@ export class PersonController {
     }
 
     @Delete(':id')
+    @Roles(UserRoles.ADMIN)
     @ApiOperation({ summary: 'Delete a person' })
     @ApiParam({ name: 'id', description: 'Person ID' })
     @ApiResponse({

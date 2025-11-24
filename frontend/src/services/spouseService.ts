@@ -1,5 +1,8 @@
 import api from './api';
 import { Person } from './personService';
+import authService from './authService';
+import spousesData from '../data/spouses.json';
+import personsData from '../data/persons.json';
 
 // Định nghĩa các interface
 export interface Spouse {
@@ -22,22 +25,45 @@ export interface SpouseWithDetails {
     divorceDate?: Date;
 }
 
+// Helper to populate spouse data for guest mode
+const populateSpouse = (spouse: any): SpouseWithDetails => {
+    const husband = (personsData as any[]).find((p) => p._id === spouse.husband);
+    const wife = (personsData as any[]).find((p) => p._id === spouse.wife);
+    return {
+        ...spouse,
+        husband: husband || spouse.husband,
+        wife: wife || spouse.wife,
+    };
+};
+
 // Spouse API Service
 const spouseService = {
     // Lấy tất cả mối quan hệ vợ chồng
     getAllSpouses: async (): Promise<SpouseWithDetails[]> => {
+        if (!authService.isAuthenticated()) {
+            return (spousesData as any[]).map(populateSpouse);
+        }
         const response = await api.get('/spouse');
         return response.data;
     },
 
     // Lấy mối quan hệ vợ chồng theo ID
     getSpouseById: async (id: string): Promise<SpouseWithDetails> => {
+        if (authService.isGuest()) {
+            const spouse = (spousesData as any[]).find((s) => s._id === id);
+            if (!spouse) throw new Error('Spouse not found');
+            return populateSpouse(spouse);
+        }
         const response = await api.get(`/spouse/${id}`);
         return response.data;
     },
 
     // Lấy tất cả mối quan hệ vợ chồng của một người
     getSpousesByPersonId: async (personId: string): Promise<SpouseWithDetails[]> => {
+        if (authService.isGuest()) {
+            const spouses = (spousesData as any[]).filter((s) => s.husband === personId || s.wife === personId);
+            return spouses.map(populateSpouse);
+        }
         const response = await api.get(`/spouse/person/${personId}`);
         return response.data;
     },

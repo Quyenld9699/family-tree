@@ -8,10 +8,12 @@ import { PersonModule } from './modules/person/person.module';
 import { SpouseModule } from './modules/spouse/spouse.module';
 import { ParentChildModule } from './modules/parent-child/parent-child.module';
 import { GalleryModule } from './modules/gallery/gallery.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
     imports: [
         UserModule,
+        AuthModule,
         PersonModule,
         SpouseModule,
         ParentChildModule,

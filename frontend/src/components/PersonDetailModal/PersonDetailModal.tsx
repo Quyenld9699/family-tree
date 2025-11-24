@@ -10,6 +10,7 @@ import spouseService, { SpouseWithDetails } from 'src/services/spouseService';
 import parentChildService, { ParentChildWithDetails } from 'src/services/parentChildService';
 import { getGenderText, Gender } from 'src/utils/genderUtils';
 import { Avatar_Male, Avatar_Female } from 'src/constants/imagePaths';
+import { useAuth } from '../../context/AuthContext';
 
 interface PersonDetailModalProps {
     isOpen: boolean;
@@ -21,6 +22,7 @@ interface PersonDetailModalProps {
 }
 
 export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse, onAddChild, onUpdate }: PersonDetailModalProps) {
+    const { isAdmin } = useAuth();
     const [spouses, setSpouses] = useState<SpouseWithDetails[]>([]);
     const [children, setChildren] = useState<{ [spouseId: string]: ParentChildWithDetails[] }>({});
     const [loading, setLoading] = useState(false);
@@ -260,7 +262,7 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div className="flex justify-between items-start mb-6">
                         <h3 className="text-xl font-bold text-gray-800">Thông tin cá nhân</h3>
-                        {!isEditing && (
+                        {!isEditing && isAdmin && (
                             <div className="flex gap-2">
                                 <button
                                     onClick={handleEdit}
@@ -542,18 +544,20 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                                             {spouse.marriageDate && <p className="text-xs text-gray-600">Cưới: {new Date(spouse.marriageDate).toLocaleDateString('vi-VN')}</p>}
                                             {spouse.divorceDate && <p className="text-xs text-red-600">Ly hôn: {new Date(spouse.divorceDate).toLocaleDateString('vi-VN')}</p>}
                                         </div>
-                                        <div className="flex gap-2">
-                                            <button onClick={() => spouse._id && onAddChild(spouse._id)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">
-                                                + Thêm con
-                                            </button>
-                                            <button
-                                                onClick={() => spouse._id && handleDeleteSpouse(spouse._id)}
-                                                className="bg-red-50 text-red-600 px-2 py-1 rounded text-xs hover:bg-red-100 border border-red-100"
-                                                title="Xóa mối quan hệ vợ chồng"
-                                            >
-                                                Xóa
-                                            </button>
-                                        </div>
+                                        {isAdmin && (
+                                            <div className="flex gap-2">
+                                                <button onClick={() => spouse._id && onAddChild(spouse._id)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">
+                                                    + Thêm con
+                                                </button>
+                                                <button
+                                                    onClick={() => spouse._id && handleDeleteSpouse(spouse._id)}
+                                                    className="bg-red-50 text-red-600 px-2 py-1 rounded text-xs hover:bg-red-100 border border-red-100"
+                                                    title="Xóa mối quan hệ vợ chồng"
+                                                >
+                                                    Xóa
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Children of this spouse */}
@@ -567,15 +571,17 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                                                             • {typeof child.child !== 'string' && child.child?.name}
                                                             {child.isAdopted && <span className="text-xs text-gray-500"> (nuôi)</span>}
                                                         </span>
-                                                        <button
-                                                            onClick={() => child._id && handleDeleteChild(child._id)}
-                                                            className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-1"
-                                                            title="Xóa quan hệ con cái"
-                                                        >
-                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                            </svg>
-                                                        </button>
+                                                        {isAdmin && (
+                                                            <button
+                                                                onClick={() => child._id && handleDeleteChild(child._id)}
+                                                                className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                                                                title="Xóa quan hệ con cái"
+                                                            >
+                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                                </svg>
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 ))}
                                             </div>

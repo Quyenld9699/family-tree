@@ -1,16 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, UseGuards } from '@nestjs/common';
 import { ParentChildService } from './parent-child.service';
 import { CreateParentChildDto } from './dto/create-parent-child.dto';
 import { UpdateParentChildDto } from './dto/update-parent-child.dto';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { ParentChild } from './schemas/parent-child.schema';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRoles } from '../../constants';
 
 @ApiTags('Parent-Child Relationships')
+@ApiBearerAuth()
 @Controller('parent-child')
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class ParentChildController {
     constructor(private readonly parentChildService: ParentChildService) {}
 
     @Post()
+    @Roles(UserRoles.ADMIN)
     @ApiOperation({ summary: 'Create a new parent-child relationship' })
     @ApiResponse({
         status: HttpStatus.CREATED,
@@ -81,6 +88,7 @@ export class ParentChildController {
     }
 
     @Patch(':id')
+    @Roles(UserRoles.ADMIN)
     @ApiOperation({ summary: 'Update a parent-child relationship' })
     @ApiParam({ name: 'id', description: 'Parent-child relationship ID' })
     @ApiResponse({
@@ -97,6 +105,7 @@ export class ParentChildController {
     }
 
     @Delete(':id')
+    @Roles(UserRoles.ADMIN)
     @ApiOperation({ summary: 'Delete a parent-child relationship' })
     @ApiParam({ name: 'id', description: 'Parent-child relationship ID' })
     @ApiResponse({

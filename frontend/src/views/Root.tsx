@@ -16,12 +16,17 @@ import parentChildService, { ParentChildWithDetails } from 'src/services/parentC
 import { buildGenerations, buildChildrenByParentMap } from './utils/generationBuilder';
 import { calculateNodePositions } from './utils/positionCalculator';
 import { renderFamilyTree } from './utils/nodeRenderer';
+import { useAuth } from '../context/AuthContext';
+import GuestCodeModal from 'src/components/GuestCodeModal/GuestCodeModal';
+import UserMenu from 'src/components/UserMenu/UserMenu';
 
 export default function Root() {
+    const { isAdmin, logout, user } = useAuth();
     const [personDetailModalOpen, setPersonDetailModalOpen] = useState(false);
     const [addSpouseModalOpen, setAddSpouseModalOpen] = useState(false);
     const [addChildModalOpen, setAddChildModalOpen] = useState(false);
     const [addPersonModalOpen, setAddPersonModalOpen] = useState(false);
+    const [guestCodeModalOpen, setGuestCodeModalOpen] = useState(false);
     const [relationshipDetailModalOpen, setRelationshipDetailModalOpen] = useState(false);
     const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
     const [selectedSpouse, setSelectedSpouse] = useState<SpouseWithDetails | null>(null);
@@ -179,22 +184,30 @@ export default function Root() {
     }, []);
 
     return (
-        <div style={{ width: '100vw', height: '100svh', position: 'relative' }}>
+        <div style={{ width: '100vw', height: '100vh' }}>
             <style>{`
                 .react-flow__node[data-id^="gen_"] .react-flow__handle {
                     display: none !important;
                 }
             `}</style>
-
+            <div className="fixed z-50 flex gap-2" style={{ top: '1rem', right: '1rem' }}>
+                {!user ? (
+                    <a href="/guest-login" className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors font-medium h-full flex items-center">
+                        Đăng nhập
+                    </a>
+                ) : (
+                    <UserMenu user={user} isAdmin={isAdmin} onLogout={logout} onOpenGuestCodeModal={() => setGuestCodeModalOpen(true)} />
+                )}
+            </div>
             <SearchBar onSearch={handleSearch} />
-            <AddPersonButton onClick={() => setAddPersonModalOpen(true)} />
+            {isAdmin && <AddPersonButton onClick={() => setAddPersonModalOpen(true)} />}
 
             {(searchRootPersonId || searchGenerations) && (
                 <button
                     onClick={handleResetSearch}
                     className="fixed z-10 w-12 h-12 bg-gray-500 text-red-600 rounded-full shadow-lg hover:bg-gray-600 flex items-center justify-center"
                     title="Xem toàn bộ cây gia phả"
-                    style={{ top: '40px', right: '20px' }}
+                    style={{ top: '80px', right: '20px' }}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path
@@ -224,6 +237,7 @@ export default function Root() {
             <AddChildModal isOpen={addChildModalOpen} onClose={() => setAddChildModalOpen(false)} onSuccess={handleChildModalSuccess} spouseId={selectedSpouseIdForChild} />
             <AddPersonModal isOpen={addPersonModalOpen} onClose={() => setAddPersonModalOpen(false)} onSuccess={handlePersonModalSuccess} />
             <RelationshipDetailModal isOpen={relationshipDetailModalOpen} onClose={() => setRelationshipDetailModalOpen(false)} spouse={selectedSpouse} />
+            <GuestCodeModal isOpen={guestCodeModalOpen} onClose={() => setGuestCodeModalOpen(false)} />
         </div>
     );
 }

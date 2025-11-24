@@ -1,16 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, UseGuards } from '@nestjs/common';
 import { SpouseService } from './spouse.service';
 import { CreateSpouseDto } from './dto/create-spouse.dto';
 import { UpdateSpouseDto } from './dto/update-spouse.dto';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Spouse } from './schemas/spouse.schema';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRoles } from '../../constants';
 
 @ApiTags('Spouse Relationships')
+@ApiBearerAuth()
 @Controller('spouse')
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class SpouseController {
     constructor(private readonly spouseService: SpouseService) {}
 
     @Post()
+    @Roles(UserRoles.ADMIN)
     @ApiOperation({ summary: 'Create a new spouse relationship' })
     @ApiResponse({
         status: HttpStatus.CREATED,
@@ -65,6 +72,7 @@ export class SpouseController {
     }
 
     @Patch(':id')
+    @Roles(UserRoles.ADMIN)
     @ApiOperation({ summary: 'Update a spouse relationship' })
     @ApiParam({ name: 'id', description: 'Spouse relationship ID' })
     @ApiResponse({
@@ -81,6 +89,7 @@ export class SpouseController {
     }
 
     @Delete(':id')
+    @Roles(UserRoles.ADMIN)
     @ApiOperation({ summary: 'Delete a spouse relationship' })
     @ApiParam({ name: 'id', description: 'Spouse relationship ID' })
     @ApiResponse({

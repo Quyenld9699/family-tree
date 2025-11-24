@@ -1,0 +1,68 @@
+[
+  {
+    "_id": "691ede3f6039c94ca59e6b31",
+    "husband": "691ede3f6039c94ca59e6b2b",
+    "wife": "691ede3f6039c94ca59e6b2d",
+    "husbandOrder": 1,
+    "wifeOrder": 1,
+    "marriageDate": "1920-01-01T00:00:00.000Z",
+    "createdAt": "2025-11-20T09:24:15.470Z",
+    "updatedAt": "2025-11-20T09:24:15.470Z",
+    "__v": 0
+  },
+  {
+    "_id": "691ede3f6039c94ca59e6b35",
+    "husband": "691ede3f6039c94ca59e6b2b",
+    "wife": "691ede3f6039c94ca59e6b2f",
+    "husbandOrder": 1,
+    "wifeOrder": 2,
+    "marriageDate": "1925-01-01T00:00:00.000Z",
+    "createdAt": "2025-11-20T09:24:15.490Z",
+    "updatedAt": "2025-11-20T09:24:15.490Z",
+    "__v": 0
+  },
+  {
+    "_id": "691ede3f6039c94ca59e6b56",
+    "husband": "691ede3f6039c94ca59e6b52",
+    "wife": "691ede3f6039c94ca59e6b3a",
+    "husbandOrder": 1,
+    "wifeOrder": 1,
+    "marriageDate": "1940-05-20T00:00:00.000Z",
+    "createdAt": "2025-11-20T09:24:15.528Z",
+    "updatedAt": "2025-11-20T09:24:15.528Z",
+    "__v": 0
+  },
+  {
+    "_id": "691ede3f6039c94ca59e6b5a",
+    "husband": "691ede3f6039c94ca59e6b3e",
+    "wife": "691ede3f6039c94ca59e6b54",
+    "husbandOrder": 1,
+    "wifeOrder": 1,
+    "marriageDate": "1945-10-10T00:00:00.000Z",
+    "createdAt": "2025-11-20T09:24:15.532Z",
+    "updatedAt": "2025-11-20T09:24:15.532Z",
+    "__v": 0
+  },
+  {
+    "_id": "69202a3af1431ec4e98650af",
+    "husband": "691ede3f6039c94ca59e6b3c",
+    "wife": "69202a20f1431ec4e986509c",
+    "husbandOrder": 1,
+    "wifeOrder": 1,
+    "marriageDate": "2025-11-20T00:00:00.000Z",
+    "createdAt": "2025-11-21T09:00:42.203Z",
+    "updatedAt": "2025-11-21T09:00:42.203Z",
+    "__v": 0
+  },
+  {
+    "_id": "6924118f6584daeaef74b09c",
+    "husband": "691ede3f6039c94ca59e6b5e",
+    "wife": "692411796584daeaef74b08a",
+    "husbandOrder": 1,
+    "wifeOrder": 1,
+    "marriageDate": "2021-06-24T00:00:00.000Z",
+    "createdAt": "2025-11-24T08:04:31.011Z",
+    "updatedAt": "2025-11-24T08:04:31.011Z",
+    "__v": 0
+  }
+]

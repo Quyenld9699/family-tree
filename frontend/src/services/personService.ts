@@ -1,4 +1,6 @@
 import api from './api';
+import authService from './authService';
+import personsData from '../data/persons.json';
 
 // Định nghĩa các interface
 // Gender enum from backend: MALE = 0, FEMALE = 1
@@ -26,12 +28,22 @@ export interface PersonWithGenerations {
 const personService = {
     // Lấy tất cả người
     getAllPersons: async (): Promise<Person[]> => {
+        // If not authenticated, return mock data (Public Visitor)
+        if (!authService.isAuthenticated()) {
+            return personsData as unknown as Person[];
+        }
+        // If authenticated (Admin or Family Guest), return real data from API
         const response = await api.get('/person');
         return response.data;
     },
 
     // Lấy một người theo ID
     getPersonById: async (id: string): Promise<Person> => {
+        if (!authService.isAuthenticated()) {
+            const person = (personsData as unknown as Person[]).find((p) => p._id === id);
+            if (!person) throw new Error('Person not found');
+            return person;
+        }
         const response = await api.get(`/person/${id}`);
         return response.data;
     },
