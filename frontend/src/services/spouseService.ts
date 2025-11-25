@@ -49,7 +49,7 @@ const spouseService = {
 
     // Lấy mối quan hệ vợ chồng theo ID
     getSpouseById: async (id: string): Promise<SpouseWithDetails> => {
-        if (authService.isGuest()) {
+        if (!authService.isAuthenticated()) {
             const spouse = (spousesData as any[]).find((s) => s._id === id);
             if (!spouse) throw new Error('Spouse not found');
             return populateSpouse(spouse);
@@ -60,7 +60,7 @@ const spouseService = {
 
     // Lấy tất cả mối quan hệ vợ chồng của một người
     getSpousesByPersonId: async (personId: string): Promise<SpouseWithDetails[]> => {
-        if (authService.isGuest()) {
+        if (!authService.isAuthenticated()) {
             const spouses = (spousesData as any[]).filter((s) => s.husband === personId || s.wife === personId);
             return spouses.map(populateSpouse);
         }

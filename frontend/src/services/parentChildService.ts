@@ -59,7 +59,7 @@ const parentChildService = {
 
     // Lấy quan hệ cha mẹ-con theo ID
     getParentChildById: async (id: string): Promise<ParentChildWithDetails> => {
-        if (authService.isGuest()) {
+        if (!authService.isAuthenticated()) {
             const pc = (parentChildrenData as any[]).find((p) => p._id === id);
             if (!pc) throw new Error('ParentChild not found');
             return populateParentChild(pc);
@@ -70,7 +70,7 @@ const parentChildService = {
 
     // Lấy tất cả con của một cặp cha mẹ
     getChildrenByParentId: async (parentId: string): Promise<ParentChildWithDetails[]> => {
-        if (authService.isGuest()) {
+        if (!authService.isAuthenticated()) {
             const children = (parentChildrenData as any[]).filter((pc) => pc.parent === parentId);
             return children.map(populateParentChild);
         }
@@ -80,7 +80,7 @@ const parentChildService = {
 
     // Lấy cha mẹ của một đứa trẻ
     getParentsByChildId: async (childId: string): Promise<ParentChildWithDetails[]> => {
-        if (authService.isGuest()) {
+        if (!authService.isAuthenticated()) {
             const parents = (parentChildrenData as any[]).filter((pc) => pc.child === childId);
             return parents.map(populateParentChild);
         }

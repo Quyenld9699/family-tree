@@ -1,4 +1,5 @@
 import api from './api';
+import authService from './authService';
 
 export interface GalleryImage {
     _id: string;
@@ -23,11 +24,13 @@ export const galleryService = {
     },
 
     getImagesByPerson: async (personId: string): Promise<GalleryImage[]> => {
+        if (!authService.isAuthenticated()) return [];
         const response = await api.get(`/gallery/person/${personId}`);
         return response.data;
     },
 
     getImagesBySpouse: async (spouseId: string): Promise<GalleryImage[]> => {
+        if (!authService.isAuthenticated()) return [];
         const response = await api.get(`/gallery/spouse/${spouseId}`);
         return response.data;
     },
