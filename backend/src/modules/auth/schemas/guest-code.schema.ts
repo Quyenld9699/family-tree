@@ -14,6 +14,9 @@ export class GuestCode {
     @Prop()
     note: string;
 
+    @Prop({ default: 'view' }) // 'view' or 'edit'
+    role: string;
+
     @Prop({ default: true })
     isActive: boolean;
 }

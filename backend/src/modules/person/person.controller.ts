@@ -17,7 +17,7 @@ export class PersonController {
     constructor(private readonly personService: PersonService) {}
 
     @Post()
-    @Roles(UserRoles.ADMIN)
+    @Roles(UserRoles.ADMIN, UserRoles.EDITOR)
     @ApiOperation({ summary: 'Create a new person' })
     @ApiResponse({
         status: HttpStatus.CREATED,
@@ -57,7 +57,7 @@ export class PersonController {
     }
 
     @Patch(':id')
-    @Roles(UserRoles.ADMIN)
+    @Roles(UserRoles.ADMIN, UserRoles.EDITOR)
     @ApiOperation({ summary: 'Update a person' })
     @ApiParam({ name: 'id', description: 'Person ID' })
     @ApiResponse({
@@ -74,7 +74,7 @@ export class PersonController {
     }
 
     @Delete(':id')
-    @Roles(UserRoles.ADMIN)
+    @Roles(UserRoles.ADMIN, UserRoles.EDITOR)
     @ApiOperation({ summary: 'Delete a person' })
     @ApiParam({ name: 'id', description: 'Person ID' })
     @ApiResponse({

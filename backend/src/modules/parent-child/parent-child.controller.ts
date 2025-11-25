@@ -17,7 +17,7 @@ export class ParentChildController {
     constructor(private readonly parentChildService: ParentChildService) {}
 
     @Post()
-    @Roles(UserRoles.ADMIN)
+    @Roles(UserRoles.ADMIN, UserRoles.EDITOR)
     @ApiOperation({ summary: 'Create a new parent-child relationship' })
     @ApiResponse({
         status: HttpStatus.CREATED,
@@ -88,7 +88,7 @@ export class ParentChildController {
     }
 
     @Patch(':id')
-    @Roles(UserRoles.ADMIN)
+    @Roles(UserRoles.ADMIN, UserRoles.EDITOR)
     @ApiOperation({ summary: 'Update a parent-child relationship' })
     @ApiParam({ name: 'id', description: 'Parent-child relationship ID' })
     @ApiResponse({
@@ -105,7 +105,7 @@ export class ParentChildController {
     }
 
     @Delete(':id')
-    @Roles(UserRoles.ADMIN)
+    @Roles(UserRoles.ADMIN, UserRoles.EDITOR)
     @ApiOperation({ summary: 'Delete a parent-child relationship' })
     @ApiParam({ name: 'id', description: 'Parent-child relationship ID' })
     @ApiResponse({

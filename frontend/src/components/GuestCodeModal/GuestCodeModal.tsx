@@ -11,6 +11,7 @@ interface GuestCode {
     code: string;
     expiredAt: string;
     note: string;
+    role?: string;
     isActive: boolean;
     createdAt: string;
 }
@@ -24,6 +25,7 @@ export default function GuestCodeModal({ isOpen, onClose }: GuestCodeModalProps)
     const queryClient = useQueryClient();
     const [note, setNote] = useState('');
     const [duration, setDuration] = useState(7); // Default 7 days
+    const [role, setRole] = useState('view');
 
     // Query for guest codes
     const { data: codes = [], isLoading } = useQuery({
@@ -37,12 +39,13 @@ export default function GuestCodeModal({ isOpen, onClose }: GuestCodeModalProps)
 
     // Mutation for generating code
     const generateMutation = useMutation({
-        mutationFn: (data: { duration: number; note: string }) => authService.generateGuestCode(data.duration, data.note),
+        mutationFn: (data: { duration: number; note: string; role: string }) => authService.generateGuestCode(data.duration, data.note, data.role),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['guestCodes'] });
             toast.success('Tạo mã thành công!');
             setNote('');
             setDuration(7);
+            setRole('view');
         },
         onError: (error) => {
             console.error('Failed to generate code', error);
@@ -65,7 +68,7 @@ export default function GuestCodeModal({ isOpen, onClose }: GuestCodeModalProps)
 
     const handleGenerate = (e: React.FormEvent) => {
         e.preventDefault();
-        generateMutation.mutate({ duration, note });
+        generateMutation.mutate({ duration, note, role });
     };
 
     const handleRevoke = (id: string) => {
@@ -103,6 +106,13 @@ export default function GuestCodeModal({ isOpen, onClose }: GuestCodeModalProps)
                         </div>
                         <div className="flex gap-4">
                             <div className="flex-1">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Quyền hạn</label>
+                                <select value={role} onChange={(e) => setRole(e.target.value)} className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="view">Xem (View)</option>
+                                    <option value="edit">Chỉnh sửa (Edit)</option>
+                                </select>
+                            </div>
+                            <div className="flex-1">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Thời hạn (ngày)</label>
                                 <input
                                     type="number"
@@ -138,6 +148,7 @@ export default function GuestCodeModal({ isOpen, onClose }: GuestCodeModalProps)
                                     <tr>
                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã Code</th>
                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ghi chú</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quyền</th>
                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hết hạn</th>
                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
                                         <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
@@ -148,6 +159,15 @@ export default function GuestCodeModal({ isOpen, onClose }: GuestCodeModalProps)
                                         <tr key={code._id} className={!code.isActive ? 'bg-gray-50 opacity-60' : ''}>
                                             <td className="px-4 py-3 whitespace-nowrap font-mono font-bold text-blue-600">{code.code}</td>
                                             <td className="px-4 py-3 whitespace-nowrap">{code.note}</td>
+                                            <td className="px-4 py-3 whitespace-nowrap">
+                                                <span
+                                                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                                        code.role === 'edit' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
+                                                    }`}
+                                                >
+                                                    {code.role === 'edit' ? 'Edit' : 'View'}
+                                                </span>
+                                            </td>
                                             <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{formatDate(code.expiredAt)}</td>
                                             <td className="px-4 py-3 whitespace-nowrap">
                                                 {code.isActive ? (
@@ -167,7 +187,7 @@ export default function GuestCodeModal({ isOpen, onClose }: GuestCodeModalProps)
                                     ))}
                                     {codes.length === 0 && (
                                         <tr>
-                                            <td colSpan={5} className="px-4 py-4 text-center text-gray-500">
+                                            <td colSpan={6} className="px-4 py-4 text-center text-gray-500">
                                                 Chưa có mã nào được tạo
                                             </td>
                                         </tr>

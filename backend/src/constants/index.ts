@@ -2,6 +2,7 @@ export enum UserRoles {
     ADMIN = 'admin',
     USER = 'user',
     GUEST = 'guest',
+    EDITOR = 'editor',
 }
 
 export enum AccountType {

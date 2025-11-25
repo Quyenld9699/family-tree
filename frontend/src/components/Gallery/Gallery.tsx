@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react';
 import galleryService, { GalleryImage } from 'src/services/galleryService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../context/AuthContext';
 
 interface GalleryProps {
     personId?: string;
@@ -12,6 +13,7 @@ interface GalleryProps {
 }
 
 export default function Gallery({ personId, spouseId, onAvatarUpdate }: GalleryProps) {
+    const { isAdmin, isEditor } = useAuth();
     const queryClient = useQueryClient();
     const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -105,17 +107,19 @@ export default function Gallery({ personId, spouseId, onAvatarUpdate }: GalleryP
             ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {/* Add Button Tile */}
-                    <div
-                        onClick={() => setShowUploadModal(true)}
-                        className="aspect-square bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 hover:border-blue-500 transition-colors group"
-                    >
-                        <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mb-2 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500 group-hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
+                    {(isAdmin || isEditor) && (
+                        <div
+                            onClick={() => setShowUploadModal(true)}
+                            className="aspect-square bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 hover:border-blue-500 transition-colors group"
+                        >
+                            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mb-2 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500 group-hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                            </div>
+                            <span className="text-sm text-gray-500 font-medium group-hover:text-blue-600">Thêm ảnh</span>
                         </div>
-                        <span className="text-sm text-gray-500 font-medium group-hover:text-blue-600">Thêm ảnh</span>
-                    </div>
+                    )}
 
                     {/* Images */}
                     {images.map((img) => (
@@ -127,18 +131,20 @@ export default function Gallery({ personId, spouseId, onAvatarUpdate }: GalleryP
                                 onClick={() => setSelectedImage(img)}
                             />
                             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity pointer-events-none" />
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDelete(img._id);
-                                }}
-                                className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                                title="Xóa ảnh"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
+                            {(isAdmin || isEditor) && (
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDelete(img._id);
+                                    }}
+                                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                                    title="Xóa ảnh"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            )}
                             {img.description && <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2 truncate">{img.description}</div>}
                         </div>
                     ))}

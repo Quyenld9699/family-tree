@@ -12,6 +12,7 @@ interface AuthContextType {
     logout: () => void;
     isAdmin: boolean;
     isGuest: boolean;
+    isEditor: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -66,6 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 logout,
                 isAdmin: user?.role === 'admin',
                 isGuest: user?.role === 'guest',
+                isEditor: user?.role === 'editor',
             }}
         >
             {children}

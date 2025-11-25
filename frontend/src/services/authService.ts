@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 export interface User {
     userId: string;
     username: string;
-    role: 'admin' | 'user' | 'guest';
+    role: 'admin' | 'user' | 'guest' | 'editor';
 }
 
 export interface LoginResponse {
@@ -67,9 +67,14 @@ class AuthService {
         return user?.role === 'guest';
     }
 
+    isEditor(): boolean {
+        const user = this.getCurrentUser();
+        return user?.role === 'editor';
+    }
+
     // Admin only methods
-    async generateGuestCode(duration: number, note: string) {
-        return api.post('/auth/guest-code', { duration, note });
+    async generateGuestCode(duration: number, note: string, role: string = 'view') {
+        return api.post('/auth/guest-code', { duration, note, role });
     }
 
     async listGuestCodes() {

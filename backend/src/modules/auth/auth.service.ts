@@ -60,14 +60,17 @@ export class AuthService {
             throw new UnauthorizedException('Code expired');
         }
 
-        const payload = { username: 'Guest', sub: guestCode._id, role: UserRoles.GUEST };
+        // Determine role based on guest code configuration
+        const role = guestCode.role === 'edit' ? UserRoles.EDITOR : UserRoles.GUEST;
+
+        const payload = { username: 'Guest', sub: guestCode._id, role: role };
         return {
             access_token: this.jwtService.sign(payload),
-            role: UserRoles.GUEST,
+            role: role,
         };
     }
 
-    async generateGuestCode(durationInDays: number, note: string) {
+    async generateGuestCode(durationInDays: number, note: string, role: string = 'view') {
         const code = Math.random().toString(36).substring(2, 10).toUpperCase(); // Simple random code
         const expiredAt = new Date();
         expiredAt.setDate(expiredAt.getDate() + durationInDays);
@@ -76,6 +79,7 @@ export class AuthService {
             code,
             expiredAt,
             note,
+            role,
         });
         return newCode.save();
     }

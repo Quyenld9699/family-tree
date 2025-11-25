@@ -40,7 +40,7 @@ export default function UserMenu({ user, isAdmin, onLogout, onOpenGuestCodeModal
                 <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 overflow-hidden transform origin-top-right transition-all duration-200 ease-out z-50">
                     <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Xin chào</p>
-                        <p className="text-base font-bold text-gray-900 truncate">{user.role === 'admin' ? 'Admin' : 'Gia đình'}</p>
+                        <p className="text-base font-bold text-gray-900 truncate">{user.role === 'admin' ? 'Admin' : user.role === 'editor' ? 'Người chỉnh sửa' : 'Gia đình'}</p>
                     </div>
 
                     <div className="py-1">

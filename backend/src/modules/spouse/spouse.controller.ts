@@ -17,7 +17,7 @@ export class SpouseController {
     constructor(private readonly spouseService: SpouseService) {}
 
     @Post()
-    @Roles(UserRoles.ADMIN)
+    @Roles(UserRoles.ADMIN, UserRoles.EDITOR)
     @ApiOperation({ summary: 'Create a new spouse relationship' })
     @ApiResponse({
         status: HttpStatus.CREATED,
@@ -72,7 +72,7 @@ export class SpouseController {
     }
 
     @Patch(':id')
-    @Roles(UserRoles.ADMIN)
+    @Roles(UserRoles.ADMIN, UserRoles.EDITOR)
     @ApiOperation({ summary: 'Update a spouse relationship' })
     @ApiParam({ name: 'id', description: 'Spouse relationship ID' })
     @ApiResponse({
@@ -89,7 +89,7 @@ export class SpouseController {
     }
 
     @Delete(':id')
-    @Roles(UserRoles.ADMIN)
+    @Roles(UserRoles.ADMIN, UserRoles.EDITOR)
     @ApiOperation({ summary: 'Delete a spouse relationship' })
     @ApiParam({ name: 'id', description: 'Spouse relationship ID' })
     @ApiResponse({

@@ -17,7 +17,7 @@ import { useFamilyData } from 'src/hooks/useFamilyData';
 import FamilyTreeFlow from 'src/components/FamilyTree/FamilyTreeFlow';
 
 export default function Root() {
-    const { isAdmin, logout, user } = useAuth();
+    const { isAdmin, isEditor, logout, user } = useAuth();
     const [personDetailModalOpen, setPersonDetailModalOpen] = useState(false);
     const [addSpouseModalOpen, setAddSpouseModalOpen] = useState(false);
     const [addChildModalOpen, setAddChildModalOpen] = useState(false);
@@ -115,7 +115,7 @@ export default function Root() {
                 )}
             </div>
             <SearchBar onSearch={handleSearch} />
-            {isAdmin && <AddPersonButton onClick={() => setAddPersonModalOpen(true)} />}
+            {(isAdmin || isEditor) && <AddPersonButton onClick={() => setAddPersonModalOpen(true)} />}
 
             <LoadingOverlay isLoading={isLoading} />
 

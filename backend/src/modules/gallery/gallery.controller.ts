@@ -15,7 +15,7 @@ export class GalleryController {
     constructor(private readonly galleryService: GalleryService) {}
 
     @Post('upload')
-    @Roles(UserRoles.ADMIN)
+    @Roles(UserRoles.ADMIN, UserRoles.EDITOR)
     @UseInterceptors(FileInterceptor('file'))
     async uploadFile(@UploadedFile() file: Express.Multer.File, @Body() body: { personId?: string; spouseId?: string; description?: string; eventDate?: string; setAsAvatar?: boolean }) {
         return this.galleryService.uploadImage(file, body);
@@ -32,7 +32,7 @@ export class GalleryController {
     }
 
     @Delete(':id')
-    @Roles(UserRoles.ADMIN)
+    @Roles(UserRoles.ADMIN, UserRoles.EDITOR)
     async delete(@Param('id') id: string) {
         return this.galleryService.deleteImage(id);
     }
