@@ -547,49 +547,56 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                                             <p className="text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-lg text-sm">{person.desc}</p>
                                         </div>
                                     )}
-
-                                    {/* Parents Info */}
-                                    {parents.length > 0 && (
-                                        <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                                            <h4 className="font-semibold text-blue-800 mb-2 text-sm flex items-center gap-2">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                                                    />
-                                                </svg>
-                                                Cha mẹ
-                                            </h4>
-                                            {parents.map((pc, index) => {
-                                                const parentSpouse = pc.parent as SpouseWithDetails;
-                                                const father = typeof parentSpouse.husband === 'object' ? (parentSpouse.husband as Person) : null;
-                                                const mother = typeof parentSpouse.wife === 'object' ? (parentSpouse.wife as Person) : null;
-                                                return (
-                                                    <div key={index} className="grid grid-cols-1 gap-2 text-sm">
-                                                        {father && (
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-gray-500 w-10">Cha:</span>
-                                                                <span className="font-medium text-gray-900">{father.name}</span>
-                                                            </div>
-                                                        )}
-                                                        {mother && (
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-gray-500 w-10">Mẹ:</span>
-                                                                <span className="font-medium text-gray-900">{mother.name}</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
                                 </div>
                             )}
                         </div>
                     </div>
                 </div>
+
+                {/* Parents Info */}
+                {loadingParents ? (
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex justify-center items-center">
+                        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-600 mr-2"></div>
+                        <span className="text-gray-500 text-sm">Đang tải thông tin cha mẹ...</span>
+                    </div>
+                ) : parents.length > 0 ? (
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <h4 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                                />
+                            </svg>
+                            Cha mẹ
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {parents.map((pc, index) => {
+                                const parentSpouse = pc.parent as SpouseWithDetails;
+                                const father = typeof parentSpouse.husband === 'object' ? (parentSpouse.husband as Person) : null;
+                                const mother = typeof parentSpouse.wife === 'object' ? (parentSpouse.wife as Person) : null;
+                                return (
+                                    <div key={index} className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                        {father && (
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="text-gray-500 w-10 text-sm">Cha:</span>
+                                                <span className="font-medium text-gray-900">{father.name}</span>
+                                            </div>
+                                        )}
+                                        {mother && (
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-gray-500 w-10 text-sm">Mẹ:</span>
+                                                <span className="font-medium text-gray-900">{mother.name}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                ) : null}
 
                 {/* Spouse Relationships */}
                 <div className="bg-gray-50 p-4 rounded-lg">
@@ -600,13 +607,16 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                         </button>
                     </div>
 
-                    {loading ? (
-                        <p className="text-sm text-gray-500">Đang tải...</p>
+                    {loadingSpouses ? (
+                        <div className="flex justify-center items-center py-4">
+                            <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-600 mr-2"></div>
+                            <span className="text-gray-500 text-sm">Đang tải thông tin vợ/chồng...</span>
+                        </div>
                     ) : spouses.length === 0 ? (
                         <p className="text-sm text-gray-500">Chưa có thông tin vợ/chồng</p>
                     ) : (
                         <div className="space-y-3">
-                            {spouses.map((spouse) => (
+                            {spouses.map((spouse, index) => (
                                 <div key={spouse._id} className="bg-white p-3 rounded border">
                                     <div className="flex justify-between items-start mb-2">
                                         <div>
@@ -631,31 +641,40 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                                     </div>
 
                                     {/* Children of this spouse */}
-                                    {spouse._id && children[spouse._id] && children[spouse._id].length > 0 && (
-                                        <div className="mt-2 pl-3 border-l-2 border-gray-300">
-                                            <p className="text-xs text-gray-600 mb-1">Con cái:</p>
-                                            <div className="space-y-1">
-                                                {children[spouse._id].map((child) => (
-                                                    <div key={child._id} className="text-sm flex justify-between items-center group hover:bg-gray-50 rounded px-1 -mx-1">
-                                                        <span>
-                                                            • {typeof child.child !== 'string' && child.child?.name}
-                                                            {child.isAdopted && <span className="text-xs text-gray-500"> (nuôi)</span>}
-                                                        </span>
-                                                        {isAdmin && (
-                                                            <button
-                                                                onClick={() => child._id && handleDeleteChild(child._id)}
-                                                                className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-1"
-                                                                title="Xóa quan hệ con cái"
-                                                            >
-                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                                </svg>
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </div>
+                                    {childrenQueries[index]?.isLoading ? (
+                                        <div className="mt-2 pl-3 border-l-2 border-gray-300 flex items-center">
+                                            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-gray-400 mr-2"></div>
+                                            <span className="text-xs text-gray-500">Đang tải con cái...</span>
                                         </div>
+                                    ) : (
+                                        spouse._id &&
+                                        children[spouse._id] &&
+                                        children[spouse._id].length > 0 && (
+                                            <div className="mt-2 pl-3 border-l-2 border-gray-300">
+                                                <p className="text-xs text-gray-600 mb-1">Con cái:</p>
+                                                <div className="space-y-1">
+                                                    {children[spouse._id].map((child) => (
+                                                        <div key={child._id} className="text-sm flex justify-between items-center group hover:bg-gray-50 rounded px-1 -mx-1">
+                                                            <span>
+                                                                • {typeof child.child !== 'string' && child.child?.name}
+                                                                {child.isAdopted && <span className="text-xs text-gray-500"> (nuôi)</span>}
+                                                            </span>
+                                                            {isAdmin && (
+                                                                <button
+                                                                    onClick={() => child._id && handleDeleteChild(child._id)}
+                                                                    className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                                                                    title="Xóa quan hệ con cái"
+                                                                >
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                                    </svg>
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )
                                     )}
                                 </div>
                             ))}

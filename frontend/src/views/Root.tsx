@@ -1,8 +1,5 @@
 'use client';
-import { Background, BackgroundVariant, MiniMap, ReactFlow } from '@xyflow/react';
-import PersonNode from 'src/components/PersonNode/PersonNode';
-import RelationshipNode from 'src/components/RelationshipNode/RelationshipNode';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PersonDetailModal from 'src/components/PersonDetailModal/PersonDetailModal';
 import AddSpouseModal from 'src/components/AddSpouseModal/AddSpouseModal';
 import AddChildModal from 'src/components/AddChildModal/AddChildModal';
@@ -10,15 +7,14 @@ import AddPersonModal from 'src/components/AddPersonModal/AddPersonModal';
 import AddPersonButton from 'src/components/AddPersonButton/AddPersonButton';
 import SearchBar from 'src/components/SearchBar/SearchBar';
 import RelationshipDetailModal from 'src/components/RelationshipDetailModal/RelationshipDetailModal';
-import personService, { Person } from 'src/services/personService';
-import spouseService, { SpouseWithDetails } from 'src/services/spouseService';
-import parentChildService, { ParentChildWithDetails } from 'src/services/parentChildService';
-import { buildGenerations, buildChildrenByParentMap } from './utils/generationBuilder';
-import { calculateNodePositions } from './utils/positionCalculator';
-import { renderFamilyTree } from './utils/nodeRenderer';
+import { Person } from 'src/services/personService';
+import { SpouseWithDetails } from 'src/services/spouseService';
 import { useAuth } from '../context/AuthContext';
 import GuestCodeModal from 'src/components/GuestCodeModal/GuestCodeModal';
 import UserMenu from 'src/components/UserMenu/UserMenu';
+import LoadingOverlay from 'src/components/LoadingOverlay/LoadingOverlay';
+import { useFamilyData } from 'src/hooks/useFamilyData';
+import FamilyTreeFlow from 'src/components/FamilyTree/FamilyTreeFlow';
 
 export default function Root() {
     const { isAdmin, logout, user } = useAuth();
@@ -31,11 +27,10 @@ export default function Root() {
     const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
     const [selectedSpouse, setSelectedSpouse] = useState<SpouseWithDetails | null>(null);
     const [selectedSpouseIdForChild, setSelectedSpouseIdForChild] = useState<string | null>(null);
-    const [persons, setPersons] = useState<Person[]>([]);
-    const [spouses, setSpouses] = useState<SpouseWithDetails[]>([]);
-    const [parentChilds, setParentChilds] = useState<ParentChildWithDetails[]>([]);
     const [searchRootPersonId, setSearchRootPersonId] = useState<string | null>(null);
     const [searchGenerations, setSearchGenerations] = useState<number | null>(null);
+
+    const { persons, spouses, parentChilds, isLoading, refetchAll } = useFamilyData();
 
     const handlePersonNodeClick = useCallback(
         (personData: any) => {
@@ -59,18 +54,6 @@ export default function Root() {
         [spouses],
     );
 
-    const nodeTypes = useMemo(
-        () => ({
-            relationship: (props: any) => <RelationshipNode {...props} onClick={handleRelationshipNodeClick} />,
-            person: (props: any) => <PersonNode {...props} onClick={handlePersonNodeClick} />,
-        }),
-        [handlePersonNodeClick, handleRelationshipNodeClick],
-    );
-
-    useEffect(() => {
-        loadAllData();
-    }, []);
-
     // Sync selectedPerson with persons list when it updates
     useEffect(() => {
         if (selectedPerson) {
@@ -80,69 +63,6 @@ export default function Root() {
             }
         }
     }, [persons, selectedPerson]);
-
-    // Build family tree with memoization
-    const { nodes, edges } = useMemo(() => {
-        if (persons.length === 0) {
-            return { nodes: [], edges: [] };
-        }
-
-        // Find ROOT_PERSON_ID
-        const ROOT_PERSON_ID = searchRootPersonId || persons.find((p) => p.name?.includes('Lê Đình A'))?._id || persons[0]?._id;
-
-        // Build maps
-        const personMap = new Map<string, Person>();
-        const spouseMap = new Map<string, SpouseWithDetails[]>();
-        const childrenMap = new Map<string, ParentChildWithDetails[]>();
-
-        persons.forEach((p) => personMap.set(p._id!, p));
-
-        spouses.forEach((spouse) => {
-            const husbandId = typeof spouse.husband === 'string' ? spouse.husband : spouse.husband._id;
-            const wifeId = typeof spouse.wife === 'string' ? spouse.wife : spouse.wife._id;
-
-            if (husbandId) {
-                if (!spouseMap.has(husbandId)) spouseMap.set(husbandId, []);
-                spouseMap.get(husbandId)!.push(spouse);
-            }
-            if (wifeId) {
-                if (!spouseMap.has(wifeId)) spouseMap.set(wifeId, []);
-                spouseMap.get(wifeId)!.push(spouse);
-            }
-        });
-
-        parentChilds.forEach((pc) => {
-            const parentId = typeof pc.parent === 'string' ? pc.parent : pc.parent._id;
-            if (parentId) {
-                if (!childrenMap.has(parentId)) childrenMap.set(parentId, []);
-                childrenMap.get(parentId)!.push(pc);
-            }
-        });
-
-        // Build generations
-        const { generations, personGeneration } = buildGenerations(ROOT_PERSON_ID!, personMap, spouseMap, childrenMap, searchGenerations || undefined);
-
-        // Build children by parent map
-        const lastGenIndex = generations.length - 1;
-        const childrenByParent = buildChildrenByParentMap(generations, lastGenIndex, spouseMap, childrenMap, personMap);
-
-        // Calculate positions
-        const { nodeXPositions, relationshipXPositions, spouseNodeXPositions } = calculateNodePositions(generations, spouseMap, childrenMap, personGeneration, childrenByParent, personMap);
-
-        // Render tree
-        return renderFamilyTree(generations, spouseMap, childrenMap, personGeneration, nodeXPositions, relationshipXPositions, spouseNodeXPositions);
-    }, [persons, spouses, parentChilds, searchRootPersonId, searchGenerations]);
-
-    const loadAllData = useCallback(async () => {
-        try {
-            const [personsData, spousesData, parentChildsData] = await Promise.all([personService.getAllPersons(), spouseService.getAllSpouses(), parentChildService.getAllParentChildRelationships()]);
-            setPersons(personsData);
-            setSpouses(spousesData);
-            setParentChilds(parentChildsData);
-        } catch (error) {
-            console.error('Failed to load data:', error);
-        }
-    }, []);
 
     const handleAddSpouseFromPerson = useCallback((person: Person) => {
         setSelectedPerson(person);
@@ -157,21 +77,21 @@ export default function Root() {
     }, []);
 
     const handleSpouseModalSuccess = useCallback(() => {
-        loadAllData();
+        refetchAll();
         setAddSpouseModalOpen(false);
         setPersonDetailModalOpen(true);
-    }, [loadAllData]);
+    }, [refetchAll]);
 
     const handleChildModalSuccess = useCallback(() => {
-        loadAllData();
+        refetchAll();
         setAddChildModalOpen(false);
         setPersonDetailModalOpen(true);
-    }, [loadAllData]);
+    }, [refetchAll]);
 
     const handlePersonModalSuccess = useCallback(() => {
-        loadAllData();
+        refetchAll();
         setAddPersonModalOpen(false);
-    }, [loadAllData]);
+    }, [refetchAll]);
 
     const handleSearch = useCallback((personId: string, generations: number) => {
         setSearchRootPersonId(personId);
@@ -185,11 +105,6 @@ export default function Root() {
 
     return (
         <div style={{ width: '100vw', height: '100vh' }}>
-            <style>{`
-                .react-flow__node[data-id^="gen_"] .react-flow__handle {
-                    display: none !important;
-                }
-            `}</style>
             <div className="fixed z-50 flex gap-2" style={{ top: '1rem', right: '1rem' }}>
                 {!user ? (
                     <a href="/guest-login" className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors font-medium h-full flex items-center">
@@ -201,6 +116,8 @@ export default function Root() {
             </div>
             <SearchBar onSearch={handleSearch} />
             {isAdmin && <AddPersonButton onClick={() => setAddPersonModalOpen(true)} />}
+
+            <LoadingOverlay isLoading={isLoading} />
 
             {(searchRootPersonId || searchGenerations) && (
                 <button
@@ -220,10 +137,15 @@ export default function Root() {
                 </button>
             )}
 
-            <ReactFlow nodeTypes={nodeTypes} nodes={nodes} edges={edges}>
-                <MiniMap />
-                <Background variant={BackgroundVariant.Lines} gap={12} size={1} />
-            </ReactFlow>
+            <FamilyTreeFlow
+                persons={persons}
+                spouses={spouses}
+                parentChilds={parentChilds}
+                searchRootPersonId={searchRootPersonId}
+                searchGenerations={searchGenerations}
+                onPersonNodeClick={handlePersonNodeClick}
+                onRelationshipNodeClick={handleRelationshipNodeClick}
+            />
 
             <PersonDetailModal
                 isOpen={personDetailModalOpen}
@@ -231,7 +153,7 @@ export default function Root() {
                 person={selectedPerson}
                 onAddSpouse={handleAddSpouseFromPerson}
                 onAddChild={handleAddChildFromSpouse}
-                onUpdate={loadAllData}
+                onUpdate={refetchAll}
             />
             <AddSpouseModal isOpen={addSpouseModalOpen} onClose={() => setAddSpouseModalOpen(false)} onSuccess={handleSpouseModalSuccess} person={selectedPerson} />
             <AddChildModal isOpen={addChildModalOpen} onClose={() => setAddChildModalOpen(false)} onSuccess={handleChildModalSuccess} spouseId={selectedSpouseIdForChild} />

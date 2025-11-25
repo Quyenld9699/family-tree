@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     keywords: KEYWORD,
-    publisher: 'A-Star Group',
+    publisher: 'Quyền Lê Đình',
     robots: {
         follow: true,
         index: true,
