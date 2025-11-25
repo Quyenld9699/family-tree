@@ -185,7 +185,7 @@ export default function AddSpouseModal({ isOpen, onClose, onSuccess, person }: A
                     <select
                         value={searchType}
                         onChange={(e) => handleSearchTypeChange(e.target.value as 'name' | 'cccd')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                         <option value="name">Tên</option>
                         <option value="cccd">CCCD</option>
@@ -206,7 +206,7 @@ export default function AddSpouseModal({ isOpen, onClose, onSuccess, person }: A
                                 setSelectedSpouse(null);
                             }}
                             placeholder={searchType === 'name' ? `Nhập tên ${spouseLabel}...` : 'Nhập số CCCD...'}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             required
                         />
 
@@ -245,7 +245,7 @@ export default function AddSpouseModal({ isOpen, onClose, onSuccess, person }: A
                         value={order}
                         onChange={(e) => setOrder(parseInt(e.target.value) || 1)}
                         min="1"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                     />
                     {existingSpouses.length > 0 && (
@@ -268,7 +268,7 @@ export default function AddSpouseModal({ isOpen, onClose, onSuccess, person }: A
                             type="date"
                             value={marriageDate}
                             onChange={(e) => setMarriageDate(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
 
@@ -278,7 +278,7 @@ export default function AddSpouseModal({ isOpen, onClose, onSuccess, person }: A
                             type="date"
                             value={divorceDate}
                             onChange={(e) => setDivorceDate(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
                 </div>

@@ -75,7 +75,7 @@ export default function AddPersonModal({ isOpen, onClose, onSuccess }: AddPerson
                         type="text"
                         value={formData.cccd || ''}
                         onChange={(e) => setFormData({ ...formData, cccd: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md"
                         required
                         placeholder="Nhập số CCCD"
                     />
@@ -89,7 +89,7 @@ export default function AddPersonModal({ isOpen, onClose, onSuccess }: AddPerson
                         type="text"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md"
                         required
                     />
                 </div>
@@ -100,7 +100,7 @@ export default function AddPersonModal({ isOpen, onClose, onSuccess }: AddPerson
                         type="text"
                         value={formData.avatar || ''}
                         onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md"
                         placeholder="https://..."
                     />
                 </div>
@@ -110,7 +110,7 @@ export default function AddPersonModal({ isOpen, onClose, onSuccess }: AddPerson
                     <select
                         value={formData.gender}
                         onChange={(e) => setFormData({ ...formData, gender: parseInt(e.target.value) as 0 | 1 })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md"
                     >
                         <option value={Gender.MALE}>Nam</option>
                         <option value={Gender.FEMALE}>Nữ</option>
@@ -123,7 +123,7 @@ export default function AddPersonModal({ isOpen, onClose, onSuccess }: AddPerson
                         type="date"
                         value={formData.birth ? new Date(formData.birth).toISOString().split('T')[0] : ''}
                         onChange={(e) => setFormData({ ...formData, birth: e.target.value ? new Date(e.target.value) : undefined })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md"
                     />
                 </div>
 
@@ -133,7 +133,7 @@ export default function AddPersonModal({ isOpen, onClose, onSuccess }: AddPerson
                         type="date"
                         value={formData.death ? new Date(formData.death).toISOString().split('T')[0] : ''}
                         onChange={(e) => setFormData({ ...formData, death: e.target.value ? new Date(e.target.value) : undefined })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md"
                     />
                 </div>
 
@@ -156,7 +156,7 @@ export default function AddPersonModal({ isOpen, onClose, onSuccess }: AddPerson
                         type="text"
                         value={formData.address || ''}
                         onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md"
                     />
                 </div>
 
@@ -165,7 +165,7 @@ export default function AddPersonModal({ isOpen, onClose, onSuccess }: AddPerson
                     <textarea
                         value={formData.desc || ''}
                         onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md"
                         rows={3}
                     />
                 </div>

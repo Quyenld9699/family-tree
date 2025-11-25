@@ -291,7 +291,7 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
         <Modal isOpen={isOpen} onClose={onClose} title={`Thông tin: ${person.name}`}>
             <div className="space-y-6">
                 {/* Personal Information */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="bg-white p-2 md:p-6 rounded-xl shadow-sm border border-gray-100">
                     <div className="flex justify-between items-start mb-6">
                         <h3 className="text-xl font-bold text-gray-800">Thông tin cá nhân</h3>
                         {!isEditing && isAdmin && (
@@ -555,12 +555,12 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
 
                 {/* Parents Info */}
                 {loadingParents ? (
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex justify-center items-center">
+                    <div className="bg-white p-2 md:p-6 rounded-xl shadow-sm border border-gray-100 flex justify-center items-center">
                         <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-600 mr-2"></div>
                         <span className="text-gray-500 text-sm">Đang tải thông tin cha mẹ...</span>
                     </div>
                 ) : parents.length > 0 ? (
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div className="bg-white p-2 md:p-6 rounded-xl shadow-sm border border-gray-100">
                         <h4 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path
@@ -599,7 +599,7 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                 ) : null}
 
                 {/* Spouse Relationships */}
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 p-2 md:p-4 rounded-lg">
                     <div className="flex justify-between items-center mb-3">
                         <h3 className="font-semibold">Vợ/Chồng ({spouses.length})</h3>
                         <button onClick={() => onAddSpouse(person)} className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">

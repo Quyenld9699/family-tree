@@ -87,75 +87,79 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
     };
 
     return (
-        <div className="fixed top-2 left-1/2 transform -translate-x-1/2 z-10 bg-white rounded-lg shadow-lg px-4 py-2 flex items-center gap-3">
-            {/* Search Type Selector */}
-            <select
-                value={searchType}
-                onChange={(e) => handleSearchTypeChange(e.target.value as 'name' | 'cccd')}
-                className="px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-                <option value="name">Tìm theo Tên</option>
-                <option value="cccd">Tìm theo CCCD</option>
-            </select>
+        <div className="fixed top-16 md:top-2 left-1/2 transform -translate-x-1/2 z-10 bg-white rounded-lg shadow-lg px-3 py-2 md:px-4 md:py-2 flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3 w-[95%] md:w-auto justify-center">
+            {/* Row 1: Search Type & Input */}
+            <div className="flex items-center gap-2 w-full md:w-auto">
+                <select
+                    value={searchType}
+                    onChange={(e) => handleSearchTypeChange(e.target.value as 'name' | 'cccd')}
+                    className="px-2 py-1 md:px-3 md:py-2 text-sm md:text-base border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-1/3 md:w-auto"
+                >
+                    <option value="name">Tên</option>
+                    <option value="cccd">CCCD</option>
+                </select>
 
-            {/* Autocomplete Search Input */}
-            <div ref={wrapperRef} className="relative">
-                <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        setSelectedPerson(null);
-                    }}
-                    placeholder={searchType === 'name' ? 'Nhập tên người...' : 'Nhập số CCCD...'}
-                    className="w-64 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {loading && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                    </div>
-                )}
+                {/* Autocomplete Search Input */}
+                <div ref={wrapperRef} className="relative flex-1 md:flex-none">
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => {
+                            setSearchQuery(e.target.value);
+                            setSelectedPerson(null);
+                        }}
+                        placeholder={searchType === 'name' ? 'Nhập tên người...' : 'Nhập số CCCD...'}
+                        className="w-full md:w-64 px-2 py-1 md:px-3 md:py-2 text-sm md:text-base border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {loading && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                        </div>
+                    )}
 
-                {/* Suggestions Dropdown */}
-                {showSuggestions && suggestions.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded shadow-lg max-h-60 overflow-y-auto z-20">
-                        {suggestions.map((person) => (
-                            <div key={person._id} onClick={() => handleSelectPerson(person)} className="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b last:border-b-0">
-                                <div className="font-medium">{person.name}</div>
-                                <div className="text-xs text-gray-600">
-                                    CCCD: {person.cccd || 'N/A'} | Giới tính: {getGenderText(person.gender)}
+                    {/* Suggestions Dropdown */}
+                    {showSuggestions && suggestions.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded shadow-lg max-h-60 overflow-y-auto z-20 text-left">
+                            {suggestions.map((person) => (
+                                <div key={person._id} onClick={() => handleSelectPerson(person)} className="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b last:border-b-0">
+                                    <div className="font-medium">{person.name}</div>
+                                    <div className="text-xs text-gray-600">
+                                        CCCD: {person.cccd || 'N/A'} | Giới tính: {getGenderText(person.gender)}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                            ))}
+                        </div>
+                    )}
 
-                {showSuggestions && suggestions.length === 0 && searchQuery.length >= 2 && !loading && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded shadow-lg p-3 text-gray-500 text-sm">Không tìm thấy kết quả</div>
-                )}
+                    {showSuggestions && suggestions.length === 0 && searchQuery.length >= 2 && !loading && (
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded shadow-lg p-3 text-gray-500 text-sm text-left">Không tìm thấy kết quả</div>
+                    )}
+                </div>
             </div>
 
-            {/* Generations Input */}
-            <div className="flex items-center gap-2">
-                <label className="text-sm text-gray-700 whitespace-nowrap">Số thế hệ:</label>
-                <input
-                    type="number"
-                    min="1"
-                    max="10"
-                    value={generations}
-                    onChange={(e) => setGenerations(parseInt(e.target.value) || 1)}
-                    className="w-16 px-2 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-            </div>
+            {/* Row 2: Generations & Button */}
+            <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-start">
+                <div className="flex items-center gap-2 flex-1 md:flex-none">
+                    <label className="text-sm text-gray-700 whitespace-nowrap">Số thế hệ:</label>
+                    <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={generations}
+                        onChange={(e) => setGenerations(parseInt(e.target.value) || 1)}
+                        className="w-full md:w-16 px-1 py-1 md:px-2 md:py-2 text-sm md:text-base border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div>
 
-            {/* Search Button */}
-            <button
-                onClick={handleSearch}
-                disabled={!selectedPerson}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap"
-            >
-                Tìm kiếm
-            </button>
+                {/* Search Button */}
+                <button
+                    onClick={handleSearch}
+                    disabled={!selectedPerson}
+                    className="px-3 py-1 md:px-4 md:py-2 text-sm md:text-base bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                    Tìm kiếm
+                </button>
+            </div>
         </div>
     );
 }

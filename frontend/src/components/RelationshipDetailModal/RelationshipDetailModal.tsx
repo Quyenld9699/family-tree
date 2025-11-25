@@ -25,7 +25,7 @@ export default function RelationshipDetailModal({ isOpen, onClose, spouse }: Rel
         <Modal isOpen={isOpen} onClose={onClose} title={`Quan hệ: ${husbandName} - ${wifeName}`}>
             <div className="space-y-6">
                 {/* Basic Info */}
-                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                <div className="bg-white p-2 md:p-4 rounded-lg shadow-sm border border-gray-100">
                     <h3 className="text-lg font-semibold mb-3 text-gray-800 border-b pb-2">Thông tin hôn nhân</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
