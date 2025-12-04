@@ -34,7 +34,7 @@ const FamilyTreeFlow: React.FC<FamilyTreeFlowProps> = ({ persons, spouses, paren
         }
 
         // Find ROOT_PERSON_ID
-        const ROOT_PERSON_ID = searchRootPersonId || persons.find((p) => p.name?.includes('Lê Đình A'))?._id || persons[0]?._id;
+        const ROOT_PERSON_ID = searchRootPersonId || persons.find((p) => p.cccd == '0x00001')?._id || persons[0]?._id;
 
         // Build maps
         const personMap = new Map<string, Person>();
