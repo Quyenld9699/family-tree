@@ -1,5 +1,6 @@
 import { Background, BackgroundVariant, MiniMap, ReactFlow, Controls } from '@xyflow/react';
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
+import React from 'react';
 import PersonNode from 'src/components/PersonNode/PersonNode';
 import RelationshipNode from 'src/components/RelationshipNode/RelationshipNode';
 import { Person } from 'src/services/personService';
@@ -104,4 +105,4 @@ const FamilyTreeFlow: React.FC<FamilyTreeFlowProps> = ({ persons, spouses, paren
     );
 };
 
-export default FamilyTreeFlow;
+export default memo(FamilyTreeFlow);

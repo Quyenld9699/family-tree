@@ -7,14 +7,20 @@ import Link from 'next/link';
 export default function GuestLoginPage() {
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const { loginGuest } = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (isSubmitting) return;
+        setError('');
+        setIsSubmitting(true);
         try {
             await loginGuest(code);
         } catch (err: any) {
             setError(err.response?.data?.message || 'Mã khách không hợp lệ hoặc đã hết hạn');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -27,7 +33,16 @@ export default function GuestLoginPage() {
                 Quay lại trang chủ
             </Link>
 
-            <div className="p-6 md:p-8 rounded-[24px] border w-full max-w-sm mx-4" style={{ backgroundColor: '#f9f7f2', borderColor: '#e5e5e5' }}>
+            <div className="relative p-6 md:p-8 rounded-[24px] border w-full max-w-sm mx-4" style={{ backgroundColor: '#f9f7f2', borderColor: '#e5e5e5' }}>
+                {isSubmitting && (
+                    <div className="absolute inset-0 rounded-[24px] flex items-center justify-center" style={{ backgroundColor: 'rgba(254,254,249,0.78)', backdropFilter: 'blur(2px)' }}>
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="animate-spin rounded-full h-8 w-8 border-2 border-t-transparent" style={{ borderColor: '#1a3a3a', borderTopColor: 'transparent' }} />
+                            <p className="text-[13px] font-medium" style={{ color: '#3a3a3a' }}>Đang kiểm tra mã...</p>
+                        </div>
+                    </div>
+                )}
+
                 <h1 className="text-[24px] font-semibold mb-2 text-center" style={{ color: '#0a0a0a', letterSpacing: '-0.5px' }}>
                     Đăng nhập Khách
                 </h1>
@@ -52,16 +67,18 @@ export default function GuestLoginPage() {
                             style={{ backgroundColor: '#fefef9', borderColor: '#e5e5e5', color: '#0a0a0a' }}
                             placeholder="XXXX-XXXX"
                             required
+                            disabled={isSubmitting}
                         />
                     </div>
                     <button
                         type="submit"
-                        className="w-full font-semibold py-2.5 px-4 rounded-[12px] text-[14px] transition-colors"
+                        disabled={isSubmitting}
+                        className="w-full font-semibold py-2.5 px-4 rounded-[12px] text-[14px] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                         style={{ backgroundColor: '#1a3a3a', color: '#ffffff' }}
-                        onMouseEnter={(e) => ((e.target as HTMLElement).style.backgroundColor = '#0a2020')}
-                        onMouseLeave={(e) => ((e.target as HTMLElement).style.backgroundColor = '#1a3a3a')}
+                        onMouseEnter={(e) => { if (!isSubmitting) (e.target as HTMLElement).style.backgroundColor = '#0a2020'; }}
+                        onMouseLeave={(e) => { (e.target as HTMLElement).style.backgroundColor = '#1a3a3a'; }}
                     >
-                        Vào xem gia phả
+                        {isSubmitting ? 'Đang xác thực...' : 'Vào xem gia phả'}
                     </button>
                 </form>
                 <div className="mt-4 text-center">
@@ -72,21 +89,13 @@ export default function GuestLoginPage() {
             </div>
 
             <div className="mt-8 text-center text-[13px]" style={{ color: '#6a6a6a' }}>
-                <p className="font-semibold mb-1" style={{ color: '#3a3a3a' }}>
-                    Thông tin tác giả:
-                </p>
+                <p className="font-semibold mb-1" style={{ color: '#3a3a3a' }}>Thông tin tác giả:</p>
                 <p>Họ tên: Lê Đình Quyền</p>
                 <p>
-                    Gmail:{' '}
-                    <a href="mailto:quyenld9699@gmail.com" style={{ color: '#1a3a3a' }}>
-                        quyenld9699@gmail.com
-                    </a>
+                    Gmail: <a href="mailto:quyenld9699@gmail.com" style={{ color: '#1a3a3a' }}>quyenld9699@gmail.com</a>
                 </p>
                 <p>
-                    SĐT:{' '}
-                    <a href="tel:0941158376" style={{ color: '#1a3a3a' }}>
-                        0941158376
-                    </a>
+                    SĐT: <a href="tel:0941158376" style={{ color: '#1a3a3a' }}>0941158376</a>
                 </p>
             </div>
         </div>
