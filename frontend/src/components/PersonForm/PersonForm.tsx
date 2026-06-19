@@ -97,119 +97,58 @@ export default function PersonForm({ isOpen, onClose, onSuccess, person }: Perso
         <Modal isOpen={isOpen} onClose={onClose} title={person ? 'Cập nhật thông tin người' : 'Thêm người mới'}>
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Họ và tên <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Giới tính <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                        name="gender"
-                        value={formData.gender}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                        <option value="MALE">Nam</option>
-                        <option value="FEMALE">Nữ</option>
-                        <option value="OTHER">Khác</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">CCCD</label>
-                    <input
-                        type="text"
-                        name="cccd"
-                        value={formData.cccd}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Ảnh đại diện (URL)</label>
-                    <input
-                        type="url"
-                        name="avatar"
-                        value={formData.avatar}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <label className="clay-label">Họ và tên <span style={{ color: '#ef4444' }}>*</span></label>
+                    <input type="text" name="name" value={formData.name} onChange={handleChange} required className="clay-input" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Ngày sinh</label>
-                        <input
-                            type="date"
-                            name="birth"
-                            value={formData.birth ? new Date(formData.birth).toISOString().split('T')[0] : ''}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
+                        <label className="clay-label">Giới tính <span style={{ color: '#ef4444' }}>*</span></label>
+                        <select name="gender" value={formData.gender} onChange={handleChange} required className="clay-select">
+                            <option value="MALE">Nam</option>
+                            <option value="FEMALE">Nữ</option>
+                        </select>
                     </div>
-
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Ngày mất</label>
-                        <input
-                            type="date"
-                            name="death"
-                            value={formData.death ? new Date(formData.death).toISOString().split('T')[0] : ''}
-                            onChange={handleChange}
-                            disabled={!formData.isDead}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                        />
+                        <label className="clay-label">CCCD</label>
+                        <input type="text" name="cccd" value={formData.cccd} onChange={handleChange} className="clay-input" />
                     </div>
                 </div>
 
                 <div>
-                    <label className="flex items-center">
-                        <input type="checkbox" name="isDead" checked={formData.isDead} onChange={handleChange} className="mr-2" />
-                        <span className="text-sm font-medium text-gray-700">Đã mất</span>
-                    </label>
+                    <label className="clay-label">Ảnh đại diện (URL)</label>
+                    <input type="url" name="avatar" value={formData.avatar} onChange={handleChange} className="clay-input" placeholder="https://..." />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="clay-label">Ngày sinh</label>
+                        <input type="date" name="birth" value={formData.birth ? new Date(formData.birth).toISOString().split('T')[0] : ''} onChange={handleChange} className="clay-input" />
+                    </div>
+                    <div>
+                        <label className="clay-label">Ngày mất</label>
+                        <input type="date" name="death" value={formData.death ? new Date(formData.death).toISOString().split('T')[0] : ''} onChange={handleChange} disabled={!formData.isDead} className="clay-input" />
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <input type="checkbox" name="isDead" id="pf-isDead" checked={formData.isDead} onChange={handleChange} className="rounded" />
+                    <label htmlFor="pf-isDead" className="text-[13px]" style={{ color: '#3a3a3a' }}>Đã mất</label>
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
-                    <input
-                        type="text"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <label className="clay-label">Địa chỉ</label>
+                    <input type="text" name="address" value={formData.address} onChange={handleChange} className="clay-input" />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
-                    <textarea
-                        name="desc"
-                        value={formData.desc}
-                        onChange={handleChange}
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <label className="clay-label">Mô tả</label>
+                    <textarea name="desc" value={formData.desc} onChange={handleChange} rows={3} className="clay-textarea" />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4">
-                    <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50" disabled={mutation.isPending}>
-                        Hủy
-                    </button>
-                    <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50" disabled={mutation.isPending}>
-                        {mutation.isPending ? 'Đang xử lý...' : person ? 'Cập nhật' : 'Thêm mới'}
-                    </button>
+                <div className="flex justify-end gap-3 pt-2">
+                    <button type="button" onClick={onClose} disabled={mutation.isPending} className="clay-btn-secondary">Hủy</button>
+                    <button type="submit" disabled={mutation.isPending} className="clay-btn-primary">{mutation.isPending ? 'Đang xử lý...' : person ? 'Cập nhật' : 'Thêm mới'}</button>
                 </div>
             </form>
         </Modal>

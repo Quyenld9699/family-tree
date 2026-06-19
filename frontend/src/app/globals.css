@@ -1,17 +1,148 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-    --background: #ffffff;
-    --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+    --canvas: #fefef9;
+    --surface-card: #f9f7f2;
+    --surface-soft: #fbfaf6;
+    --surface-strong: #f3f0e8;
+    --hairline: #e8e8e8;
+    --ink: #0a0a0a;
+    --body: #3a3a3a;
+    --muted: #6a6a6a;
+    --brand-pink: #ff4d8b;
+    --brand-teal: #1a3a3a;
+    --brand-ochre: #e8b94a;
+    --brand-lavender: #b8a4ed;
+    --background: var(--canvas);
+    --foreground: var(--ink);
 }
 
 body {
-    color: var(--foreground);
-    background: var(--background);
-    font-family: Arial, Helvetica, sans-serif;
+    color: var(--ink);
+    background: var(--canvas);
+    font-family:
+        'Inter',
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+    /* ── Inputs & Selects ── */
+    .clay-input {
+        @apply w-full px-4 py-2.5 text-[13px] rounded-[12px] border focus:outline-none transition-colors;
+        background-color: var(--canvas);
+        border-color: var(--hairline);
+        color: var(--ink);
+    }
+    .clay-input:focus {
+        border-color: var(--brand-teal);
+    }
+    .clay-input:disabled {
+        background-color: var(--surface-strong);
+        color: var(--muted);
+        cursor: not-allowed;
+    }
+
+    .clay-select {
+        @apply w-full px-4 py-2.5 text-[13px] rounded-[12px] border focus:outline-none transition-colors;
+        background-color: var(--canvas);
+        border-color: var(--hairline);
+        color: var(--ink);
+    }
+    .clay-textarea {
+        @apply w-full px-4 py-2.5 text-[13px] rounded-[12px] border focus:outline-none transition-colors resize-none;
+        background-color: var(--canvas);
+        border-color: var(--hairline);
+        color: var(--ink);
+    }
+
+    /* ── Labels ── */
+    .clay-label {
+        @apply block text-[11px] font-semibold uppercase tracking-wider mb-1.5;
+        color: var(--muted);
+    }
+
+    /* ── Buttons ── */
+    .clay-btn-primary {
+        @apply px-4 py-2.5 text-[13px] font-semibold rounded-[12px] transition-colors;
+        background-color: var(--ink);
+        color: #ffffff;
+    }
+    .clay-btn-primary:hover:not(:disabled) {
+        background-color: #1f1f1f;
+    }
+    .clay-btn-primary:disabled {
+        background-color: var(--hairline);
+        color: var(--muted);
+        cursor: not-allowed;
+    }
+
+    .clay-btn-secondary {
+        @apply px-4 py-2.5 text-[13px] font-medium rounded-[12px] border transition-colors;
+        background-color: var(--surface-card);
+        border-color: var(--hairline);
+        color: var(--body);
+    }
+    .clay-btn-secondary:hover:not(:disabled) {
+        background-color: var(--surface-strong);
+    }
+    .clay-btn-secondary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .clay-btn-danger {
+        @apply px-4 py-2.5 text-[13px] font-medium rounded-[12px] transition-colors;
+        background-color: #fee2e2;
+        color: #ef4444;
+    }
+    .clay-btn-danger:hover:not(:disabled) {
+        background-color: #fecaca;
+    }
+
+    .clay-btn-ghost {
+        @apply px-3 py-1.5 text-[12px] font-medium rounded-[10px] border transition-colors;
+        background-color: var(--surface-card);
+        border-color: var(--hairline);
+        color: var(--body);
+    }
+    .clay-btn-ghost:hover {
+        background-color: var(--surface-strong);
+    }
+
+    .clay-btn-teal {
+        @apply px-4 py-2.5 text-[13px] font-semibold rounded-[12px] transition-colors;
+        background-color: var(--brand-teal);
+        color: #ffffff;
+    }
+    .clay-btn-teal:hover:not(:disabled) {
+        background-color: #0a2020;
+    }
+
+    /* ── Cards ── */
+    .clay-card {
+        @apply rounded-[16px] p-5;
+        background-color: var(--surface-card);
+        border: 1px solid var(--hairline);
+    }
+    .clay-card-inner {
+        @apply rounded-[12px] p-3;
+        background-color: var(--canvas);
+        border: 1px solid var(--hairline);
+    }
+
+    /* ── Section title ── */
+    .clay-section-title {
+        @apply text-[15px] font-semibold mb-4;
+        color: var(--ink);
+        letter-spacing: -0.2px;
+    }
 }

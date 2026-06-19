@@ -179,78 +179,88 @@ export default function AddSpouseModal({ isOpen, onClose, onSuccess, person }: A
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={`Thêm ${spouseLabel} cho ${person?.name}`}>
             <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Search Type Selector */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm theo</label>
-                    <select
-                        value={searchType}
-                        onChange={(e) => handleSearchTypeChange(e.target.value as 'name' | 'cccd')}
-                        className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                        <option value="name">Tên</option>
-                        <option value="cccd">CCCD</option>
-                    </select>
-                </div>
-
-                {/* Autocomplete Search */}
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Chọn {spouseLabel} <span className="text-red-500">*</span>
-                    </label>
-                    <div ref={wrapperRef} className="relative">
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => {
-                                setSearchQuery(e.target.value);
-                                setSelectedSpouse(null);
-                            }}
-                            placeholder={searchType === 'name' ? `Nhập tên ${spouseLabel}...` : 'Nhập số CCCD...'}
-                            className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                        />
-
-                        {/* Suggestions Dropdown */}
-                        {showSuggestions && suggestions.length > 0 && (
-                            <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded shadow-lg max-h-60 overflow-y-auto z-20">
-                                {suggestions.map((p) => (
-                                    <div key={p._id} onClick={() => handleSelectPerson(p)} className="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b last:border-b-0">
-                                        <div className="font-medium">{p.name}</div>
-                                        <div className="text-xs text-gray-600">
-                                            CCCD: {p.cccd || 'N/A'} {p.birth ? `| Sinh: ${new Date(p.birth).getFullYear()}` : ''}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {showSuggestions && suggestions.length === 0 && searchQuery.length >= 2 && (
-                            <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded shadow-lg p-3 text-gray-500 text-sm">Không tìm thấy kết quả</div>
-                        )}
+                {/* Search Type + Input */}
+                <div className="flex gap-3">
+                    <div className="w-28 flex-shrink-0">
+                        <label className="clay-label">Tìm theo</label>
+                        <select value={searchType} onChange={(e) => handleSearchTypeChange(e.target.value as 'name' | 'cccd')} className="clay-select">
+                            <option value="name">Tên</option>
+                            <option value="cccd">CCCD</option>
+                        </select>
                     </div>
-                    {selectedSpouse && (
-                        <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-sm">
-                            ✓ Đã chọn: <span className="font-medium">{selectedSpouse.name}</span>
+                    <div className="flex-1">
+                        <label className="clay-label">
+                            Chọn {spouseLabel} <span style={{ color: '#ef4444' }}>*</span>
+                        </label>
+                        <div ref={wrapperRef} className="relative">
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => {
+                                    setSearchQuery(e.target.value);
+                                    setSelectedSpouse(null);
+                                }}
+                                placeholder={searchType === 'name' ? `Nhập tên ${spouseLabel}...` : 'Nhập số CCCD...'}
+                                className="clay-input"
+                                required
+                            />
+                            {showSuggestions && suggestions.length > 0 && (
+                                <div
+                                    className="absolute top-full left-0 right-0 mt-1 rounded-[12px] border max-h-52 overflow-y-auto z-20"
+                                    style={{ backgroundColor: '#fefef9', borderColor: '#e5e5e5', boxShadow: '0 4px 16px rgba(10,10,10,0.08)' }}
+                                >
+                                    {suggestions.map((p) => (
+                                        <div
+                                            key={p._id}
+                                            onClick={() => handleSelectPerson(p)}
+                                            className="px-3 py-2.5 cursor-pointer transition-colors border-b last:border-b-0"
+                                            style={{ borderColor: '#e5e5e5' }}
+                                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f9f7f2')}
+                                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+                                        >
+                                            <div className="text-[13px] font-semibold" style={{ color: '#0a0a0a' }}>
+                                                {p.name}
+                                            </div>
+                                            <div className="text-[11px]" style={{ color: '#6a6a6a' }}>
+                                                CCCD: {p.cccd || 'N/A'}
+                                                {p.birth ? ` · Sinh: ${new Date(p.birth).getFullYear()}` : ''}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            {showSuggestions && suggestions.length === 0 && searchQuery.length >= 2 && (
+                                <div
+                                    className="absolute top-full left-0 right-0 mt-1 rounded-[12px] border p-3 text-[13px]"
+                                    style={{ backgroundColor: '#fefef9', borderColor: '#e5e5e5', color: '#6a6a6a' }}
+                                >
+                                    Không tìm thấy kết quả
+                                </div>
+                            )}
                         </div>
-                    )}
+                    </div>
                 </div>
 
-                {/* Order Input */}
+                {selectedSpouse && (
+                    <div className="clay-card-inner flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" style={{ color: '#16a34a' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="text-[13px]" style={{ color: '#0a0a0a' }}>
+                            Đã chọn: <strong>{selectedSpouse.name}</strong>
+                        </span>
+                    </div>
+                )}
+
+                {/* Order + Dates */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Thứ tự {spouseLabel} <span className="text-red-500">*</span>
+                    <label className="clay-label">
+                        Thứ tự {spouseLabel} <span style={{ color: '#ef4444' }}>*</span>
                     </label>
-                    <input
-                        type="number"
-                        value={order}
-                        onChange={(e) => setOrder(parseInt(e.target.value) || 1)}
-                        min="1"
-                        className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
-                    />
+                    <input type="number" value={order} onChange={(e) => setOrder(parseInt(e.target.value) || 1)} min="1" className="clay-input" required />
                     {existingSpouses.length > 0 && (
-                        <p className="mt-1 text-xs text-gray-600">
-                            Thứ tự đã sử dụng:{' '}
+                        <p className="mt-1 text-[11px]" style={{ color: '#6a6a6a' }}>
+                            Đã sử dụng:{' '}
                             {existingSpouses
                                 .map((s) => (isPersonMale ? s.wifeOrder : s.husbandOrder))
                                 .filter((o): o is number => o !== undefined)
@@ -260,35 +270,23 @@ export default function AddSpouseModal({ isOpen, onClose, onSuccess, person }: A
                     )}
                 </div>
 
-                {/* Marriage and Divorce Dates */}
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Ngày cưới</label>
-                        <input
-                            type="date"
-                            value={marriageDate}
-                            onChange={(e) => setMarriageDate(e.target.value)}
-                            className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
+                        <label className="clay-label">Ngày cưới</label>
+                        <input type="date" value={marriageDate} onChange={(e) => setMarriageDate(e.target.value)} className="clay-input" />
                     </div>
-
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Ngày ly hôn</label>
-                        <input
-                            type="date"
-                            value={divorceDate}
-                            onChange={(e) => setDivorceDate(e.target.value)}
-                            className="w-full px-2 py-1 md:px-3 md:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
+                        <label className="clay-label">Ngày ly hôn</label>
+                        <input type="date" value={divorceDate} onChange={(e) => setDivorceDate(e.target.value)} className="clay-input" />
                     </div>
                 </div>
 
                 {/* Buttons */}
-                <div className="flex justify-end gap-3 pt-4">
-                    <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50" disabled={createSpouseMutation.isPending}>
+                <div className="flex justify-end gap-2 pt-2">
+                    <button type="button" onClick={onClose} disabled={createSpouseMutation.isPending} className="clay-btn-secondary">
                         Hủy
                     </button>
-                    <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50" disabled={createSpouseMutation.isPending}>
+                    <button type="submit" disabled={createSpouseMutation.isPending} className="clay-btn-primary">
                         {createSpouseMutation.isPending ? 'Đang xử lý...' : 'Thêm mới'}
                     </button>
                 </div>

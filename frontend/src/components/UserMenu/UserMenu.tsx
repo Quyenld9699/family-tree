@@ -28,19 +28,27 @@ export default function UserMenu({ user, isAdmin, onLogout, onOpenGuestCodeModal
         <div className="relative" ref={menuRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center border border-gray-200 hover:bg-gray-50 focus:outline-none transition-all duration-200 hover:scale-105"
+                className="w-10 h-10 rounded-[12px] flex items-center justify-center border focus:outline-none transition-all duration-150 hover:scale-[1.03]"
+                style={{ backgroundColor: '#fefef9', borderColor: '#e5e5e5', color: '#3a3a3a' }}
                 title="Menu người dùng"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 overflow-hidden transform origin-top-right transition-all duration-200 ease-out z-50">
-                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Xin chào</p>
-                        <p className="text-base font-bold text-gray-900 truncate">{user.role === 'admin' ? 'Admin' : user.role === 'editor' ? 'Người chỉnh sửa' : 'Gia đình'}</p>
+                <div
+                    className="absolute right-0 mt-2 w-56 rounded-[16px] border py-2 overflow-hidden z-50"
+                    style={{ backgroundColor: '#fefef9', borderColor: '#e5e5e5', boxShadow: '0 4px 24px rgba(10,10,10,0.08)' }}
+                >
+                    <div className="px-4 py-3 border-b" style={{ borderColor: '#e5e5e5', backgroundColor: '#f9f7f2' }}>
+                        <p className="text-[11px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: '#6a6a6a', letterSpacing: '1px' }}>
+                            Xin chào
+                        </p>
+                        <p className="text-[15px] font-semibold truncate" style={{ color: '#0a0a0a', letterSpacing: '-0.2px' }}>
+                            {user.role === 'admin' ? 'Admin' : user.role === 'editor' ? 'Người chỉnh sửa' : 'Gia đình'}
+                        </p>
                     </div>
 
                     <div className="py-1">
@@ -50,15 +58,18 @@ export default function UserMenu({ user, isAdmin, onLogout, onOpenGuestCodeModal
                                     onOpenGuestCodeModal();
                                     setIsOpen(false);
                                 }}
-                                className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-3 group"
+                                className="w-full text-left px-4 py-2.5 text-[13px] transition-colors flex items-center gap-3"
+                                style={{ color: '#3a3a3a' }}
+                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f9f7f2')}
+                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
                             >
-                                <div className="p-1.5 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div className="p-1.5 rounded-[8px]" style={{ backgroundColor: '#f3f0e8' }}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" style={{ color: '#1a3a3a' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
                                             strokeWidth={2}
-                                            d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11.536 16l-1.518 4.674a1 1 0 00.933 1.318 1 1 0 00.933-1.318l.828-3.172a3 3 0 002.328-2.328l.828-3.172a3 3 0 00-2.328-2.328l-.828 3.172a3 3 0 01-2.328 2.328l-.828 3.172a3 3 0 01-2.328 2.328L4 20V4a1 1 0 011-1h6a1 1 0 011 1v4a1 1 0 001 1h3a2 2 0 002-2v-1"
+                                            d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
                                         />
                                     </svg>
                                 </div>
@@ -66,9 +77,15 @@ export default function UserMenu({ user, isAdmin, onLogout, onOpenGuestCodeModal
                             </button>
                         )}
 
-                        <button onClick={onLogout} className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3 group">
-                            <div className="p-1.5 bg-red-100 rounded-lg group-hover:bg-red-200 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <button
+                            onClick={onLogout}
+                            className="w-full text-left px-4 py-2.5 text-[13px] transition-colors flex items-center gap-3"
+                            style={{ color: '#ef4444' }}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#fff0f0')}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+                        >
+                            <div className="p-1.5 rounded-[8px]" style={{ backgroundColor: '#fee2e2' }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                 </svg>
                             </div>

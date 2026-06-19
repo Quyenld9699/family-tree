@@ -289,18 +289,15 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={`Thông tin: ${person.name}`}>
-            <div className="space-y-6">
+            <div className="space-y-4">
                 {/* Personal Information */}
-                <div className="bg-white p-2 md:p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div className="flex justify-between items-start mb-6">
-                        <h3 className="text-xl font-bold text-gray-800">Thông tin cá nhân</h3>
+                <div className="clay-card">
+                    <div className="flex justify-between items-start mb-4">
+                        <h3 className="clay-section-title mb-0">Thông tin cá nhân</h3>
                         {!isEditing && (isAdmin || isEditor) && (
                             <div className="flex gap-2">
-                                <button
-                                    onClick={handleEdit}
-                                    className="flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <button onClick={handleEdit} className="clay-btn-ghost flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
@@ -313,7 +310,8 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                                 <button
                                     onClick={handleDelete}
                                     disabled={loading}
-                                    className="flex items-center gap-1 bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors disabled:opacity-50"
+                                    className="clay-btn-danger flex items-center gap-1 disabled:opacity-50"
+                                    style={{ padding: '6px 12px', fontSize: '12px' }}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path
@@ -329,23 +327,22 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                         )}
                     </div>
 
-                    <div className="flex flex-col md:flex-row gap-8">
+                    <div className="flex flex-col md:flex-row gap-6 mt-4">
                         {/* Avatar Column */}
                         <div className="flex-shrink-0 flex flex-col items-center space-y-3">
                             <div className="relative group">
                                 <img
                                     src={person.avatar || (person.gender === Gender.MALE ? Avatar_Male : Avatar_Female)}
                                     alt={person.name}
-                                    className={`w-40 h-40 rounded-full object-cover border-4 border-white shadow-lg cursor-pointer group-hover:opacity-90 transition-all ${
-                                        person.isDead ? 'grayscale' : ''
-                                    }`}
+                                    className={`w-36 h-36 rounded-full object-cover cursor-pointer group-hover:opacity-90 transition-all ${person.isDead ? 'grayscale opacity-80' : ''}`}
+                                    style={{ border: `3px solid ${person.gender === Gender.MALE ? '#1a3a3a' : '#ff4d8b'}` }}
                                     onClick={handleAvatarClick}
                                 />
                                 {/* Halo if dead */}
                                 {person.isDead && (
                                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
                                         <svg width="60" height="30" viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <ellipse cx="20" cy="10" rx="18" ry="6" stroke="#FFD700" strokeWidth="2" fill="none" />
+                                            <ellipse cx="20" cy="10" rx="18" ry="6" stroke="#e8b94a" strokeWidth="2" fill="none" />
                                         </svg>
                                     </div>
                                 )}
@@ -376,7 +373,10 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                             </div>
 
                             {/* Status Badge */}
-                            <div className={`px-3 py-1 rounded-full text-sm font-medium ${person.isDead ? 'bg-gray-100 text-gray-600' : 'bg-green-100 text-green-700'}`}>
+                            <div
+                                className="px-3 py-1 rounded-full text-[11px] font-semibold tracking-wide"
+                                style={person.isDead ? { backgroundColor: '#f3f0e8', color: '#6a6a6a' } : { backgroundColor: '#dcfce7', color: '#16a34a' }}
+                            >
                                 {person.isDead ? 'Đã mất' : 'Còn sống'}
                             </div>
                         </div>
@@ -384,99 +384,79 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                         {/* Info Column */}
                         <div className="flex-grow">
                             {isEditing ? (
-                                <div className="grid grid-cols-2 gap-3 text-sm">
+                                <div className="grid grid-cols-2 gap-3">
                                     <div className="col-span-2">
-                                        <label className="block text-gray-700 mb-1">
-                                            Họ và tên <span className="text-red-500">*</span>
+                                        <label className="clay-label">
+                                            Họ và tên <span style={{ color: '#ef4444' }}>*</span>
                                         </label>
-                                        <input
-                                            type="text"
-                                            value={editForm.name || ''}
-                                            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded"
-                                            required
-                                        />
+                                        <input type="text" value={editForm.name || ''} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="clay-input" required />
                                     </div>
                                     <div>
-                                        <label className="block text-gray-700 mb-1">
-                                            Giới tính <span className="text-red-500">*</span>
+                                        <label className="clay-label">
+                                            Giới tính <span style={{ color: '#ef4444' }}>*</span>
                                         </label>
                                         <select
                                             value={editForm.gender ?? Gender.MALE}
                                             onChange={(e) => setEditForm({ ...editForm, gender: parseInt(e.target.value) as 0 | 1 })}
-                                            className="w-full px-3 py-2 border rounded"
+                                            className="clay-select"
                                         >
                                             <option value={Gender.MALE}>Nam</option>
                                             <option value={Gender.FEMALE}>Nữ</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-gray-700 mb-1">
-                                            CCCD <span className="text-red-500">*</span>
+                                        <label className="clay-label">
+                                            CCCD <span style={{ color: '#ef4444' }}>*</span>
                                         </label>
-                                        <input
-                                            type="text"
-                                            value={editForm.cccd || ''}
-                                            onChange={(e) => setEditForm({ ...editForm, cccd: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded"
-                                            required
-                                        />
+                                        <input type="text" value={editForm.cccd || ''} onChange={(e) => setEditForm({ ...editForm, cccd: e.target.value })} className="clay-input" required />
                                     </div>
                                     <div>
-                                        <label className="block text-gray-700 mb-1">Ngày sinh</label>
+                                        <label className="clay-label">Ngày sinh</label>
                                         <input
                                             type="date"
                                             value={editForm.birth ? new Date(editForm.birth).toISOString().split('T')[0] : ''}
                                             onChange={(e) => setEditForm({ ...editForm, birth: e.target.value ? new Date(e.target.value) : undefined })}
-                                            className="w-full px-3 py-2 border rounded"
+                                            className="clay-input"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-gray-700 mb-1">Ngày mất</label>
+                                        <label className="clay-label">Ngày mất</label>
                                         <input
                                             type="date"
                                             value={editForm.death ? new Date(editForm.death).toISOString().split('T')[0] : ''}
                                             onChange={(e) => setEditForm({ ...editForm, death: e.target.value ? new Date(e.target.value) : undefined })}
-                                            className="w-full px-3 py-2 border rounded"
+                                            className="clay-input"
                                         />
                                     </div>
-                                    <div className="col-span-2 flex items-center">
+                                    <div className="col-span-2 flex items-center gap-2">
                                         <input
                                             type="checkbox"
                                             id="isDead"
                                             checked={editForm.isDead || false}
                                             onChange={(e) => setEditForm({ ...editForm, isDead: e.target.checked })}
-                                            className="mr-2"
+                                            className="rounded"
                                         />
-                                        <label htmlFor="isDead" className="text-gray-700">
+                                        <label htmlFor="isDead" className="text-[13px]" style={{ color: '#3a3a3a' }}>
                                             Đã mất
                                         </label>
                                     </div>
                                     <div className="col-span-2">
-                                        <label className="block text-gray-700 mb-1">Địa chỉ</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.address || ''}
-                                            onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded"
-                                        />
+                                        <label className="clay-label">Địa chỉ</label>
+                                        <input type="text" value={editForm.address || ''} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} className="clay-input" />
                                     </div>
                                     <div className="col-span-2">
-                                        <label className="block text-gray-700 mb-1">Mô tả</label>
-                                        <textarea
-                                            value={editForm.desc || ''}
-                                            onChange={(e) => setEditForm({ ...editForm, desc: e.target.value })}
-                                            className="w-full px-3 py-2 border rounded"
-                                            rows={3}
-                                        />
+                                        <label className="clay-label">Mô tả</label>
+                                        <textarea value={editForm.desc || ''} onChange={(e) => setEditForm({ ...editForm, desc: e.target.value })} className="clay-textarea" rows={3} />
                                     </div>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
                                     {/* Name & Basic Info */}
                                     <div>
-                                        <h2 className="text-2xl font-bold text-gray-900 mb-1">{person.name}</h2>
-                                        <div className="flex items-center text-gray-500 text-sm">
+                                        <h2 className="text-[20px] font-semibold mb-1" style={{ color: '#0a0a0a', letterSpacing: '-0.4px' }}>
+                                            {person.name}
+                                        </h2>
+                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px]" style={{ color: '#6a6a6a' }}>
                                             <span className="mr-3 flex items-center">
                                                 {person.gender === Gender.MALE ? (
                                                     <svg className="w-4 h-4 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
@@ -514,37 +494,45 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                                     </div>
 
                                     {/* Details Grid */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 py-4 border-t border-b border-gray-100">
-                                        <div>
-                                            <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider mb-1">Ngày sinh</p>
-                                            <p className="text-gray-900 font-medium">{person.birth ? new Date(person.birth).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3" style={{ borderTop: '1px solid #e5e5e5' }}>
+                                        <div className="clay-card-inner">
+                                            <p className="clay-label mb-1">Ngày sinh</p>
+                                            <p className="text-[13px] font-medium" style={{ color: '#0a0a0a' }}>
+                                                {person.birth ? new Date(person.birth).toLocaleDateString('vi-VN') : '—'}
+                                            </p>
                                         </div>
-
-                                        <div>
-                                            <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider mb-1">Ngày mất</p>
-                                            <div className="text-gray-900 font-medium">
+                                        <div className="clay-card-inner">
+                                            <p className="clay-label mb-1">Ngày mất</p>
+                                            <div className="text-[13px] font-medium" style={{ color: '#0a0a0a' }}>
                                                 {person.death ? (
                                                     <>
                                                         {new Date(person.death).toLocaleDateString('vi-VN')}
-                                                        {ageAtDeath !== null && <span className="text-gray-500 text-sm ml-2 font-normal">(Hưởng thọ: {ageAtDeath} tuổi)</span>}
+                                                        {ageAtDeath !== null && (
+                                                            <span className="font-normal ml-1 text-[11px]" style={{ color: '#6a6a6a' }}>
+                                                                (Hưởng thọ: {ageAtDeath} tuổi)
+                                                            </span>
+                                                        )}
                                                     </>
                                                 ) : (
-                                                    <span className="text-gray-400">-</span>
+                                                    <span style={{ color: '#9a9a9a' }}>—</span>
                                                 )}
                                             </div>
                                         </div>
-
-                                        <div className="sm:col-span-2">
-                                            <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider mb-1">Địa chỉ</p>
-                                            <p className="text-gray-900">{person.address || 'Chưa cập nhật'}</p>
+                                        <div className="clay-card-inner sm:col-span-2">
+                                            <p className="clay-label mb-1">Địa chỉ</p>
+                                            <p className="text-[13px]" style={{ color: '#0a0a0a' }}>
+                                                {person.address || '—'}
+                                            </p>
                                         </div>
                                     </div>
 
                                     {/* Description */}
                                     {person.desc && (
-                                        <div>
-                                            <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider mb-1">Tiểu sử / Mô tả</p>
-                                            <p className="text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-lg text-sm">{person.desc}</p>
+                                        <div className="clay-card-inner">
+                                            <p className="clay-label mb-1">Tiểu sử / Mô tả</p>
+                                            <p className="text-[13px] leading-relaxed" style={{ color: '#3a3a3a' }}>
+                                                {person.desc}
+                                            </p>
                                         </div>
                                     )}
                                 </div>
@@ -555,40 +543,38 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
 
                 {/* Parents Info */}
                 {loadingParents ? (
-                    <div className="bg-white p-2 md:p-6 rounded-xl shadow-sm border border-gray-100 flex justify-center items-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-600 mr-2"></div>
-                        <span className="text-gray-500 text-sm">Đang tải thông tin cha mẹ...</span>
+                    <div className="clay-card flex items-center gap-2 py-3 text-[13px]" style={{ color: '#6a6a6a' }}>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent" style={{ borderColor: '#1a3a3a', borderTopColor: 'transparent' }} />
+                        Đang tải thông tin cha mẹ...
                     </div>
                 ) : parents.length > 0 ? (
-                    <div className="bg-white p-2 md:p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h4 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                                />
-                            </svg>
-                            Cha mẹ
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="clay-card">
+                        <h4 className="clay-section-title">Cha mẹ</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {parents.map((pc, index) => {
                                 const parentSpouse = pc.parent as SpouseWithDetails;
                                 const father = typeof parentSpouse.husband === 'object' ? (parentSpouse.husband as Person) : null;
                                 const mother = typeof parentSpouse.wife === 'object' ? (parentSpouse.wife as Person) : null;
                                 return (
-                                    <div key={index} className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                    <div key={index} className="clay-card-inner">
                                         {father && (
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <span className="text-gray-500 w-10 text-sm">Cha:</span>
-                                                <span className="font-medium text-gray-900">{father.name}</span>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="text-[11px] font-semibold uppercase tracking-wide w-8" style={{ color: '#1a3a3a' }}>
+                                                    Cha
+                                                </span>
+                                                <span className="text-[13px] font-medium" style={{ color: '#0a0a0a' }}>
+                                                    {father.name}
+                                                </span>
                                             </div>
                                         )}
                                         {mother && (
                                             <div className="flex items-center gap-2">
-                                                <span className="text-gray-500 w-10 text-sm">Mẹ:</span>
-                                                <span className="font-medium text-gray-900">{mother.name}</span>
+                                                <span className="text-[11px] font-semibold uppercase tracking-wide w-8" style={{ color: '#ff4d8b' }}>
+                                                    Mẹ
+                                                </span>
+                                                <span className="text-[13px] font-medium" style={{ color: '#0a0a0a' }}>
+                                                    {mother.name}
+                                                </span>
                                             </div>
                                         )}
                                     </div>
@@ -599,75 +585,100 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                 ) : null}
 
                 {/* Spouse Relationships */}
-                <div className="bg-gray-50 p-2 md:p-4 rounded-lg">
-                    <div className="flex justify-between items-center mb-3">
-                        <h3 className="font-semibold">Vợ/Chồng ({spouses.length})</h3>
+                <div className="clay-card">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="clay-section-title mb-0">
+                            Vợ / Chồng{' '}
+                            <span className="text-[13px] font-normal" style={{ color: '#6a6a6a' }}>
+                                ({spouses.length})
+                            </span>
+                        </h3>
                         {(isAdmin || isEditor) && (
-                            <button onClick={() => onAddSpouse(person)} className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">
+                            <button onClick={() => onAddSpouse(person)} className="clay-btn-teal" style={{ padding: '6px 12px', fontSize: '12px' }}>
                                 + Thêm vợ/chồng
                             </button>
                         )}
                     </div>
 
                     {loadingSpouses ? (
-                        <div className="flex justify-center items-center py-4">
-                            <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-600 mr-2"></div>
-                            <span className="text-gray-500 text-sm">Đang tải thông tin vợ/chồng...</span>
+                        <div className="flex items-center gap-2 py-3 text-[13px]" style={{ color: '#6a6a6a' }}>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent" style={{ borderColor: '#1a3a3a', borderTopColor: 'transparent' }} />
+                            Đang tải...
                         </div>
                     ) : spouses.length === 0 ? (
-                        <p className="text-sm text-gray-500">Chưa có thông tin vợ/chồng</p>
+                        <p className="text-[13px]" style={{ color: '#9a9a9a' }}>
+                            Chưa có thông tin vợ/chồng
+                        </p>
                     ) : (
                         <div className="space-y-3">
                             {spouses.map((spouse, index) => (
-                                <div key={spouse._id} className="bg-white p-3 rounded border">
+                                <div key={spouse._id} className="clay-card-inner">
                                     <div className="flex justify-between items-start mb-2">
                                         <div>
-                                            <p className="font-medium">{getSpouseName(spouse)}</p>
-                                            {spouse.marriageDate && <p className="text-xs text-gray-600">Cưới: {new Date(spouse.marriageDate).toLocaleDateString('vi-VN')}</p>}
-                                            {spouse.divorceDate && <p className="text-xs text-red-600">Ly hôn: {new Date(spouse.divorceDate).toLocaleDateString('vi-VN')}</p>}
+                                            <p className="text-[14px] font-semibold" style={{ color: '#0a0a0a' }}>
+                                                {getSpouseName(spouse)}
+                                            </p>
+                                            {spouse.marriageDate && (
+                                                <p className="text-[11px] mt-0.5" style={{ color: '#6a6a6a' }}>
+                                                    Cưới: {new Date(spouse.marriageDate).toLocaleDateString('vi-VN')}
+                                                </p>
+                                            )}
+                                            {spouse.divorceDate && (
+                                                <p className="text-[11px]" style={{ color: '#ef4444' }}>
+                                                    Ly hôn: {new Date(spouse.divorceDate).toLocaleDateString('vi-VN')}
+                                                </p>
+                                            )}
                                         </div>
                                         {(isAdmin || isEditor) && (
-                                            <div className="flex gap-2">
-                                                <button onClick={() => spouse._id && onAddChild(spouse._id)} className="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">
+                                            <div className="flex gap-1.5">
+                                                <button onClick={() => spouse._id && onAddChild(spouse._id)} className="clay-btn-ghost">
                                                     + Thêm con
                                                 </button>
-                                                <button
-                                                    onClick={() => spouse._id && handleDeleteSpouse(spouse._id)}
-                                                    className="bg-red-50 text-red-600 px-2 py-1 rounded text-xs hover:bg-red-100 border border-red-100"
-                                                    title="Xóa mối quan hệ vợ chồng"
-                                                >
+                                                <button onClick={() => spouse._id && handleDeleteSpouse(spouse._id)} className="clay-btn-danger" style={{ padding: '4px 10px', fontSize: '11px' }}>
                                                     Xóa
                                                 </button>
                                             </div>
                                         )}
                                     </div>
 
-                                    {/* Children of this spouse */}
                                     {childrenQueries[index]?.isLoading ? (
-                                        <div className="mt-2 pl-3 border-l-2 border-gray-300 flex items-center">
-                                            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-gray-400 mr-2"></div>
-                                            <span className="text-xs text-gray-500">Đang tải con cái...</span>
+                                        <div className="flex items-center gap-1.5 mt-2 text-[11px]" style={{ color: '#6a6a6a' }}>
+                                            <div className="animate-spin rounded-full h-3 w-3 border-2 border-t-transparent" style={{ borderColor: '#6a6a6a', borderTopColor: 'transparent' }} />
+                                            Đang tải con cái...
                                         </div>
                                     ) : (
                                         spouse._id &&
                                         children[spouse._id] &&
                                         children[spouse._id].length > 0 && (
-                                            <div className="mt-2 pl-3 border-l-2 border-gray-300">
-                                                <p className="text-xs text-gray-600 mb-1">Con cái:</p>
-                                                <div className="space-y-1">
+                                            <div className="mt-2 pt-2" style={{ borderTop: '1px solid #e5e5e5' }}>
+                                                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: '#6a6a6a' }}>
+                                                    Con cái
+                                                </p>
+                                                <div className="space-y-0.5">
                                                     {children[spouse._id].map((child) => (
-                                                        <div key={child._id} className="text-sm flex justify-between items-center group hover:bg-gray-50 rounded px-1 -mx-1">
+                                                        <div
+                                                            key={child._id}
+                                                            className="text-[13px] flex justify-between items-center group rounded-[8px] px-2 py-1 -mx-1 transition-colors"
+                                                            style={{ color: '#3a3a3a' }}
+                                                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f9f7f2')}
+                                                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+                                                        >
                                                             <span>
-                                                                • {typeof child.child !== 'string' && child.child?.name}
-                                                                {child.isAdopted && <span className="text-xs text-gray-500"> (nuôi)</span>}
+                                                                · {typeof child.child !== 'string' && child.child?.name}
+                                                                {child.isAdopted && (
+                                                                    <span className="text-[10px] ml-1" style={{ color: '#6a6a6a' }}>
+                                                                        (nuôi)
+                                                                    </span>
+                                                                )}
                                                             </span>
                                                             {(isAdmin || isEditor) && (
                                                                 <button
                                                                     onClick={() => child._id && handleDeleteChild(child._id)}
-                                                                    className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-1"
-                                                                    title="Xóa quan hệ con cái"
+                                                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded"
+                                                                    style={{ color: '#ef4444' }}
+                                                                    title="Xóa"
                                                                 >
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                                                     </svg>
                                                                 </button>
@@ -688,18 +699,18 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                 {!isEditing && <Gallery personId={person._id} onAvatarUpdate={onUpdate} />}
 
                 {/* Actions */}
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-end gap-2 pt-1">
                     {isEditing ? (
                         <>
-                            <button onClick={handleCancelEdit} disabled={loading} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:bg-gray-100">
+                            <button onClick={handleCancelEdit} disabled={loading} className="clay-btn-secondary">
                                 Hủy
                             </button>
-                            <button onClick={handleSaveEdit} disabled={loading} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400">
+                            <button onClick={handleSaveEdit} disabled={loading} className="clay-btn-primary">
                                 {loading ? 'Đang lưu...' : 'Lưu'}
                             </button>
                         </>
                     ) : (
-                        <button onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+                        <button onClick={onClose} className="clay-btn-secondary">
                             Đóng
                         </button>
                     )}

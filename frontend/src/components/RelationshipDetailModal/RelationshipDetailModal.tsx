@@ -126,15 +126,15 @@ export default function RelationshipDetailModal({ isOpen, onClose, spouse }: Rel
     const wifeName = wife?.name || 'Vợ';
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={`Quan hệ: ${husbandName} - ${wifeName}`}>
-            <div className="space-y-6">
+        <Modal isOpen={isOpen} onClose={onClose} title={`Quan hệ: ${husbandName} — ${wifeName}`}>
+            <div className="space-y-4">
                 {/* Basic Info */}
-                <div className="bg-white p-2 md:p-4 rounded-lg shadow-sm border border-gray-100 relative">
-                    <div className="flex justify-between items-center mb-3 border-b pb-2">
-                        <h3 className="text-lg font-semibold text-gray-800">Thông tin hôn nhân</h3>
+                <div className="clay-card relative">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="clay-section-title mb-0">Thông tin hôn nhân</h3>
                         {(isAdmin || isEditor) && !isEditing && (
-                            <button onClick={() => setIsEditing(true)} className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <button onClick={() => setIsEditing(true)} className="clay-btn-ghost flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
@@ -151,84 +151,74 @@ export default function RelationshipDetailModal({ isOpen, onClose, spouse }: Rel
                         <div className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Ngày cưới</label>
-                                    <input
-                                        type="date"
-                                        value={formData.marriageDate}
-                                        onChange={(e) => setFormData({ ...formData, marriageDate: e.target.value })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    />
+                                    <label className="clay-label">Ngày cưới</label>
+                                    <input type="date" value={formData.marriageDate} onChange={(e) => setFormData({ ...formData, marriageDate: e.target.value })} className="clay-input" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Ngày ly hôn</label>
-                                    <input
-                                        type="date"
-                                        value={formData.divorceDate}
-                                        onChange={(e) => setFormData({ ...formData, divorceDate: e.target.value })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    />
+                                    <label className="clay-label">Ngày ly hôn</label>
+                                    <input type="date" value={formData.divorceDate} onChange={(e) => setFormData({ ...formData, divorceDate: e.target.value })} className="clay-input" />
                                 </div>
                             </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3" style={{ borderTop: '1px solid #e5e5e5' }}>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Thứ tự vợ của {husbandName}</label>
+                                    <label className="clay-label">Thứ tự vợ của {husbandName}</label>
                                     <input
                                         type="number"
                                         min="1"
                                         value={formData.wifeOrder}
                                         onChange={(e) => setFormData({ ...formData, wifeOrder: parseInt(e.target.value) || 1 })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="clay-input"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Thứ tự chồng của {wifeName}</label>
+                                    <label className="clay-label">Thứ tự chồng của {wifeName}</label>
                                     <input
                                         type="number"
                                         min="1"
                                         value={formData.husbandOrder}
                                         onChange={(e) => setFormData({ ...formData, husbandOrder: parseInt(e.target.value) || 1 })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="clay-input"
                                     />
                                 </div>
                             </div>
-
-                            <div className="flex justify-end gap-3 pt-2">
-                                <button
-                                    onClick={() => setIsEditing(false)}
-                                    className="px-3 py-1.5 border border-gray-300 rounded-md text-sm hover:bg-gray-50"
-                                    disabled={updateSpouseMutation.isPending}
-                                >
+                            <div className="flex justify-end gap-2 pt-2">
+                                <button onClick={() => setIsEditing(false)} disabled={updateSpouseMutation.isPending} className="clay-btn-secondary">
                                     Hủy
                                 </button>
-                                <button
-                                    onClick={handleSave}
-                                    className="px-3 py-1.5 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:opacity-50"
-                                    disabled={updateSpouseMutation.isPending}
-                                >
+                                <button onClick={handleSave} disabled={updateSpouseMutation.isPending} className="clay-btn-primary">
                                     {updateSpouseMutation.isPending ? 'Đang lưu...' : 'Lưu thay đổi'}
                                 </button>
                             </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-500">Ngày cưới</label>
-                                <div className="mt-1 text-gray-900">{spouse.marriageDate ? new Date(spouse.marriageDate).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}</div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-500">Ngày ly hôn</label>
-                                <div className="mt-1 text-gray-900">{spouse.divorceDate ? new Date(spouse.divorceDate).toLocaleDateString('vi-VN') : 'Không'}</div>
-                            </div>
-                            <div className="md:col-span-2 pt-2 border-t border-gray-100 mt-2">
-                                <div className="text-sm text-gray-700">
-                                    <p className="mb-1">
-                                        <span className="font-medium">{wifeName}</span> là vợ thứ <span className="font-bold text-blue-600">{spouse.wifeOrder || 1}</span> của {husbandName}
-                                    </p>
-                                    <p>
-                                        <span className="font-medium">{husbandName}</span> là chồng thứ <span className="font-bold text-blue-600">{spouse.husbandOrder || 1}</span> của {wifeName}
-                                    </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="clay-card-inner">
+                                <label className="clay-label mb-1">Ngày cưới</label>
+                                <div className="text-[13px] font-medium" style={{ color: '#0a0a0a' }}>
+                                    {spouse.marriageDate ? new Date(spouse.marriageDate).toLocaleDateString('vi-VN') : '—'}
                                 </div>
+                            </div>
+                            <div className="clay-card-inner">
+                                <label className="clay-label mb-1">Ngày ly hôn</label>
+                                <div className="text-[13px] font-medium" style={{ color: '#0a0a0a' }}>
+                                    {spouse.divorceDate ? new Date(spouse.divorceDate).toLocaleDateString('vi-VN') : '—'}
+                                </div>
+                            </div>
+                            <div className="clay-card-inner md:col-span-2">
+                                <p className="text-[13px]" style={{ color: '#3a3a3a' }}>
+                                    <span className="font-semibold">{wifeName}</span> là vợ thứ{' '}
+                                    <span className="font-bold" style={{ color: '#1a3a3a' }}>
+                                        {spouse.wifeOrder || 1}
+                                    </span>{' '}
+                                    của {husbandName}
+                                </p>
+                                <p className="text-[13px] mt-1" style={{ color: '#3a3a3a' }}>
+                                    <span className="font-semibold">{husbandName}</span> là chồng thứ{' '}
+                                    <span className="font-bold" style={{ color: '#1a3a3a' }}>
+                                        {spouse.husbandOrder || 1}
+                                    </span>{' '}
+                                    của {wifeName}
+                                </p>
                             </div>
                         </div>
                     )}

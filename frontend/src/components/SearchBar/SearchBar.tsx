@@ -87,13 +87,17 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
     };
 
     return (
-        <div className="fixed top-16 md:top-2 left-1/2 transform -translate-x-1/2 z-10 bg-white rounded-lg shadow-lg px-3 py-2 md:px-4 md:py-2 flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3 w-[95%] md:w-auto justify-center">
+        <div
+            className="fixed top-16 md:top-2 left-1/2 transform -translate-x-1/2 z-10 rounded-[16px] border px-3 py-2 md:px-4 md:py-2 flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3 w-[95%] md:w-auto justify-center"
+            style={{ backgroundColor: '#fefef9', borderColor: '#e5e5e5', boxShadow: '0 2px 16px rgba(10,10,10,0.07)' }}
+        >
             {/* Row 1: Search Type & Input */}
             <div className="flex items-center gap-2 w-full md:w-auto">
                 <select
                     value={searchType}
                     onChange={(e) => handleSearchTypeChange(e.target.value as 'name' | 'cccd')}
-                    className="px-2 py-1 md:px-3 md:py-2 text-sm md:text-base border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-1/3 md:w-auto"
+                    className="px-2 py-1.5 md:px-3 md:py-2 text-[13px] rounded-[10px] border focus:outline-none focus:ring-2 w-1/3 md:w-auto"
+                    style={{ backgroundColor: '#f9f7f2', borderColor: '#e5e5e5', color: '#3a3a3a', focusRingColor: '#1a3a3a' } as React.CSSProperties}
                 >
                     <option value="name">Tên</option>
                     <option value="cccd">CCCD</option>
@@ -109,22 +113,35 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
                             setSelectedPerson(null);
                         }}
                         placeholder={searchType === 'name' ? 'Nhập tên người...' : 'Nhập số CCCD...'}
-                        className="w-full md:w-64 px-2 py-1 md:px-3 md:py-2 text-sm md:text-base border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full md:w-64 px-3 py-1.5 md:py-2 text-[13px] border rounded-[10px] focus:outline-none"
+                        style={{ backgroundColor: '#fefef9', borderColor: '#e5e5e5', color: '#0a0a0a' }}
                     />
                     {loading && (
                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                            <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                            <div className="animate-spin h-4 w-4 border-2 border-t-transparent rounded-full" style={{ borderColor: '#1a3a3a', borderTopColor: 'transparent' }}></div>
                         </div>
                     )}
 
                     {/* Suggestions Dropdown */}
                     {showSuggestions && suggestions.length > 0 && (
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded shadow-lg max-h-60 overflow-y-auto z-20 text-left">
+                        <div
+                            className="absolute top-full left-0 right-0 mt-1 border rounded-[12px] max-h-60 overflow-y-auto z-20 text-left"
+                            style={{ backgroundColor: '#fefef9', borderColor: '#e5e5e5', boxShadow: '0 4px 16px rgba(10,10,10,0.08)' }}
+                        >
                             {suggestions.map((person) => (
-                                <div key={person._id} onClick={() => handleSelectPerson(person)} className="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b last:border-b-0">
-                                    <div className="font-medium">{person.name}</div>
-                                    <div className="text-xs text-gray-600">
-                                        CCCD: {person.cccd || 'N/A'} | Giới tính: {getGenderText(person.gender)}
+                                <div
+                                    key={person._id}
+                                    onClick={() => handleSelectPerson(person)}
+                                    className="px-3 py-2 cursor-pointer border-b last:border-b-0 transition-colors"
+                                    style={{ borderColor: '#e5e5e5' }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f9f7f2')}
+                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+                                >
+                                    <div className="text-[13px] font-semibold" style={{ color: '#0a0a0a' }}>
+                                        {person.name}
+                                    </div>
+                                    <div className="text-[11px] mt-0.5" style={{ color: '#6a6a6a' }}>
+                                        CCCD: {person.cccd || 'N/A'} | {getGenderText(person.gender)}
                                     </div>
                                 </div>
                             ))}
@@ -132,7 +149,12 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
                     )}
 
                     {showSuggestions && suggestions.length === 0 && searchQuery.length >= 2 && !loading && (
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded shadow-lg p-3 text-gray-500 text-sm text-left">Không tìm thấy kết quả</div>
+                        <div
+                            className="absolute top-full left-0 right-0 mt-1 border rounded-[12px] p-3 text-[13px] text-left"
+                            style={{ backgroundColor: '#fefef9', borderColor: '#e5e5e5', color: '#6a6a6a' }}
+                        >
+                            Không tìm thấy kết quả
+                        </div>
                     )}
                 </div>
             </div>
@@ -140,14 +162,17 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
             {/* Row 2: Generations & Button */}
             <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-start">
                 <div className="flex items-center gap-2 flex-1 md:flex-none">
-                    <label className="text-sm text-gray-700 whitespace-nowrap">Số thế hệ:</label>
+                    <label className="text-[13px] whitespace-nowrap" style={{ color: '#3a3a3a' }}>
+                        Số thế hệ:
+                    </label>
                     <input
                         type="number"
                         min="1"
                         max="10"
                         value={generations}
                         onChange={(e) => setGenerations(parseInt(e.target.value) || 1)}
-                        className="w-full md:w-16 px-1 py-1 md:px-2 md:py-2 text-sm md:text-base border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full md:w-16 px-2 py-1.5 text-[13px] border rounded-[10px] focus:outline-none"
+                        style={{ backgroundColor: '#fefef9', borderColor: '#e5e5e5', color: '#0a0a0a' }}
                     />
                 </div>
 
@@ -155,7 +180,12 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
                 <button
                     onClick={handleSearch}
                     disabled={!selectedPerson}
-                    className="px-3 py-1 md:px-4 md:py-2 text-sm md:text-base bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed whitespace-nowrap"
+                    className="px-4 py-1.5 text-[13px] font-semibold rounded-[10px] transition-colors whitespace-nowrap"
+                    style={{
+                        backgroundColor: selectedPerson ? '#0a0a0a' : '#e5e5e5',
+                        color: selectedPerson ? '#ffffff' : '#6a6a6a',
+                        cursor: selectedPerson ? 'pointer' : 'not-allowed',
+                    }}
                 >
                     Tìm kiếm
                 </button>

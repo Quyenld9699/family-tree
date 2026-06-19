@@ -87,48 +87,30 @@ export default function GuestCodeModal({ isOpen, onClose }: GuestCodeModalProps)
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Quản lý Mã Khách (Guest Codes)">
-            <div className="p-4">
+        <Modal isOpen={isOpen} onClose={onClose} title="Quản lý Mã Khách">
+            <div className="space-y-5">
                 {/* Form tạo mã mới */}
-                <div className="mb-8 bg-gray-50 p-4 rounded-lg border">
-                    <h3 className="text-lg font-semibold mb-4">Tạo mã mới</h3>
-                    <form onSubmit={handleGenerate} className="flex flex-col gap-4">
+                <div className="clay-card">
+                    <h3 className="clay-section-title">Tạo mã mới</h3>
+                    <form onSubmit={handleGenerate} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Ghi chú (Cho ai?)</label>
-                            <input
-                                type="text"
-                                value={note}
-                                onChange={(e) => setNote(e.target.value)}
-                                placeholder="Ví dụ: Chú Bảy, Cô Ba..."
-                                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                required
-                            />
+                            <label className="clay-label">Ghi chú (Cho ai?)</label>
+                            <input type="text" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ví dụ: Chú Bảy, Cô Ba..." className="clay-input" required />
                         </div>
-                        <div className="flex gap-4">
+                        <div className="flex gap-3">
                             <div className="flex-1">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Quyền hạn</label>
-                                <select value={role} onChange={(e) => setRole(e.target.value)} className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <label className="clay-label">Quyền hạn</label>
+                                <select value={role} onChange={(e) => setRole(e.target.value)} className="clay-select">
                                     <option value="view">Xem (View)</option>
                                     <option value="edit">Chỉnh sửa (Edit)</option>
                                 </select>
                             </div>
                             <div className="flex-1">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Thời hạn (ngày)</label>
-                                <input
-                                    type="number"
-                                    min="1"
-                                    max="365"
-                                    value={duration}
-                                    onChange={(e) => setDuration(parseInt(e.target.value))}
-                                    className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                />
+                                <label className="clay-label">Thời hạn (ngày)</label>
+                                <input type="number" min="1" max="365" value={duration} onChange={(e) => setDuration(parseInt(e.target.value))} className="clay-input" />
                             </div>
                             <div className="flex items-end">
-                                <button
-                                    type="submit"
-                                    disabled={generateMutation.isPending}
-                                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 whitespace-nowrap"
-                                >
+                                <button type="submit" disabled={generateMutation.isPending} className="clay-btn-teal whitespace-nowrap">
                                     {generateMutation.isPending ? 'Đang tạo...' : 'Tạo mã'}
                                 </button>
                             </div>
@@ -138,47 +120,60 @@ export default function GuestCodeModal({ isOpen, onClose }: GuestCodeModalProps)
 
                 {/* Danh sách mã */}
                 <div>
-                    <h3 className="text-lg font-semibold mb-4">Danh sách mã đã tạo</h3>
+                    <h3 className="clay-section-title">Danh sách mã đã tạo</h3>
                     {isLoading ? (
-                        <div className="text-center py-4">Đang tải...</div>
+                        <div className="flex items-center gap-2 py-4 text-[13px]" style={{ color: '#6a6a6a' }}>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent" style={{ borderColor: '#1a3a3a', borderTopColor: 'transparent' }} />
+                            Đang tải...
+                        </div>
                     ) : (
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
+                        <div className="overflow-x-auto rounded-[12px] border" style={{ borderColor: '#e5e5e5' }}>
+                            <table className="min-w-full">
+                                <thead style={{ backgroundColor: '#f9f7f2' }}>
                                     <tr>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã Code</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ghi chú</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quyền</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hết hạn</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
+                                        {['Mã Code', 'Ghi chú', 'Quyền', 'Hết hạn', 'Trạng thái', ''].map((h) => (
+                                            <th key={h} className="px-4 py-2.5 text-left text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#6a6a6a' }}>
+                                                {h}
+                                            </th>
+                                        ))}
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {codes.map((code: GuestCode) => (
-                                        <tr key={code._id} className={!code.isActive ? 'bg-gray-50 opacity-60' : ''}>
-                                            <td className="px-4 py-3 whitespace-nowrap font-mono font-bold text-blue-600">{code.code}</td>
-                                            <td className="px-4 py-3 whitespace-nowrap">{code.note}</td>
+                                <tbody style={{ backgroundColor: '#fefef9' }}>
+                                    {codes.map((code: GuestCode, i: number) => (
+                                        <tr key={code._id} style={{ opacity: code.isActive ? 1 : 0.5, borderTop: i > 0 ? '1px solid #e5e5e5' : undefined }}>
+                                            <td className="px-4 py-3 whitespace-nowrap font-mono text-[13px] font-bold" style={{ color: '#1a3a3a' }}>
+                                                {code.code}
+                                            </td>
+                                            <td className="px-4 py-3 whitespace-nowrap text-[13px]" style={{ color: '#3a3a3a' }}>
+                                                {code.note}
+                                            </td>
                                             <td className="px-4 py-3 whitespace-nowrap">
                                                 <span
-                                                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                                        code.role === 'edit' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
-                                                    }`}
+                                                    className="px-2 py-0.5 text-[11px] font-semibold rounded-full"
+                                                    style={code.role === 'edit' ? { backgroundColor: '#ede9ff', color: '#7c3aed' } : { backgroundColor: '#e5e5e5', color: '#6a6a6a' }}
                                                 >
                                                     {code.role === 'edit' ? 'Edit' : 'View'}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{formatDate(code.expiredAt)}</td>
-                                            <td className="px-4 py-3 whitespace-nowrap">
-                                                {code.isActive ? (
-                                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Hoạt động</span>
-                                                ) : (
-                                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Đã hủy</span>
-                                                )}
+                                            <td className="px-4 py-3 whitespace-nowrap text-[12px]" style={{ color: '#6a6a6a' }}>
+                                                {formatDate(code.expiredAt)}
                                             </td>
-                                            <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                                            <td className="px-4 py-3 whitespace-nowrap">
+                                                <span
+                                                    className="px-2 py-0.5 text-[11px] font-semibold rounded-full"
+                                                    style={code.isActive ? { backgroundColor: '#dcfce7', color: '#16a34a' } : { backgroundColor: '#fee2e2', color: '#ef4444' }}
+                                                >
+                                                    {code.isActive ? 'Hoạt động' : 'Đã hủy'}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 whitespace-nowrap text-right">
                                                 {code.isActive && (
-                                                    <button onClick={() => handleRevoke(code._id)} className="text-red-600 hover:text-red-900" disabled={revokeMutation.isPending}>
+                                                    <button
+                                                        onClick={() => handleRevoke(code._id)}
+                                                        disabled={revokeMutation.isPending}
+                                                        className="clay-btn-danger"
+                                                        style={{ padding: '4px 10px', fontSize: '11px' }}
+                                                    >
                                                         {revokeMutation.isPending ? '...' : 'Hủy'}
                                                     </button>
                                                 )}
@@ -187,7 +182,7 @@ export default function GuestCodeModal({ isOpen, onClose }: GuestCodeModalProps)
                                     ))}
                                     {codes.length === 0 && (
                                         <tr>
-                                            <td colSpan={6} className="px-4 py-4 text-center text-gray-500">
+                                            <td colSpan={6} className="px-4 py-6 text-center text-[13px]" style={{ color: '#9a9a9a' }}>
                                                 Chưa có mã nào được tạo
                                             </td>
                                         </tr>

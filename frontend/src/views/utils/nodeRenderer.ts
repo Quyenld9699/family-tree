@@ -77,14 +77,16 @@ export const renderFamilyTree = (
             style: {
                 background: 'transparent',
                 border: 'none',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                color: '#dc2626',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#e8b94a',
                 padding: 0,
                 width: 100,
                 height: 40,
                 textAlign: 'center',
                 pointerEvents: 'none',
+                letterSpacing: '-0.2px',
+                fontFamily: 'Inter, sans-serif',
             },
         });
 

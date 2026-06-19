@@ -29,27 +29,34 @@ export default function RelationshipNode(props: RelationshipNodeProps) {
             onClick={() => props.onClick && props.onClick(props.data)}
             className="cursor-pointer hover:scale-105 transition-transform"
         >
-            {/* Handles - ĐẶT ĐÚNG VỊ TRÍ HÌNH THOI (center container) */}
+            {/* Handles */}
             <Handle type="target" position={Position.Top} id={'tt'} style={{ opacity: 0, top: 0 }} />
             <Handle type="source" position={Position.Bottom} id={'sb'} style={{ opacity: 0, bottom: 0 }} />
 
-            {/* Hình thoi - 4 đỉnh chạm cạnh container */}
+            {/* Diamond — Clay theme: cream fill, split border teal/pink */}
             <div
-                className="absolute bg-white border-2"
+                className="absolute"
                 style={{
                     width: DIAMOND_SIZE,
                     height: DIAMOND_SIZE,
                     top: '50%',
                     left: '50%',
                     transform: 'translate(-50%, -50%) rotate(45deg)',
-                    borderColor: props.data.top === Gender.MALE ? '#1448c5 #E91E63 #E91E63 #1448c5' : '#E91E63 #1448c5 #1448c5 #E91E63',
+                    backgroundColor: '#fefef9',
+                    border: '2px solid',
+                    borderColor: props.data.top === Gender.MALE ? '#1a3a3a #ff4d8b #ff4d8b #1a3a3a' : '#ff4d8b #1a3a3a #1a3a3a #ff4d8b',
+                    borderRadius: '4px',
                 }}
             />
 
-            {/* Nội dung text - nằm trên hình thoi */}
+            {/* Text overlay */}
             <div className="absolute text-center z-10" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '80%' }}>
-                <p className="text-xs leading-tight">{marriageDateStr}</p>
-                <p className="text-xs font-semibold">{props.data.top === Gender.MALE ? 'v' + props.data.wifeOrder : 'c' + props.data.husbandOrder}</p>
+                <p className="text-[10px] leading-tight" style={{ color: '#6a6a6a' }}>
+                    {marriageDateStr}
+                </p>
+                <p className="text-[11px] font-semibold" style={{ color: '#0a0a0a' }}>
+                    {props.data.top === Gender.MALE ? 'v' + props.data.wifeOrder : 'c' + props.data.husbandOrder}
+                </p>
             </div>
         </div>
     );

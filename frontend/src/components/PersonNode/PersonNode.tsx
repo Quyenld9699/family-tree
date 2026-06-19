@@ -47,8 +47,15 @@ export default function PersonNode(props: PersonNodeProps) {
 
     return (
         <div
-            className={`relative border-2 ${isMale(props.data.gender) ? 'border-blue-500' : 'border-pink-500'} bg-white rounded-md p-2 text-center cursor-pointer hover:shadow-lg transition-shadow`}
-            style={{ minWidth: PersonNodeWidth, maxWidth: PersonNodeWidth, height: PersonNodeHeight }}
+            className={`relative border-2 rounded-[12px] p-2 text-center cursor-pointer transition-all duration-150 hover:scale-[1.03]`}
+            style={{
+                minWidth: PersonNodeWidth,
+                maxWidth: PersonNodeWidth,
+                height: PersonNodeHeight,
+                backgroundColor: '#fefef9',
+                borderColor: isMale(props.data.gender) ? '#1a3a3a' : '#ff4d8b',
+                boxShadow: isMale(props.data.gender) ? '0 0 0 1px rgba(26,58,58,0.08)' : '0 0 0 1px rgba(255,77,139,0.08)',
+            }}
             onClick={handleClick}
         >
             <Handle type="target" position={Position.Top} id={'tt'} style={{ opacity: 0 }} />
@@ -57,7 +64,7 @@ export default function PersonNode(props: PersonNodeProps) {
                 alt={props.data.name}
                 width={50}
                 height={50}
-                className={`rounded-full mx-auto w-[50px] h-[50px] object-cover ${props.data.isDead ? 'grayscale' : ''}`}
+                className={`rounded-full mx-auto w-[50px] h-[50px] object-cover ${props.data.isDead ? 'grayscale opacity-70' : ''}`}
                 onError={(e) => {
                     e.currentTarget.src = isMale(props.data.gender) ? Avatar_Male : Avatar_Female;
                 }}
@@ -65,13 +72,21 @@ export default function PersonNode(props: PersonNodeProps) {
             {props.data.isDead && (
                 <div className="absolute top-[-5px] left-1/2 transform -translate-x-1/2 z-10">
                     <svg width="40" height="20" viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <ellipse cx="20" cy="10" rx="18" ry="6" stroke="#FFD700" strokeWidth="2" fill="none" />
+                        <ellipse cx="20" cy="10" rx="18" ry="6" stroke="#e8b94a" strokeWidth="2" fill="none" />
                     </svg>
                 </div>
             )}
-            <p className="text-sm font-bold">{props.data.name}</p>
-            <p className="text-xs text-gray-500">{birthStr}</p>
-            {ageStr && <p className="text-xs text-gray-500">{ageStr}</p>}
+            <p className="text-[13px] font-semibold leading-tight mt-1" style={{ color: '#0a0a0a', letterSpacing: '-0.2px' }}>
+                {props.data.name}
+            </p>
+            <p className="text-[11px] mt-0.5" style={{ color: '#6a6a6a' }}>
+                {birthStr}
+            </p>
+            {ageStr && (
+                <p className="text-[10px]" style={{ color: '#6a6a6a' }}>
+                    {ageStr}
+                </p>
+            )}
             <Handle type="source" position={Position.Bottom} id={'sb'} style={{ opacity: 0 }} />
         </div>
     );

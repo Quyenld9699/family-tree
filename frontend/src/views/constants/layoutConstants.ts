@@ -10,16 +10,19 @@ export const OFFSET_PERSON = 0;
 export const OFFSET_RELATIONSHIP = 170;
 export const OFFSET_SPOUSE = 350;
 
-// Generation box styling
+// Generation box styling — Clay theme: ochre dashed border, cream-tinted bg
 export const GROUP_PADDING = 100;
 export const GENERATION_BOX_STYLE = {
-    backgroundColor: 'rgba(255, 200, 200, 0.08)',
-    border: '1px dashed rgba(255, 100, 100, 0.6)',
+    backgroundColor: 'rgba(249, 247, 242, 0.4)',
+    border: '1.5px dashed rgba(232, 185, 74, 0.65)',
+    borderRadius: '16px',
 };
 
-// Edge styling
+// Edge styling — Clay theme: soft ink stroke
 export const EDGE_STYLE = {
-    strokeWidth: 2,
+    strokeWidth: 1.5,
+    stroke: '#3a3a3a',
+    opacity: 0.5,
 };
 
 // Node styles
