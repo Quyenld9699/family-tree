@@ -8,21 +8,32 @@ interface TopBarProps {
     isAdmin: boolean;
     onLogout: () => void;
     onOpenGuestCodeModal: () => void;
+    onOpenSearch: () => void;
+    isSearchActive: boolean;
 }
 
-export default function TopBar({ user, isAdmin, onLogout, onOpenGuestCodeModal }: TopBarProps) {
+export default function TopBar({ user, isAdmin, onLogout, onOpenGuestCodeModal, onOpenSearch, isSearchActive }: TopBarProps) {
     return (
         <div className="fixed z-50 flex items-center gap-2" style={{ top: '0.75rem', right: '0.75rem' }}>
+            {/* Search toggle button */}
+            <button
+                onClick={onOpenSearch}
+                className="relative w-9 h-9 flex items-center justify-center rounded-[12px] border transition-all duration-150 hover:scale-[1.04]"
+                style={{ backgroundColor: '#fefef9', borderColor: isSearchActive ? '#1a3a3a' : '#e5e5e5', color: isSearchActive ? '#1a3a3a' : '#6a6a6a' }}
+                title="Tìm kiếm"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+                </svg>
+                {isSearchActive && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#1a3a3a' }} />}
+            </button>
+
             {/* Link to persons list */}
             {user && (
                 <Link
                     href="/persons"
                     className="flex items-center gap-1.5 px-2.5 py-2 md:px-3 text-[13px] font-medium rounded-[12px] border transition-colors"
-                    style={{
-                        backgroundColor: '#fefef9',
-                        borderColor: '#e5e5e5',
-                        color: '#3a3a3a',
-                    }}
+                    style={{ backgroundColor: '#fefef9', borderColor: '#e5e5e5', color: '#3a3a3a' }}
                     onMouseEnter={(e) => {
                         (e.currentTarget as HTMLElement).style.backgroundColor = '#f9f7f2';
                     }}

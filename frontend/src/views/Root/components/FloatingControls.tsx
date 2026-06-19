@@ -1,5 +1,4 @@
 'use client';
-import { useCallback } from 'react';
 import SearchBar from 'src/components/SearchBar/SearchBar';
 import AddPersonButton from 'src/components/AddPersonButton/AddPersonButton';
 import LoadingOverlay from 'src/components/LoadingOverlay/LoadingOverlay';
@@ -12,12 +11,14 @@ interface FloatingControlsProps {
     onAddPerson: () => void;
     isSearchActive: boolean;
     onResetSearch: () => void;
+    searchOpen: boolean;
+    onCloseSearch: () => void;
 }
 
-export default function FloatingControls({ isAdmin, isEditor, isLoading, onSearch, onAddPerson, isSearchActive, onResetSearch }: FloatingControlsProps) {
+export default function FloatingControls({ isAdmin, isEditor, isLoading, onSearch, onAddPerson, isSearchActive, onResetSearch, searchOpen, onCloseSearch }: FloatingControlsProps) {
     return (
         <>
-            <SearchBar onSearch={onSearch} />
+            {searchOpen && <SearchBar onSearch={onSearch} onClose={onCloseSearch} />}
             {(isAdmin || isEditor) && <AddPersonButton onClick={onAddPerson} />}
 
             <LoadingOverlay isLoading={isLoading} />

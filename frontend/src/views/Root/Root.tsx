@@ -28,6 +28,7 @@ export default function Root() {
     // Search state
     const [searchRootPersonId, setSearchRootPersonId] = useState<string | null>(null);
     const [searchGenerations, setSearchGenerations] = useState<number | null>(null);
+    const [searchOpen, setSearchOpen] = useState(false);
 
     const { persons, spouses, parentChilds, isLoading, refetchAll } = useFamilyData();
 
@@ -123,6 +124,7 @@ export default function Root() {
     const handleSearch = useCallback((personId: string, generations: number) => {
         setSearchRootPersonId(personId);
         setSearchGenerations(generations);
+        setSearchOpen(false);
     }, []);
 
     const handleResetSearch = useCallback(() => {
@@ -132,10 +134,12 @@ export default function Root() {
 
     const isSearchActive = searchRootPersonId !== null || searchGenerations !== null;
     const handleOpenGuestCodeModal = useCallback(() => setGuestCodeModalOpen(true), []);
+    const handleOpenSearch = useCallback(() => setSearchOpen(true), []);
+    const handleCloseSearch = useCallback(() => setSearchOpen(false), []);
 
     return (
         <div style={{ width: '100vw', height: '100vh' }}>
-            <TopBar user={user} isAdmin={isAdmin} onLogout={logout} onOpenGuestCodeModal={handleOpenGuestCodeModal} />
+            <TopBar user={user} isAdmin={isAdmin} onLogout={logout} onOpenGuestCodeModal={handleOpenGuestCodeModal} onOpenSearch={handleOpenSearch} isSearchActive={isSearchActive} />
 
             <FloatingControls
                 isAdmin={isAdmin}
@@ -145,6 +149,8 @@ export default function Root() {
                 onAddPerson={() => setAddPersonModalOpen(true)}
                 isSearchActive={isSearchActive}
                 onResetSearch={handleResetSearch}
+                searchOpen={searchOpen}
+                onCloseSearch={handleCloseSearch}
             />
 
             <FamilyTreeFlow
