@@ -32,6 +32,17 @@ body {
         Roboto,
         sans-serif;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+/* iOS smooth scroll in modal */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe area padding for iOS notch/home indicator */
+.safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 @layer components {

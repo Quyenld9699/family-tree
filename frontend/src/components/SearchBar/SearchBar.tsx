@@ -88,7 +88,7 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
 
     return (
         <div
-            className="fixed top-16 md:top-2 left-1/2 transform -translate-x-1/2 z-10 rounded-[16px] border px-3 py-2 md:px-4 md:py-2 flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3 w-[95%] md:w-auto justify-center"
+            className="fixed top-[60px] sm:top-3 md:top-2 left-1/2 -translate-x-1/2 z-10 rounded-[16px] border px-3 py-2 md:px-4 md:py-2 flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3 w-[92vw] sm:w-[95%] md:w-auto justify-center"
             style={{ backgroundColor: '#fefef9', borderColor: '#e5e5e5', boxShadow: '0 2px 16px rgba(10,10,10,0.07)' }}
         >
             {/* Row 1: Search Type & Input */}

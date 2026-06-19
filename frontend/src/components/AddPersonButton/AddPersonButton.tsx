@@ -8,8 +8,8 @@ export default function AddPersonButton({ onClick }: AddPersonButtonProps) {
     return (
         <button
             onClick={onClick}
-            className="absolute top-4 left-4 z-10 font-semibold p-3 rounded-[12px] transition-all duration-150 hover:scale-[1.04] flex items-center justify-center"
-            style={{ backgroundColor: '#0a0a0a', color: '#ffffff' }}
+            className="fixed bottom-6 left-4 z-10 font-semibold p-3 rounded-[14px] transition-all duration-150 hover:scale-[1.04] flex items-center justify-center md:absolute md:top-4 md:bottom-auto md:left-4"
+            style={{ backgroundColor: '#0a0a0a', color: '#ffffff', boxShadow: '0 4px 16px rgba(10,10,10,0.18)' }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1f1f1f')}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0a0a0a')}
             title="Thêm người mới"

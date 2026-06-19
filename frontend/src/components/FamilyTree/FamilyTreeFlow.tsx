@@ -1,4 +1,4 @@
-import { Background, BackgroundVariant, MiniMap, ReactFlow } from '@xyflow/react';
+import { Background, BackgroundVariant, MiniMap, ReactFlow, Controls } from '@xyflow/react';
 import { useMemo } from 'react';
 import PersonNode from 'src/components/PersonNode/PersonNode';
 import RelationshipNode from 'src/components/RelationshipNode/RelationshipNode';
@@ -85,9 +85,19 @@ const FamilyTreeFlow: React.FC<FamilyTreeFlowProps> = ({ persons, spouses, paren
                 .react-flow__node[data-id^="gen_"] .react-flow__handle {
                     display: none !important;
                 }
+                /* Hide minimap on small screens */
+                @media (max-width: 640px) {
+                    .react-flow__minimap { display: none !important; }
+                }
+                /* Larger touch targets for ReactFlow controls on mobile */
+                .react-flow__controls-button {
+                    width: 32px !important;
+                    height: 32px !important;
+                }
             `}</style>
-            <ReactFlow nodeTypes={nodeTypes} nodes={nodes} edges={edges}>
+            <ReactFlow nodeTypes={nodeTypes} nodes={nodes} edges={edges} minZoom={0.05} panOnScroll zoomOnPinch>
                 <MiniMap />
+                <Controls showInteractive={false} />
                 <Background variant={BackgroundVariant.Lines} gap={12} size={1} />
             </ReactFlow>
         </>

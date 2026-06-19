@@ -28,7 +28,7 @@ export default function LoginPage() {
                 Quay lại trang chủ
             </Link>
 
-            <div className="p-8 rounded-[24px] border w-96" style={{ backgroundColor: '#f9f7f2', borderColor: '#e5e5e5' }}>
+            <div className="p-6 md:p-8 rounded-[24px] border w-full max-w-sm mx-4" style={{ backgroundColor: '#f9f7f2', borderColor: '#e5e5e5' }}>
                 <h1 className="text-[24px] font-semibold mb-6 text-center" style={{ color: '#0a0a0a', letterSpacing: '-0.5px' }}>
                     Đăng nhập Admin
                 </h1>

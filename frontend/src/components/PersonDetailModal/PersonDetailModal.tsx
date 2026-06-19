@@ -327,14 +327,14 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                         )}
                     </div>
 
-                    <div className="flex flex-col md:flex-row gap-6 mt-4">
+                    <div className="flex flex-col md:flex-row gap-4 md:gap-6 mt-4">
                         {/* Avatar Column */}
-                        <div className="flex-shrink-0 flex flex-col items-center space-y-3">
+                        <div className="flex-shrink-0 flex flex-row md:flex-col items-center gap-4 md:gap-3 md:space-y-3">
                             <div className="relative group">
                                 <img
                                     src={person.avatar || (person.gender === Gender.MALE ? Avatar_Male : Avatar_Female)}
                                     alt={person.name}
-                                    className={`w-36 h-36 rounded-full object-cover cursor-pointer group-hover:opacity-90 transition-all ${person.isDead ? 'grayscale opacity-80' : ''}`}
+                                    className={`w-20 h-20 md:w-36 md:h-36 rounded-full object-cover cursor-pointer group-hover:opacity-90 transition-all ${person.isDead ? 'grayscale opacity-80' : ''}`}
                                     style={{ border: `3px solid ${person.gender === Gender.MALE ? '#1a3a3a' : '#ff4d8b'}` }}
                                     onClick={handleAvatarClick}
                                 />

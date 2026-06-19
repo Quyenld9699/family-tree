@@ -26,7 +26,7 @@ export default function FloatingControls({ isAdmin, isEditor, isLoading, onSearc
                 <button
                     onClick={onResetSearch}
                     className="fixed z-10 w-10 h-10 rounded-[12px] flex items-center justify-center transition-all duration-150 hover:scale-[1.04]"
-                    style={{ top: '80px', right: '20px', backgroundColor: '#fefef9', border: '1.5px solid #e5e5e5', color: '#0a0a0a', boxShadow: '0 2px 12px rgba(10,10,10,0.07)' }}
+                    style={{ bottom: '24px', right: '20px', top: 'auto', backgroundColor: '#fefef9', border: '1.5px solid #e5e5e5', color: '#0a0a0a', boxShadow: '0 2px 12px rgba(10,10,10,0.1)' }}
                     onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f9f7f2')}
                     onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#fefef9')}
                     title="Xem toàn bộ cây gia phả"
