@@ -221,6 +221,52 @@ src/
 
 ---
 
+## Design System — Theme (`.github/DESIGN.md`)
+
+Dự án tuân theo design system Clay-inspired được mô tả đầy đủ trong `.github/DESIGN.md`. Mọi thay đổi UI phải nhất quán với hệ thống này.
+
+### Bảng màu chính
+
+| Token            | Hex       | Dùng ở đâu                            |
+| ---------------- | --------- | ------------------------------------- |
+| `canvas`         | `#fffaf0` | Background trang, nền node, nền input |
+| `primary`        | `#0a0a0a` | CTA button, headline text             |
+| `ink`            | `#0a0a0a` | Heading text                          |
+| `body`           | `#3a3a3a` | Body text                             |
+| `muted`          | `#6a6a6a` | Sub-text, placeholder                 |
+| `hairline`       | `#e5e5e5` | 1px border card, input                |
+| `brand-pink`     | `#ff4d8b` | Female accent, PersonNode nữ          |
+| `brand-teal`     | `#1a3a3a` | Male accent, PersonNode nam           |
+| `brand-lavender` | `#b8a4ed` | Accent phụ                            |
+| `brand-ochre`    | `#e8b94a` | Generation box border, accent         |
+| `surface-card`   | `#f5f0e0` | Card thứ cấp, generation box bg       |
+
+### Typography
+
+- **Display**: Inter 600, letter-spacing âm (-0.5px đến -1px) → heading trong modal, tên người
+- **Body**: Inter 400, 14-16px, line-height 1.55
+- **Caption**: Inter 500, 12-13px → ngày sinh, ghi chú nhỏ trong node
+
+### Component design tokens
+
+- **Buttons**: `bg-[#0a0a0a] text-white rounded-[12px] px-5 py-3 text-sm font-semibold`
+- **Inputs**: `bg-[#fffaf0] border border-[#e5e5e5] rounded-[12px] px-4 py-3 text-sm`
+- **Cards**: `bg-[#fffaf0] border border-[#e5e5e5] rounded-[16px]`
+- **Feature cards**: `rounded-[24px]` với saturated brand color
+- **PersonNode (nam)**: border-left hoặc top-border `#1a3a3a` (brand-teal), bg `#fffaf0`
+- **PersonNode (nữ)**: border `#ff4d8b` (brand-pink), bg `#fffaf0`
+- **RelationshipNode**: diamond bg `#fffaf0`, border split màu nam/nữ
+- **Generation box**: bg `rgba(245,240,224,0.35)` (surface-card tinted), border dashed `#e8b94a` (ochre)
+
+### Nguyên tắc
+
+- Nền ấm cream (`#fffaf0`) — KHÔNG dùng cool gray hay pure white.
+- Không dùng shadow nặng. Depth từ border và màu contrast.
+- Hover state: `scale(1.02)` hoặc `border-opacity tăng` — không thêm box-shadow phức tạp.
+- Font chính: Inter (Google Fonts). Fallback: `-apple-system, BlinkMacSystemFont, sans-serif`.
+
+---
+
 ## Skills cải thiện code (frontend/.agents/skills/)
 
 ### `vercel-composition-patterns`
