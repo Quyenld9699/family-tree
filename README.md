@@ -1,3 +1,6 @@
+# UI Showcase
+![UI Showcase](./github/Example-UI.png)
+
 # Hướng dẫn Triển khai (Deployment Guide)
 
 Tài liệu này liệt kê các cấu hình cần thiết để triển khai ứng dụng Family Tree lên server.
