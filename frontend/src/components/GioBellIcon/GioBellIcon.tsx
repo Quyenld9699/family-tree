@@ -84,7 +84,7 @@ export default function GioBellIcon({ reminders }: GioBellIconProps) {
 
             {isOpen && (
                 <div
-                    className="absolute right-0 mt-2 w-80 rounded-[16px] border overflow-hidden z-50"
+                    className="fixed left-3 right-3 top-[4.25rem] z-50 overflow-hidden rounded-[16px] border sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80"
                     style={{ backgroundColor: '#fefef9', borderColor: '#e5e5e5', boxShadow: '0 4px 24px rgba(10,10,10,0.10)' }}
                 >
                     {/* Header */}
@@ -105,7 +105,7 @@ export default function GioBellIcon({ reminders }: GioBellIconProps) {
                     </div>
 
                     {/* Body */}
-                    <div className="max-h-[400px] overflow-y-auto">
+                    <div className="max-h-[min(60vh,400px)] overflow-y-auto">
                         {count === 0 ? (
                             <div className="px-4 py-8 text-center">
                                 <p className="text-[13px]" style={{ color: '#9a9a9a' }}>
@@ -116,7 +116,7 @@ export default function GioBellIcon({ reminders }: GioBellIconProps) {
                             <ul className="divide-y" style={{ borderColor: '#f0ebe0' }}>
                                 {reminders.map((r) => (
                                     <li key={r.person._id} className="px-4 py-3 hover:bg-[#f9f7f2] transition-colors">
-                                        <div className="flex items-start justify-between gap-2">
+                                        <div className="flex flex-col items-start gap-2 sm:flex-row sm:justify-between">
                                             <div className="min-w-0">
                                                 <p className="text-[13px] font-semibold truncate" style={{ color: '#0a0a0a', letterSpacing: '-0.2px' }}>
                                                     {r.person.name}
@@ -131,7 +131,7 @@ export default function GioBellIcon({ reminders }: GioBellIconProps) {
                                                     ({r.gioDate.toLocaleDateString('vi-VN')} dương lịch)
                                                 </p>
                                             </div>
-                                            <div className="flex-shrink-0 mt-0.5">
+                                            <div className="flex-shrink-0 sm:mt-0.5">
                                                 <DaysLabel daysUntil={r.daysUntil} />
                                             </div>
                                         </div>

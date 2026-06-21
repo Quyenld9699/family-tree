@@ -259,6 +259,7 @@ src/
 - `PersonNodeHeight = 130` (tăng từ 112 để chứa dòng âm lịch và hưởng thọ trong PersonNode).
 - Ngày mất trong PersonNode hiển thị âm lịch ngắn (màu đỏ) + "Hưởng thọ: N tuổi" (dòng riêng).
 - Ngày mất trong PersonDetailModal hiển thị 3 dòng: dương lịch → âm lịch → hưởng thọ.
+- Luôn check responsive mobile cho các component được code mới. Ưu tiên mobile-first, dùng Tailwind responsive classes (`sm:`, `md:`, `lg:`) khi cần.
 
 ---
 
