@@ -1,7 +1,10 @@
 'use client';
 import Link from 'next/link';
 import UserMenu from 'src/components/UserMenu/UserMenu';
+import GioBellIcon from 'src/components/GioBellIcon/GioBellIcon';
 import { User } from 'src/services/authService';
+import { Person } from 'src/services/personService';
+import { useGioReminders } from 'src/hooks/useGioReminders';
 
 interface TopBarProps {
     user: User | null;
@@ -10,11 +13,16 @@ interface TopBarProps {
     onOpenGuestCodeModal: () => void;
     onOpenSearch: () => void;
     isSearchActive: boolean;
+    persons: Person[];
 }
 
-export default function TopBar({ user, isAdmin, onLogout, onOpenGuestCodeModal, onOpenSearch, isSearchActive }: TopBarProps) {
+export default function TopBar({ user, isAdmin, onLogout, onOpenGuestCodeModal, onOpenSearch, isSearchActive, persons }: TopBarProps) {
+    const gioReminders = useGioReminders(persons);
     return (
         <div className="fixed z-50 flex items-center gap-2" style={{ top: '0.75rem', right: '0.75rem' }}>
+            {/* Gio reminder bell */}
+            <GioBellIcon reminders={gioReminders} />
+
             {/* Search toggle button */}
             <button
                 onClick={onOpenSearch}

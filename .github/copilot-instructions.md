@@ -184,6 +184,37 @@ Tìm kiếm: chọn `rootPersonId` + `maxGenerations` → chỉ vẽ cây con t�
 
 ---
 
+## Âm lịch & Lịch giỗ
+
+### Thư viện
+
+`lunar-javascript` — chuyển đổi dương lịch ↔ âm lịch. Type declarations tự định nghĩa tại `src/types/lunar-javascript.d.ts`.
+
+### Utility (`src/utils/lunarDateUtils.ts`)
+
+- **`toVietnameseLunarDate(date)`** → chuỗi đầy đủ `"16 tháng 3 năm Ất Dậu"` — dùng trong modal.
+- **`toVietnameseLunarDateShort(date)`** → chuỗi ngắn `"16/3 Ất Dậu"` — dùng trong PersonNode.
+- Xử lý tháng nhuận (tháng âm lịch âm), ánh xạ Can Chi sang tiếng Việt.
+
+### Hook lịch giỗ (`src/hooks/useGioReminders.ts`)
+
+**`useGioReminders(persons) → GioReminder[]`**:
+
+- Duyệt persons có `isDead && death`, chuyển ngày mất sang âm lịch.
+- Tính ngày giỗ năm âm lịch hiện tại bằng `Lunar.fromYmd` → `getSolar()`.
+- Nếu đã qua → thử năm âm lịch tiếp theo.
+- Chỉ trả về giỗ trong vòng **0–30 ngày** từ hôm nay, sắp xếp theo ngày gần nhất.
+- `GioReminder`: `{ person, gioDate, gioLunarStr, daysUntil }`.
+
+### Component (`src/components/GioBellIcon/GioBellIcon.tsx`)
+
+- Chuông thông báo ở TopBar, badge đỏ hiển thị số lượng giỗ sắp tới.
+- Viền vàng ochre khi có thông báo.
+- Dropdown danh sách: tên, năm mất, ngày giỗ âm + dương lịch, label màu theo độ gấp (Hôm nay / Ngày mai / Còn N ngày).
+- `TopBar` nhận thêm prop `persons: Person[]`, tính `gioReminders` bằng hook và truyền vào `GioBellIcon`.
+
+---
+
 ## Cấu trúc thư mục frontend quan trọng
 
 ```
@@ -201,10 +232,17 @@ src/
     FamilyTree/FamilyTreeFlow.tsx  — entry point kết nối pipeline + ReactFlow
     PersonNode/                    — hiển thị person hình chữ nhật
     RelationshipNode/              — hiển thị quan hệ hình thoi
+    GioBellIcon/                   — chuông thông báo lịch giỗ (TopBar)
   hooks/
     useFamilyData.ts               — React Query fetch persons/spouses/parentChilds
+    useGioReminders.ts             — tính danh sách giỗ trong 30 ngày tới
   services/
     personService.ts / spouseService.ts / parentChildService.ts / authService.ts
+  utils/
+    genderUtils.ts
+    lunarDateUtils.ts              — chuyển đổi dương→âm lịch tiếng Việt
+  types/
+    lunar-javascript.d.ts          — TypeScript declarations cho lunar-javascript
   context/
     AuthContext.tsx
 ```
@@ -218,6 +256,9 @@ src/
 - Edges con luôn nối từ **SpouseNode (hàng 3)** chứ không phải từ RelationshipNode (hàng 2).
 - `parentId` của mỗi node trong ReactFlow là id generation box (`gen${genIndex}`) nhưng generation box không dùng `type: 'group'` — chúng là node riêng không có nested layout của ReactFlow.
 - Backend chạy qua Docker: `docker-compose up` trong thư mục `backend/`.
+- `PersonNodeHeight = 130` (tăng từ 112 để chứa dòng âm lịch và hưởng thọ trong PersonNode).
+- Ngày mất trong PersonNode hiển thị âm lịch ngắn (màu đỏ) + "Hưởng thọ: N tuổi" (dòng riêng).
+- Ngày mất trong PersonDetailModal hiển thị 3 dòng: dương lịch → âm lịch → hưởng thọ.
 
 ---
 

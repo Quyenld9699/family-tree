@@ -10,6 +10,7 @@ import spouseService, { SpouseWithDetails } from 'src/services/spouseService';
 import parentChildService, { ParentChildWithDetails } from 'src/services/parentChildService';
 import { getGenderText, Gender } from 'src/utils/genderUtils';
 import { Avatar_Male, Avatar_Female } from 'src/constants/imagePaths';
+import { toVietnameseLunarDate } from 'src/utils/lunarDateUtils';
 import { useAuth } from '../../context/AuthContext';
 import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
@@ -286,6 +287,7 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
     };
 
     const ageAtDeath = getAgeAtDeath();
+    const deathLunarDate = person.death ? toVietnameseLunarDate(new Date(person.death)) : null;
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={`Thông tin: ${person.name}`}>
@@ -505,14 +507,19 @@ export default function PersonDetailModal({ isOpen, onClose, person, onAddSpouse
                                             <p className="clay-label mb-1">Ngày mất</p>
                                             <div className="text-[13px] font-medium" style={{ color: '#0a0a0a' }}>
                                                 {person.death ? (
-                                                    <>
-                                                        {new Date(person.death).toLocaleDateString('vi-VN')}
-                                                        {ageAtDeath !== null && (
-                                                            <span className="font-normal ml-1 text-[11px]" style={{ color: '#6a6a6a' }}>
-                                                                (Hưởng thọ: {ageAtDeath} tuổi)
-                                                            </span>
+                                                    <div className="space-y-0.5">
+                                                        <div>{new Date(person.death).toLocaleDateString('vi-VN')}</div>
+                                                        {deathLunarDate && (
+                                                            <div className="text-[12px] font-normal" style={{ color: '#c0392b' }}>
+                                                                {deathLunarDate}
+                                                            </div>
                                                         )}
-                                                    </>
+                                                        {ageAtDeath !== null && (
+                                                            <div className="text-[12px] font-normal" style={{ color: '#6a6a6a' }}>
+                                                                Hưởng thọ: {ageAtDeath} tuổi
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 ) : (
                                                     <span style={{ color: '#9a9a9a' }}>—</span>
                                                 )}

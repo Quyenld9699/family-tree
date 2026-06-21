@@ -12,6 +12,6 @@ export const OffsetY = {
 export const GenHeight = 450;
 
 export const PersonNodeWidth = 128;
-export const PersonNodeHeight = 112;
+export const PersonNodeHeight = 130;
 
 export const RelationshipNodeSize = 80;

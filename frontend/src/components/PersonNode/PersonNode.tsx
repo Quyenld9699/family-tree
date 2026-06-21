@@ -7,6 +7,7 @@ import { Gender, PersonNodeHeight, PersonNodeWidth } from 'src/constants';
 import { Avatar_Female, Avatar_Male } from 'src/constants/imagePaths';
 import { PersonInfo } from 'src/schema/PersonInfo';
 import { isMale } from 'src/utils/genderUtils';
+import { toVietnameseLunarDateShort } from 'src/utils/lunarDateUtils';
 
 export type TPersionNode = Omit<Node, 'data' | 'type'> & {
     data: PersonInfo;
@@ -32,6 +33,10 @@ export default function PersonNode(props: PersonNodeProps) {
     const birthDate = props.data.birth ? (typeof props.data.birth === 'string' ? new Date(props.data.birth) : props.data.birth) : null;
     const birthStr = birthDate ? birthDate.toLocaleDateString() : '';
 
+    // Format death date + lunar conversion
+    const deathDate = props.data.death ? (typeof props.data.death === 'string' ? new Date(props.data.death) : props.data.death) : null;
+    const deathLunarStr = deathDate ? toVietnameseLunarDateShort(deathDate) : '';
+
     // Calculate age if dead
     let ageStr = '';
     if (props.data.isDead && props.data.birth && props.data.death) {
@@ -42,7 +47,7 @@ export default function PersonNode(props: PersonNodeProps) {
         if (m < 0 || (m === 0 && death.getDate() < birth.getDate())) {
             age--;
         }
-        ageStr = `(Hưởng thọ: ${age})`;
+        ageStr = `Hưởng thọ: ${age} tuổi`;
     }
 
     return (
@@ -82,6 +87,11 @@ export default function PersonNode(props: PersonNodeProps) {
             <p className="text-[11px] mt-0.5" style={{ color: '#6a6a6a' }}>
                 {birthStr}
             </p>
+            {deathLunarStr && (
+                <p className="text-[10px] mt-0.5 font-medium" style={{ color: '#c0392b' }}>
+                    {deathLunarStr}
+                </p>
+            )}
             {ageStr && (
                 <p className="text-[10px]" style={{ color: '#6a6a6a' }}>
                     {ageStr}

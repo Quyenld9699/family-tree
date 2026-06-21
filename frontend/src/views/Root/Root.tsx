@@ -72,7 +72,15 @@ export default function Root() {
 
     return (
         <div style={{ width: '100vw', height: '100vh' }}>
-            <TopBar user={user} isAdmin={isAdmin} onLogout={logout} onOpenGuestCodeModal={modals.openGuestCode} onOpenSearch={() => setSearchOpen(true)} isSearchActive={isSearchActive} />
+            <TopBar
+                user={user}
+                isAdmin={isAdmin}
+                onLogout={logout}
+                onOpenGuestCodeModal={modals.openGuestCode}
+                onOpenSearch={() => setSearchOpen(true)}
+                isSearchActive={isSearchActive}
+                persons={persons}
+            />
 
             <FloatingControls
                 isAdmin={isAdmin}
