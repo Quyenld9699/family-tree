@@ -164,7 +164,8 @@ Tất cả so sánh ở mức **ngày** (bỏ giờ). Một event có thể kh�
   ```
   (00:00 UTC ≈ 7h sáng VN. Hobby: 1 lần/ngày.)
 - Endpoint `/event/cron/daily-notify` bảo vệ bằng header `Authorization: Bearer ${CRON_SECRET}` (Vercel tự gắn từ env) — KHÔNG dùng JWT user.
-- Logic: duyệt mọi event `isActive=true` → gom event có `getActiveTriggers(...)` không rỗng → soạn **1 message digest** (gộp theo mốc, dedup) → gửi tới Telegram group.
+- Logic: duyệt mọi event `isActive=true` → gom event có `getActiveTriggers(...)` không rỗng → soạn **digest** gộp theo mốc, dedup → gửi tới Telegram group.
+- **Định dạng digest**: mỗi event 1 khối ngắt dòng rõ ràng (tên, loại, ngày âm+dương, còn N ngày, mốc). Telegram giới hạn ~4096 ký tự/tin nhắn → nếu digest vượt giới hạn, **tách thành nhiều tin nhắn** (chia theo ranh giới khối event, không cắt giữa event), gửi tuần tự.
 - Env mới (backend): `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `CRON_SECRET`.
 - Message kèm: tên, loại (giỗ/sinh nhật/lễ), ngày âm + dương, "còn N ngày", mốc trigger. Gửi qua `fetch` tới `https://api.telegram.org/bot<token>/sendMessage`.
 - Nếu thiếu env Telegram → endpoint log cảnh báo, không crash.
