@@ -26,16 +26,17 @@ export class PersonService {
             throw new ConflictException(`CCCD ${createPersonDto.cccd} đã tồn tại trong hệ thống`);
         }
 
+        let newPerson;
         try {
-            const newPerson = await this.personModel.create(createPersonDto);
-            await this.eventService.syncPersonEvents(newPerson);
-            return newPerson;
+            newPerson = await this.personModel.create(createPersonDto);
         } catch (error) {
             if (error.code === 11000) {
                 throw new ConflictException(`CCCD ${createPersonDto.cccd} đã tồn tại trong hệ thống`);
             }
             throw error;
         }
+        await this.eventService.syncPersonEvents(newPerson);
+        return newPerson;
     }
 
     async findAll() {
@@ -75,21 +76,22 @@ export class PersonService {
             }
         }
 
+        let updatedPerson;
         try {
-            const updatedPerson = await this.personModel.findByIdAndUpdate(id, updatePersonDto, { new: true }).exec();
-
-            if (!updatedPerson) {
-                throw new NotFoundException(`Person with ID ${id} not found`);
-            }
-
-            await this.eventService.syncPersonEvents(updatedPerson);
-            return updatedPerson;
+            updatedPerson = await this.personModel.findByIdAndUpdate(id, updatePersonDto, { new: true }).exec();
         } catch (error) {
             if (error.code === 11000) {
                 throw new ConflictException(`CCCD ${updatePersonDto.cccd} đã tồn tại trong hệ thống`);
             }
             throw error;
         }
+
+        if (!updatedPerson) {
+            throw new NotFoundException(`Person with ID ${id} not found`);
+        }
+
+        await this.eventService.syncPersonEvents(updatedPerson);
+        return updatedPerson;
     }
 
     async remove(id: string) {

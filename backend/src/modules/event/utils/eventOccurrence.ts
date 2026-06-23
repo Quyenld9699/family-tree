@@ -25,6 +25,14 @@ function mondayOf(d: Date): Date {
     return addDays(d, -offset);
 }
 
+/** Lùi `n` tháng theo lịch, kẹp ngày về ngày cuối tháng đích nếu tràn. */
+function monthsBefore(d: Date, n: number): Date {
+    const firstOfTarget = new Date(d.getFullYear(), d.getMonth() - n, 1);
+    const lastDay = new Date(firstOfTarget.getFullYear(), firstOfTarget.getMonth() + 1, 0).getDate();
+    const day = Math.min(d.getDate(), lastDay);
+    return new Date(firstOfTarget.getFullYear(), firstOfTarget.getMonth(), day);
+}
+
 /** Solar Date của event trong 1 "chu kỳ năm" (solar year hoặc lunar year). */
 function occurrenceForCycle(ev: OccurrenceInput, cycleYear: number): Date | null {
     if (ev.calendar === EventCalendar.SOLAR || ev.calendar === 'solar') {
@@ -63,7 +71,7 @@ export function getActiveTriggers(ev: OccurrenceInput, today: Date): EventTrigge
     const triggers: EventTrigger[] = [];
     if (sameDay(t, occ)) triggers.push(EventTrigger.DAY_OF);
     if (sameDay(t, addDays(occ, -7))) triggers.push(EventTrigger.ONE_WEEK);
-    if (sameDay(t, new Date(occ.getFullYear(), occ.getMonth() - 1, occ.getDate()))) triggers.push(EventTrigger.ONE_MONTH);
+    if (sameDay(t, monthsBefore(occ, 1))) triggers.push(EventTrigger.ONE_MONTH);
     if (sameDay(t, new Date(occ.getFullYear(), occ.getMonth(), 1))) triggers.push(EventTrigger.MONTH_START);
     if (sameDay(t, mondayOf(occ))) triggers.push(EventTrigger.WEEK_START);
     return triggers;

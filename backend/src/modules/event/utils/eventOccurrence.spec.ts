@@ -40,6 +40,16 @@ describe('getActiveTriggers (solar)', () => {
         const t = getActiveTriggers(solarEvent, new Date(2026, 2, 3));
         expect(t).toEqual([]);
     });
+
+    it('fires 1_month one calendar-month before a day-31 event without overflow', () => {
+        const marchEnd: OccurrenceInput = { calendar: EventCalendar.SOLAR, day: 31, month: 3 };
+        // One calendar month before 31 Mar 2026, clamped to last day of Feb = 28 Feb 2026
+        const t = getActiveTriggers(marchEnd, new Date(2026, 1, 28));
+        expect(t).toContain(EventTrigger.ONE_MONTH);
+        // And it must NOT also fire on 3 Mar (the old overflow date)
+        const wrong = getActiveTriggers(marchEnd, new Date(2026, 2, 3));
+        expect(wrong).not.toContain(EventTrigger.ONE_MONTH);
+    });
 });
 
 describe('lunar occurrence', () => {
