@@ -59,3 +59,80 @@ describe('EventService.syncPersonEvents', () => {
         expect(eventModel.deleteOne).toHaveBeenCalledWith({ sourceType: EventSourceType.DEATH, sourcePersonId: 'p1' });
     });
 });
+
+describe('EventService.update (auto-event guard)', () => {
+    let service: EventService;
+    let eventModel: any;
+
+    const buildModule = async () => {
+        const { Test } = await import('@nestjs/testing');
+        const { getModelToken } = await import('@nestjs/mongoose');
+        const moduleRef = await Test.createTestingModule({
+            providers: [
+                EventService,
+                { provide: getModelToken(Event.name), useValue: eventModel },
+                { provide: getModelToken(Person.name), useValue: {} },
+            ],
+        }).compile();
+        return moduleRef.get(EventService);
+    };
+
+    const validId = '507f1f77bcf86cd799439011';
+
+    it('rejects changing a non-desc/isActive field on an auto (death) event', async () => {
+        eventModel = {
+            findById: jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue({ _id: validId, sourceType: 'death' }) }),
+            findByIdAndUpdate: jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue({}) }),
+        };
+        service = await buildModule();
+        await expect(service.update(validId, { day: 5 } as any)).rejects.toThrow();
+        expect(eventModel.findByIdAndUpdate).not.toHaveBeenCalled();
+    });
+
+    it('allows updating desc on an auto event', async () => {
+        eventModel = {
+            findById: jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue({ _id: validId, sourceType: 'birth' }) }),
+            findByIdAndUpdate: jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue({ _id: validId, desc: 'new' }) }),
+        };
+        service = await buildModule();
+        await service.update(validId, { desc: 'new' } as any);
+        expect(eventModel.findByIdAndUpdate).toHaveBeenCalledWith(validId, { desc: 'new' }, { new: true });
+    });
+});
+
+describe('EventService.syncAll (orphan cleanup)', () => {
+    let service: EventService;
+    let eventModel: any;
+
+    it('deletes auto-events whose person no longer exists', async () => {
+        const persons = [{ _id: { toString: () => 'p1' }, name: 'A', isDead: false, death: null, birth: null }];
+        eventModel = {
+            updateOne: jest.fn().mockResolvedValue({}),
+            deleteOne: jest.fn().mockResolvedValue({}),
+            deleteMany: jest.fn().mockResolvedValue({}),
+            find: jest.fn().mockReturnValue({
+                exec: jest.fn().mockResolvedValue([
+                    { _id: 'e1', sourceType: 'death', sourcePersonId: { toString: () => 'pX' } }, // orphan
+                    { _id: 'e2', sourceType: 'birth', sourcePersonId: { toString: () => 'p1' } }, // valid
+                ]),
+            }),
+        };
+        const personModel = { find: jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(persons) }) };
+
+        const { Test } = await import('@nestjs/testing');
+        const { getModelToken } = await import('@nestjs/mongoose');
+        const moduleRef = await Test.createTestingModule({
+            providers: [
+                EventService,
+                { provide: getModelToken(Event.name), useValue: eventModel },
+                { provide: getModelToken(Person.name), useValue: personModel },
+            ],
+        }).compile();
+        service = moduleRef.get(EventService);
+
+        const res = await service.syncAll();
+        expect(eventModel.deleteMany).toHaveBeenCalledWith({ _id: { $in: ['e1'] } });
+        expect(res.deletedOrphans).toBe(1);
+        expect(res.processed).toBe(1);
+    });
+});

@@ -76,15 +76,16 @@ export class EventService {
         const autoEvents = await this.eventModel
             .find({ sourceType: { $in: [EventSourceType.DEATH, EventSourceType.BIRTH] } })
             .exec();
-        let deletedOrphans = 0;
-        for (const e of autoEvents) {
-            const sid = e.sourcePersonId ? e.sourcePersonId.toString() : null;
-            if (!sid || !validIds.has(sid)) {
-                await this.eventModel.deleteOne({ _id: e._id });
-                deletedOrphans++;
-            }
+        const orphanIds = autoEvents
+            .filter((e) => {
+                const sid = e.sourcePersonId ? e.sourcePersonId.toString() : null;
+                return !sid || !validIds.has(sid);
+            })
+            .map((e) => e._id);
+        if (orphanIds.length > 0) {
+            await this.eventModel.deleteMany({ _id: { $in: orphanIds } });
         }
-        return { processed: persons.length, deletedOrphans };
+        return { processed: persons.length, deletedOrphans: orphanIds.length };
     }
 
     // ---------- CRUD ----------
@@ -110,12 +111,13 @@ export class EventService {
         if (!event) throw new NotFoundException(`Event ${id} not found`);
 
         if (event.sourceType !== EventSourceType.MANUAL) {
+            const providedKeys = Object.keys(dto).filter((k) => (dto as any)[k] !== undefined);
+            if (providedKeys.some((k) => k !== 'desc' && k !== 'isActive')) {
+                throw new BadRequestException('Auto-event chỉ cho phép sửa desc/isActive');
+            }
             const allowed: UpdateEventDto = {};
             if (dto.desc !== undefined) allowed.desc = dto.desc;
             if (dto.isActive !== undefined) allowed.isActive = dto.isActive;
-            if (Object.keys(dto).some((k) => k !== 'desc' && k !== 'isActive')) {
-                throw new BadRequestException('Auto-event chỉ cho phép sửa desc/isActive');
-            }
             return this.eventModel.findByIdAndUpdate(id, allowed, { new: true }).exec();
         }
         return this.eventModel.findByIdAndUpdate(id, dto, { new: true }).exec();
