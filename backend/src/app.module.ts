@@ -9,6 +9,7 @@ import { SpouseModule } from './modules/spouse/spouse.module';
 import { ParentChildModule } from './modules/parent-child/parent-child.module';
 import { GalleryModule } from './modules/gallery/gallery.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { EventModule } from './modules/event/event.module';
 
 @Module({
     imports: [
@@ -18,6 +19,7 @@ import { AuthModule } from './modules/auth/auth.module';
         SpouseModule,
         ParentChildModule,
         GalleryModule,
+        EventModule,
         ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '.env.local'] }),
         MongooseModule.forRootAsync({
             imports: [ConfigModule],

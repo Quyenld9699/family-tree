@@ -79,7 +79,6 @@ export default function Root() {
                 onOpenGuestCodeModal={modals.openGuestCode}
                 onOpenSearch={() => setSearchOpen(true)}
                 isSearchActive={isSearchActive}
-                persons={persons}
             />
 
             <FloatingControls

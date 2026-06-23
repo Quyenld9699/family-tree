@@ -12,5 +12,11 @@
             "dest": "src/vercel.ts",
             "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
         }
+    ],
+    "crons": [
+        {
+            "path": "/api/v1/event/cron/daily-notify",
+            "schedule": "0 0 * * *"
+        }
     ]
 }
