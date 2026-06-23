@@ -34,25 +34,44 @@ export default function TopBar({ user, isAdmin, onLogout, onOpenGuestCodeModal, 
                 {isSearchActive && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#1a3a3a' }} />}
             </button>
 
-            {/* Link to persons list */}
+            {/* Link to persons list and events */}
             {user && (
-                <Link
-                    href="/persons"
-                    className="flex items-center gap-1.5 px-2.5 py-2 md:px-3 text-[13px] font-medium rounded-[12px] border transition-colors"
-                    style={{ backgroundColor: '#fefef9', borderColor: '#e5e5e5', color: '#3a3a3a' }}
-                    onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.backgroundColor = '#f9f7f2';
-                    }}
-                    onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.backgroundColor = '#fefef9';
-                    }}
-                    title="Xem danh sách thành viên"
-                >
-                    <svg className="w-4 h-4 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                    </svg>
-                    <span className="hidden sm:inline">Danh sách</span>
-                </Link>
+                <>
+                    <Link
+                        href="/persons"
+                        className="flex items-center gap-1.5 px-2.5 py-2 md:px-3 text-[13px] font-medium rounded-[12px] border transition-colors"
+                        style={{ backgroundColor: '#fefef9', borderColor: '#e5e5e5', color: '#3a3a3a' }}
+                        onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = '#f9f7f2';
+                        }}
+                        onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = '#fefef9';
+                        }}
+                        title="Xem danh sách thành viên"
+                    >
+                        <svg className="w-4 h-4 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                        </svg>
+                        <span className="hidden sm:inline">Danh sách</span>
+                    </Link>
+                    <Link
+                        href="/events"
+                        className="flex items-center gap-1.5 px-2.5 py-2 md:px-3 text-[13px] font-medium rounded-[12px] border transition-colors"
+                        style={{ backgroundColor: '#fefef9', borderColor: '#e5e5e5', color: '#3a3a3a' }}
+                        onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = '#f9f7f2';
+                        }}
+                        onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = '#fefef9';
+                        }}
+                        title="Lịch sự kiện"
+                    >
+                        <svg className="w-4 h-4 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span className="hidden sm:inline">Sự kiện</span>
+                    </Link>
+                </>
             )}
 
             {!user ? (
