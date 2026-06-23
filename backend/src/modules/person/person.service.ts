@@ -6,6 +6,7 @@ import { Person } from './schemas/person.schema';
 import { HydratedDocument, Model, Types } from 'mongoose';
 import { SpouseService } from '../spouse/spouse.service';
 import { ParentChildService } from '../parent-child/parent-child.service';
+import { EventService } from '../event/event.service';
 
 @Injectable()
 export class PersonService {
@@ -13,6 +14,7 @@ export class PersonService {
         @InjectModel(Person.name) private readonly personModel: Model<Person>,
         private readonly spouseService: SpouseService,
         private readonly parentChildService: ParentChildService,
+        private readonly eventService: EventService,
     ) {}
 
     async create(createPersonDto: CreatePersonDto) {
@@ -26,6 +28,7 @@ export class PersonService {
 
         try {
             const newPerson = await this.personModel.create(createPersonDto);
+            await this.eventService.syncPersonEvents(newPerson);
             return newPerson;
         } catch (error) {
             if (error.code === 11000) {
@@ -79,6 +82,7 @@ export class PersonService {
                 throw new NotFoundException(`Person with ID ${id} not found`);
             }
 
+            await this.eventService.syncPersonEvents(updatedPerson);
             return updatedPerson;
         } catch (error) {
             if (error.code === 11000) {
@@ -103,6 +107,8 @@ export class PersonService {
 
         // Delete all parent-child relationships where this person is a child
         await this.parentChildService.deleteChildRelationships(id);
+
+        await this.eventService.removePersonEvents(id);
 
         // Delete the person
         await this.personModel.findByIdAndDelete(id).exec();

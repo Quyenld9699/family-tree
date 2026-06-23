@@ -5,9 +5,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Person, PersonSchema } from './schemas/person.schema';
 import { SpouseModule } from '../spouse/spouse.module';
 import { ParentChildModule } from '../parent-child/parent-child.module';
+import { EventModule } from '../event/event.module';
 
 @Module({
-    imports: [MongooseModule.forFeature([{ name: Person.name, schema: PersonSchema }]), SpouseModule, ParentChildModule],
+    imports: [MongooseModule.forFeature([{ name: Person.name, schema: PersonSchema }]), SpouseModule, ParentChildModule, EventModule],
     controllers: [PersonController],
     providers: [PersonService],
     exports: [PersonService],
