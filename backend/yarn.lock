@@ -3739,6 +3739,11 @@ lru-cache@^5.1.1:
   dependencies:
     yallist "^3.0.2"
 
+lunar-javascript@^1.7.7:
+  version "1.7.7"
+  resolved "https://registry.npmjs.org/lunar-javascript/-/lunar-javascript-1.7.7.tgz"
+  integrity sha512-u/KYiwPIBo/0bT+WWfU7qO1d+aqeB90Tuy4ErXenr2Gam0QcWeezUvtiOIyXR7HbVnW2I1DKfU0NBvzMZhbVQw==
+
 magic-string@0.30.8:
   version "0.30.8"
   resolved "https://registry.npmjs.org/magic-string/-/magic-string-0.30.8.tgz"
