@@ -5,7 +5,8 @@ import { Event } from './schemas/event.schema';
 import { Person } from '../person/schemas/person.schema';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { EventSourceType, EventCalendar } from './constants';
+import { EventSourceType, EventCalendar, EventTrigger } from './constants';
+import { TelegramService } from './telegram.service';
 import { solarToLunarParts } from './utils/lunarParts';
 import { nextOccurrence, getActiveTriggers, daysUntil } from './utils/eventOccurrence';
 
@@ -14,6 +15,7 @@ export class EventService {
     constructor(
         @InjectModel(Event.name) private readonly eventModel: Model<Event>,
         @InjectModel(Person.name) private readonly personModel: Model<Person>,
+        private readonly telegram: TelegramService,
     ) {}
 
     // ---------- Sync từ Person (Cách A) ----------
@@ -148,5 +150,34 @@ export class EventService {
         }
         result.sort((a, b) => (a.daysUntil ?? 9999) - (b.daysUntil ?? 9999));
         return result;
+    }
+
+    private triggerLabel(t: EventTrigger): string {
+        switch (t) {
+            case EventTrigger.DAY_OF: return '🔔 HÔM NAY';
+            case EventTrigger.ONE_WEEK: return 'Còn 1 tuần';
+            case EventTrigger.ONE_MONTH: return 'Còn 1 tháng';
+            case EventTrigger.WEEK_START: return 'Đầu tuần';
+            case EventTrigger.MONTH_START: return 'Đầu tháng';
+            default: return '';
+        }
+    }
+
+    async runDailyNotify(): Promise<{ events: number; sent: number }> {
+        const notifications = await this.getNotifications();
+        if (notifications.length === 0) return { events: 0, sent: 0 };
+
+        const blocks = notifications.map((n) => {
+            const occ: Date = n.occurrenceSolar;
+            const occStr = occ ? `${occ.getDate()}/${occ.getMonth() + 1}/${occ.getFullYear()}` : '';
+            const labels = n.triggers.map((t: EventTrigger) => this.triggerLabel(t)).filter(Boolean).join(' · ');
+            return `<b>${n.event.title}</b>\nNgày: ${occStr} (còn ${n.daysUntil} ngày)\n${labels}`;
+        });
+
+        const today = new Date();
+        const header = `📅 <b>Lịch sự kiện dòng họ — ${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}</b>`;
+        const messages = this.telegram.buildMessages(blocks, header);
+        const { sent } = await this.telegram.send(messages);
+        return { events: notifications.length, sent };
     }
 }

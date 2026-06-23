@@ -4,6 +4,7 @@ import { EventService } from './event.service';
 import { Event } from './schemas/event.schema';
 import { Person } from '../person/schemas/person.schema';
 import { EventSourceType } from './constants';
+import { TelegramService } from './telegram.service';
 
 describe('EventService.syncPersonEvents', () => {
     let service: EventService;
@@ -19,6 +20,7 @@ describe('EventService.syncPersonEvents', () => {
                 EventService,
                 { provide: getModelToken(Event.name), useValue: eventModel },
                 { provide: getModelToken(Person.name), useValue: {} },
+                { provide: TelegramService, useValue: { buildMessages: jest.fn(() => []), send: jest.fn().mockResolvedValue({ sent: 0 }) } },
             ],
         }).compile();
         service = moduleRef.get(EventService);
@@ -72,6 +74,7 @@ describe('EventService.update (auto-event guard)', () => {
                 EventService,
                 { provide: getModelToken(Event.name), useValue: eventModel },
                 { provide: getModelToken(Person.name), useValue: {} },
+                { provide: TelegramService, useValue: { buildMessages: jest.fn(() => []), send: jest.fn().mockResolvedValue({ sent: 0 }) } },
             ],
         }).compile();
         return moduleRef.get(EventService);
@@ -126,6 +129,7 @@ describe('EventService.syncAll (orphan cleanup)', () => {
                 EventService,
                 { provide: getModelToken(Event.name), useValue: eventModel },
                 { provide: getModelToken(Person.name), useValue: personModel },
+                { provide: TelegramService, useValue: { buildMessages: jest.fn(() => []), send: jest.fn().mockResolvedValue({ sent: 0 }) } },
             ],
         }).compile();
         service = moduleRef.get(EventService);
