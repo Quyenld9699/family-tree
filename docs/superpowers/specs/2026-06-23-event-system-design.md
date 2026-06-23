@@ -108,7 +108,18 @@ removePersonEvents(personId): deleteMany { sourcePersonId }
 - `update()` → sau khi update, gọi `syncPersonEvents(updatedPerson)`.
 - `remove()` → gọi `removePersonEvents(id)` cùng chỗ đang xóa spouse / parent-child.
 
-**Backfill 1 lần:** `POST /event/sync-all` (admin) duyệt toàn bộ persons hiện có → gọi `syncPersonEvents` cho từng người → sinh event cho dữ liệu cũ. Chạy 1 lần sau deploy. Idempotent (chạy lại an toàn).
+**Tính lại toàn bộ auto-event (nút trên page `/events`, admin):**
+
+Dữ liệu hiện tại có sẵn person với `birth`/`death` (đều dương lịch) nhưng CHƯA có event nào. Cần một thao tác chủ động để sinh auto-event cho toàn bộ persons đang có.
+
+`POST /event/sync-all` (admin):
+1. Duyệt toàn bộ persons hiện có → gọi `syncPersonEvents(person)` cho từng người (tạo/cập nhật giỗ + sinh nhật).
+2. **Dọn orphan**: xóa các auto-event (`sourceType` death/birth) có `sourcePersonId` không còn trỏ tới person nào (person đã bị xóa trước khi có tính năng này), hoặc person đã tắt isDead/xóa ngày.
+3. Trả về thống kê: số event tạo mới / cập nhật / xóa.
+
+Idempotent — bấm nhiều lần an toàn, kết quả hội tụ. KHÔNG đụng manual event (chỉ xử lý `sourceType` death/birth).
+
+Phơi ra UI: nút **"Tính lại toàn bộ giỗ & sinh nhật"** trên page `/events` (chỉ admin), có xác nhận trước khi chạy + hiển thị kết quả thống kê.
 
 ## 6. Tính occurrence & logic 5 mốc (`utils/eventOccurrence.ts`)
 
@@ -142,7 +153,7 @@ Tất cả so sánh ở mức **ngày** (bỏ giờ). Một event có thể kh�
 | POST | `/event` | ADMIN, EDITOR | Tạo manual event (validate: manual mới được set calendar/title tùy ý; không cho tạo sourceType death/birth thủ công) |
 | PATCH | `/event/:id` | ADMIN, EDITOR | Sửa event. Với auto-event chỉ cho sửa `desc`/`isActive` (ngày do person chi phối); manual sửa mọi field |
 | DELETE | `/event/:id` | ADMIN, EDITOR | Xóa event |
-| POST | `/event/sync-all` | ADMIN | Backfill từ persons (chạy 1 lần) |
+| POST | `/event/sync-all` | ADMIN | Tính lại toàn bộ auto-event từ persons + dọn orphan. Trả thống kê tạo/cập nhật/xóa. Gọi từ nút trên page /events |
 | GET | `/event/cron/daily-notify` | CRON_SECRET header | Vercel Cron gọi → gửi Telegram |
 
 ## 8. Telegram bot + Vercel Cron
@@ -164,6 +175,7 @@ Tất cả so sánh ở mức **ngày** (bỏ giờ). Một event có thể kh�
   - List toàn bộ event, **sort theo ngày-trong-năm** (nextOccurrence sắp tới), filter theo loại (giỗ/sinh nhật/lễ).
   - CRUD manual event (admin/editor): form chọn calendar (âm/dương), nhập day/month (+ nhuận nếu âm), title, desc.
   - Auto-event hiển thị read-mostly (chỉ sửa desc/isActive).
+  - Nút **"Tính lại toàn bộ giỗ & sinh nhật"** (chỉ admin) → `POST /event/sync-all`; có confirm dialog, hiển thị kết quả thống kê (tạo/cập nhật/xóa). Dùng để sinh auto-event cho dữ liệu person hiện có lần đầu, và đồng bộ lại bất cứ lúc nào.
 - **Thông báo:** `useGioReminders` → thay bằng `useEventNotifications` gọi `GET /event/notifications`; render ở `GioBellIcon`. Chuông chỉ hiện khi đã login. Logic tự-tính-giỗ-từ-persons cũ ở FE **gỡ bỏ** (event là nguồn duy nhất).
 - `services/eventService.ts` (CRUD + notifications), `hooks/useEvents.ts` (React Query, staleTime 5m).
 - Tuân design system Clay-inspired (`.github/DESIGN.md`); responsive mobile-first.
