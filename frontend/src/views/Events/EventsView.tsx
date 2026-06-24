@@ -5,6 +5,15 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useEvents } from 'src/hooks/useEvents';
 import eventService, { FamilyEvent, CreateEventInput } from 'src/services/eventService';
 import { useAuth } from 'src/context/AuthContext';
+import ConfirmDialog from 'src/components/ConfirmDialog/ConfirmDialog';
+
+interface PendingConfirm {
+    title: string;
+    message?: string;
+    confirmLabel: string;
+    tone: 'danger' | 'default';
+    run: () => Promise<void>;
+}
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -71,8 +80,21 @@ export default function EventsView() {
     const [syncMsg, setSyncMsg] = useState<string | null>(null);
     const [filter, setFilter] = useState<'all' | EventKind>('all');
     const [busyId, setBusyId] = useState<string | null>(null);
+    const [confirm, setConfirm] = useState<PendingConfirm | null>(null);
+    const [confirmLoading, setConfirmLoading] = useState(false);
 
     const refresh = () => queryClient.invalidateQueries({ queryKey: ['events'] });
+
+    const runConfirm = async () => {
+        if (!confirm) return;
+        setConfirmLoading(true);
+        try {
+            await confirm.run();
+            setConfirm(null);
+        } finally {
+            setConfirmLoading(false);
+        }
+    };
 
     const counts = useMemo(() => {
         const c = { all: events.length, death: 0, birth: 0, manual: 0 };
@@ -82,31 +104,38 @@ export default function EventsView() {
 
     const visible = useMemo(() => (filter === 'all' ? events : events.filter((e) => e.sourceType === filter)), [events, filter]);
 
-    const handleSyncAll = async () => {
-        if (!confirm('Tính lại toàn bộ giỗ & sinh nhật từ danh sách thành viên?')) return;
-        setSyncing(true);
-        setSyncMsg(null);
-        try {
-            const res = await eventService.syncAll();
-            setSyncMsg(`Đã đồng bộ ${res.processed} thành viên · dọn ${res.deletedOrphans} sự kiện thừa.`);
-            refresh();
-        } catch (e: any) {
-            setSyncMsg('Lỗi: ' + (e?.response?.data?.message || e.message));
-        } finally {
-            setSyncing(false);
-        }
-    };
+    const requestSyncAll = () =>
+        setConfirm({
+            title: 'Tính lại giỗ & sinh nhật?',
+            message: 'Hệ thống sẽ đồng bộ lại toàn bộ giỗ và sinh nhật từ danh sách thành viên, đồng thời dọn các sự kiện tự động không còn hợp lệ.',
+            confirmLabel: 'Tính lại',
+            tone: 'default',
+            run: async () => {
+                setSyncing(true);
+                setSyncMsg(null);
+                try {
+                    const res = await eventService.syncAll();
+                    setSyncMsg(`Đã đồng bộ ${res.processed} thành viên · dọn ${res.deletedOrphans} sự kiện thừa.`);
+                    refresh();
+                } catch (e: any) {
+                    setSyncMsg('Lỗi: ' + (e?.response?.data?.message || e.message));
+                } finally {
+                    setSyncing(false);
+                }
+            },
+        });
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('Xóa sự kiện này?')) return;
-        setBusyId(id);
-        try {
-            await eventService.deleteEvent(id);
-            refresh();
-        } finally {
-            setBusyId(null);
-        }
-    };
+    const requestDelete = (event: FamilyEvent) =>
+        setConfirm({
+            title: 'Xóa sự kiện này?',
+            message: `"${event.title}" sẽ bị xóa khỏi lịch. Với giỗ/sinh nhật tự động, bạn có thể tạo lại bằng nút "Tính lại giỗ & sinh nhật".`,
+            confirmLabel: 'Xóa',
+            tone: 'danger',
+            run: async () => {
+                await eventService.deleteEvent(event._id);
+                refresh();
+            },
+        });
 
     const handleToggle = async (e: FamilyEvent) => {
         setBusyId(e._id);
@@ -148,7 +177,7 @@ export default function EventsView() {
 
                     {isAdmin && (
                         <button
-                            onClick={handleSyncAll}
+                            onClick={requestSyncAll}
                             disabled={syncing}
                             className="inline-flex w-full items-center justify-center gap-2 rounded-[12px] px-4 py-3 text-sm font-semibold text-white transition-transform hover:scale-[1.02] disabled:opacity-60 sm:w-auto sm:flex-shrink-0"
                             style={{ backgroundColor: '#0a0a0a' }}
@@ -228,13 +257,24 @@ export default function EventsView() {
                                     canEdit={canEdit}
                                     busy={busyId === e._id}
                                     onToggle={() => handleToggle(e)}
-                                    onDelete={() => handleDelete(e._id)}
+                                    onDelete={() => requestDelete(e)}
                                 />
                             ))}
                         </ul>
                     )}
                 </div>
             </div>
+
+            <ConfirmDialog
+                isOpen={confirm !== null}
+                title={confirm?.title ?? ''}
+                message={confirm?.message}
+                confirmLabel={confirm?.confirmLabel}
+                tone={confirm?.tone}
+                loading={confirmLoading}
+                onConfirm={runConfirm}
+                onClose={() => setConfirm(null)}
+            />
         </div>
     );
 }
