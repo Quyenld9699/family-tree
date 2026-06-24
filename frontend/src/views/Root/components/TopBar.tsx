@@ -75,7 +75,7 @@ export default function TopBar({ user, isAdmin, onLogout, onOpenGuestCodeModal, 
             )}
 
             {!user ? (
-                <a
+                <Link
                     href="/guest-login"
                     className="px-3 py-2 md:px-4 text-[13px] font-semibold rounded-[12px] transition-colors flex items-center"
                     style={{ backgroundColor: '#0a0a0a', color: '#ffffff' }}
@@ -87,7 +87,7 @@ export default function TopBar({ user, isAdmin, onLogout, onOpenGuestCodeModal, 
                     }}
                 >
                     Đăng nhập
-                </a>
+                </Link>
             ) : (
                 <UserMenu user={user} isAdmin={isAdmin} onLogout={onLogout} onOpenGuestCodeModal={onOpenGuestCodeModal} />
             )}

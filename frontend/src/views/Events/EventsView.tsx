@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEvents } from 'src/hooks/useEvents';
 import eventService, { FamilyEvent, CreateEventInput } from 'src/services/eventService';
@@ -160,13 +161,14 @@ export default function EventsView() {
                 {/* Header */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
-                        <a
+                        <Link
                             href="/"
+                            prefetch
                             className="inline-flex items-center gap-1.5 text-[13px] font-medium transition-colors"
                             style={{ color: '#6a6a6a' }}
                         >
                             <span aria-hidden>←</span> Cây gia phả
-                        </a>
+                        </Link>
                         <h1 className="mt-1.5 text-[28px] font-semibold leading-tight" style={{ color: '#0a0a0a', letterSpacing: '-0.8px' }}>
                             Lịch sự kiện
                         </h1>
