@@ -24,6 +24,8 @@ export class EventService {
 
         if (person.isDead && person.death) {
             const parts = solarToLunarParts(new Date(person.death));
+            const honorific = person.gender === 1 ? 'bà' : 'ông';
+            const leap = parts.isLeapMonth ? ' nhuận' : '';
             await this.eventModel.updateOne(
                 { sourceType: EventSourceType.DEATH, sourcePersonId: pid },
                 {
@@ -32,7 +34,7 @@ export class EventService {
                         day: parts.day,
                         month: parts.month,
                         isLeapMonth: parts.isLeapMonth,
-                        title: `Giỗ ${person.name}`,
+                        title: `Giỗ ${honorific} ${person.name} (${parts.day}/${parts.month}${leap})`,
                     },
                     $setOnInsert: { isActive: true },
                 },

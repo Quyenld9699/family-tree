@@ -28,7 +28,7 @@ describe('EventService.syncPersonEvents', () => {
 
     it('upserts a death (giỗ, lunar) event when person is dead with death date', async () => {
         await service.syncPersonEvents({
-            _id: 'p1', name: 'Ông A', isDead: true, death: new Date(2020, 2, 10), birth: null,
+            _id: 'p1', name: 'Ông A', gender: 1, isDead: true, death: new Date(2020, 2, 10), birth: null,
         } as any);
 
         const deathCall = eventModel.updateOne.mock.calls.find(
@@ -37,7 +37,7 @@ describe('EventService.syncPersonEvents', () => {
         expect(deathCall).toBeDefined();
         expect(deathCall[0]).toEqual({ sourceType: EventSourceType.DEATH, sourcePersonId: 'p1' });
         expect(deathCall[1].$set.calendar).toBe('lunar');
-        expect(deathCall[1].$set.title).toBe('Giỗ Ông A');
+        expect(deathCall[1].$set.title).toMatch(/^Giỗ bà Ông A \(\d{1,2}\/\d{1,2}( nhuận)?\)$/);
     });
 
     it('upserts a birth (sinh nhật, solar) event when person has birth date', async () => {
