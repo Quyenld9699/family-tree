@@ -31,9 +31,14 @@ describe('getActiveTriggers (solar)', () => {
         expect(t).toContain(EventTrigger.ONE_MONTH);
     });
 
-    it('fires month_start on the 1st of the occurrence month', () => {
+    it('fires 1_day exactly one day before', () => {
+        const t = getActiveTriggers(solarEvent, new Date(2026, 5, 14));
+        expect(t).toContain(EventTrigger.ONE_DAY);
+    });
+
+    it('does not fire on the 1st of the month anymore (only 4 triggers exist)', () => {
         const t = getActiveTriggers(solarEvent, new Date(2026, 5, 1));
-        expect(t).toContain(EventTrigger.MONTH_START);
+        expect(t).toEqual([]);
     });
 
     it('returns empty on an unrelated day', () => {

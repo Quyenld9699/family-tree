@@ -12,7 +12,6 @@ export enum EventCalendar {
 export enum EventTrigger {
     ONE_MONTH = '1_month',
     ONE_WEEK = '1_week',
-    MONTH_START = 'month_start',
-    WEEK_START = 'week_start',
+    ONE_DAY = '1_day',
     DAY_OF = 'day_of',
 }
