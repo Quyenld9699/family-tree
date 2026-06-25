@@ -14,9 +14,11 @@ interface PersonListProps {
     sortDirection: SortDirection;
     onSort: (field: SortField) => void;
     onPersonClick: (person: Person) => void;
+    canEdit: boolean;
+    onPushEvent: (person: Person) => void;
 }
 
-export default function PersonList({ paginated, connectedIds, currentPage, pageSize, sortField, sortDirection, onSort, onPersonClick }: PersonListProps) {
+export default function PersonList({ paginated, connectedIds, currentPage, pageSize, sortField, sortDirection, onSort, onPersonClick, canEdit, onPushEvent }: PersonListProps) {
     if (paginated.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-16 text-gray-500">
@@ -75,6 +77,11 @@ export default function PersonList({ paginated, connectedIds, currentPage, pageS
                         <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
                             CCCD
                         </th>
+                        {canEdit && (
+                            <th scope="col" className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                                Sự kiện
+                            </th>
+                        )}
                     </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -118,6 +125,23 @@ export default function PersonList({ paginated, connectedIds, currentPage, pageS
                                     </span>
                                 </td>
                                 <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500 font-mono">{person.cccd || '—'}</td>
+                                {canEdit && (
+                                    <td className="px-4 py-2 whitespace-nowrap text-center">
+                                        <button
+                                            onClick={(ev) => {
+                                                ev.stopPropagation();
+                                                onPushEvent(person);
+                                            }}
+                                            title="Tạo/cập nhật sự kiện giỗ & sinh nhật"
+                                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                        >
+                                            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth={1.8}>
+                                                <path d="M8 2v3M16 2v3M3.5 9h17M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z" strokeLinecap="round" strokeLinejoin="round" />
+                                                <path d="M12 13v3M10.5 14.5h3" strokeLinecap="round" />
+                                            </svg>
+                                        </button>
+                                    </td>
+                                )}
                             </tr>
                         );
                     })}
