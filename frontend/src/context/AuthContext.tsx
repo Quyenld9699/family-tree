@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import authService, { User } from '../services/authService';
 import { useRouter, usePathname } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthContextType {
     user: User | null;
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const pathname = usePathname();
+    const queryClient = useQueryClient();
 
     useEffect(() => {
         const currentUser = authService.getCurrentUser();
@@ -42,12 +44,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const login = async (username: string, password: string) => {
         await authService.login(username, password);
         setUser(authService.getCurrentUser());
+        // Auth vừa đổi: bỏ cache React Query (đang giữ dữ liệu tĩnh của khách)
+        // để các query refetch lại với token → hiển thị dữ liệu thật.
+        queryClient.clear();
         router.push('/');
     };
 
     const loginGuest = async (code: string) => {
         await authService.loginGuest(code);
         setUser(authService.getCurrentUser());
+        queryClient.clear();
         router.push('/');
     };
 
