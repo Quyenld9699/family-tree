@@ -73,6 +73,11 @@ const eventService = {
         const res = await api.post(`/event/sync-person/${personId}`);
         return res.data;
     },
+
+    resyncEvent: async (eventId: string): Promise<{ ok: true }> => {
+        const res = await api.post(`/event/${eventId}/resync`);
+        return res.data;
+    },
 };
 
 export default eventService;

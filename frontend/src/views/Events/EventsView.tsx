@@ -150,10 +150,9 @@ export default function EventsView() {
     };
 
     const handleRefresh = async (e: FamilyEvent) => {
-        if (!e.sourcePersonId) return;
         setBusyId(e._id);
         try {
-            await eventService.syncPerson(e.sourcePersonId);
+            await eventService.resyncEvent(e._id);
             toast.success('Đã cập nhật từ hồ sơ thành viên');
             refresh();
         } catch (err: any) {
