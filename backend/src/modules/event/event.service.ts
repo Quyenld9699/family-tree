@@ -19,9 +19,9 @@ export class EventService {
     ) {}
 
     // ---------- Sync từ Person (Cách A) ----------
-    async syncPersonEvents(person: any): Promise<void> {
+    /** Đồng bộ riêng event GIỖ của 1 người (tạo/cập nhật nếu đã mất, xóa nếu không). */
+    private async syncDeathEvent(person: any): Promise<void> {
         const pid = person._id;
-
         if (person.isDead && person.death) {
             const parts = solarToLunarParts(new Date(person.death));
             const honorific = person.gender === 1 ? 'bà' : 'ông';
@@ -43,7 +43,11 @@ export class EventService {
         } else {
             await this.eventModel.deleteOne({ sourceType: EventSourceType.DEATH, sourcePersonId: pid });
         }
+    }
 
+    /** Đồng bộ riêng event SINH NHẬT của 1 người (tạo/cập nhật nếu có ngày sinh, xóa nếu không). */
+    private async syncBirthEvent(person: any): Promise<void> {
+        const pid = person._id;
         if (person.birth) {
             const d = new Date(person.birth);
             await this.eventModel.updateOne(
@@ -63,6 +67,29 @@ export class EventService {
         } else {
             await this.eventModel.deleteOne({ sourceType: EventSourceType.BIRTH, sourcePersonId: pid });
         }
+    }
+
+    async syncPersonEvents(person: any): Promise<void> {
+        await this.syncDeathEvent(person);
+        await this.syncBirthEvent(person);
+    }
+
+    /** Đồng bộ lại CHỈ 1 auto-event (theo loại của chính nó), không đụng event khác của người đó. */
+    async resyncEvent(eventId: string): Promise<{ ok: true }> {
+        if (!Types.ObjectId.isValid(eventId)) throw new NotFoundException(`Invalid event ID: ${eventId}`);
+        const event = await this.eventModel.findById(eventId).exec();
+        if (!event) throw new NotFoundException(`Event ${eventId} not found`);
+        if (event.sourceType === EventSourceType.MANUAL || !event.sourcePersonId) {
+            throw new BadRequestException('Chỉ auto-event (giỗ/sinh nhật) mới đồng bộ lại được');
+        }
+        const person = await this.personModel.findById(event.sourcePersonId).exec();
+        if (!person) throw new NotFoundException(`Person ${event.sourcePersonId} not found`);
+        if (event.sourceType === EventSourceType.DEATH) {
+            await this.syncDeathEvent(person);
+        } else {
+            await this.syncBirthEvent(person);
+        }
+        return { ok: true };
     }
 
     async removePersonEvents(personId: string): Promise<void> {

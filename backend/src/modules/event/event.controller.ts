@@ -72,6 +72,15 @@ export class EventController {
         return this.eventService.syncOnePerson(personId);
     }
 
+    @Post(':id/resync')
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @Roles(UserRoles.ADMIN, UserRoles.EDITOR)
+    @ApiOperation({ summary: 'Đồng bộ lại 1 auto-event (chỉ event đó) từ hồ sơ thành viên' })
+    resync(@Param('id') id: string) {
+        return this.eventService.resyncEvent(id);
+    }
+
     @Patch(':id')
     @ApiBearerAuth()
     @UseGuards(AuthGuard('jwt'), RolesGuard)

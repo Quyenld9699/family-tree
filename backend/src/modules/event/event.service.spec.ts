@@ -174,3 +174,56 @@ describe('EventService.syncOnePerson', () => {
         expect(personModel.findById).toHaveBeenCalledWith(validId);
     });
 });
+
+describe('EventService.resyncEvent', () => {
+    const eventId = '507f1f77bcf86cd799439011';
+    const personId = '507f1f77bcf86cd799439099';
+
+    const build = async (eventModel: any, personModel: any) => {
+        const { Test } = await import('@nestjs/testing');
+        const { getModelToken } = await import('@nestjs/mongoose');
+        const moduleRef = await Test.createTestingModule({
+            providers: [
+                EventService,
+                { provide: getModelToken(Event.name), useValue: eventModel },
+                { provide: getModelToken(Person.name), useValue: personModel },
+                { provide: TelegramService, useValue: { buildMessages: jest.fn(() => []), send: jest.fn().mockResolvedValue({ sent: 0 }) } },
+            ],
+        }).compile();
+        return moduleRef.get(EventService);
+    };
+
+    it('resyncing a DEATH event touches only the death event, not birth', async () => {
+        // Person still has a birth date, but resync of the giỗ must NOT recreate the birthday event
+        const person = { _id: personId, name: 'A', gender: 1, isDead: true, death: new Date(2020, 2, 10), birth: new Date(1950, 0, 1) };
+        const eventModel = {
+            findById: jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue({ _id: eventId, sourceType: 'death', sourcePersonId: personId }) }),
+            updateOne: jest.fn().mockResolvedValue({}),
+            deleteOne: jest.fn().mockResolvedValue({}),
+        };
+        const personModel = { findById: jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(person) }) };
+        const service = await build(eventModel, personModel);
+
+        const res = await service.resyncEvent(eventId);
+        expect(res).toEqual({ ok: true });
+        // Exactly one updateOne, and it must be the DEATH event
+        expect(eventModel.updateOne).toHaveBeenCalledTimes(1);
+        expect(eventModel.updateOne.mock.calls[0][0]).toEqual({ sourceType: 'death', sourcePersonId: personId });
+        // No birth upsert/delete happened
+        expect(eventModel.deleteOne).not.toHaveBeenCalled();
+    });
+
+    it('rejects resync of a manual event', async () => {
+        const eventModel = {
+            findById: jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue({ _id: eventId, sourceType: 'manual', sourcePersonId: null }) }),
+        };
+        const service = await build(eventModel, {});
+        await expect(service.resyncEvent(eventId)).rejects.toThrow();
+    });
+
+    it('throws when event not found', async () => {
+        const eventModel = { findById: jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(null) }) };
+        const service = await build(eventModel, {});
+        await expect(service.resyncEvent(eventId)).rejects.toThrow();
+    });
+});
