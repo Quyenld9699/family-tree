@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 import { useEvents } from 'src/hooks/useEvents';
 import eventService, { FamilyEvent, CreateEventInput } from 'src/services/eventService';
 import { useAuth } from 'src/context/AuthContext';
@@ -78,7 +79,6 @@ export default function EventsView() {
     const queryClient = useQueryClient();
 
     const [syncing, setSyncing] = useState(false);
-    const [syncMsg, setSyncMsg] = useState<string | null>(null);
     const [filter, setFilter] = useState<'all' | EventKind>('all');
     const [busyId, setBusyId] = useState<string | null>(null);
     const [confirm, setConfirm] = useState<PendingConfirm | null>(null);
@@ -113,13 +113,12 @@ export default function EventsView() {
             tone: 'default',
             run: async () => {
                 setSyncing(true);
-                setSyncMsg(null);
                 try {
                     const res = await eventService.syncAll();
-                    setSyncMsg(`Đã đồng bộ ${res.processed} thành viên · dọn ${res.deletedOrphans} sự kiện thừa.`);
+                    toast.success(`Đã đồng bộ ${res.processed} thành viên · dọn ${res.deletedOrphans} sự kiện thừa.`);
                     refresh();
                 } catch (e: any) {
-                    setSyncMsg('Lỗi: ' + (e?.response?.data?.message || e.message));
+                    toast.error('Lỗi: ' + (e?.response?.data?.message || e.message));
                 } finally {
                     setSyncing(false);
                 }
@@ -134,6 +133,7 @@ export default function EventsView() {
             tone: 'danger',
             run: async () => {
                 await eventService.deleteEvent(event._id);
+                toast.success('Đã xóa sự kiện');
                 refresh();
             },
         });
@@ -142,7 +142,22 @@ export default function EventsView() {
         setBusyId(e._id);
         try {
             await eventService.updateEvent(e._id, { isActive: !e.isActive });
+            toast.success(e.isActive ? 'Đã tắt thông báo' : 'Đã bật thông báo');
             refresh();
+        } finally {
+            setBusyId(null);
+        }
+    };
+
+    const handleRefresh = async (e: FamilyEvent) => {
+        if (!e.sourcePersonId) return;
+        setBusyId(e._id);
+        try {
+            await eventService.syncPerson(e.sourcePersonId);
+            toast.success('Đã cập nhật từ hồ sơ thành viên');
+            refresh();
+        } catch (err: any) {
+            toast.error('Lỗi: ' + (err?.response?.data?.message || err.message));
         } finally {
             setBusyId(null);
         }
@@ -192,15 +207,6 @@ export default function EventsView() {
                         </button>
                     )}
                 </div>
-
-                {syncMsg && (
-                    <div
-                        className="mt-4 rounded-[12px] border px-4 py-3 text-[13px]"
-                        style={{ borderColor: '#e8b94a', backgroundColor: 'rgba(232,185,74,0.10)', color: '#7a5e15' }}
-                    >
-                        {syncMsg}
-                    </div>
-                )}
 
                 {/* Filters */}
                 <div className="mt-5 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none]">
@@ -259,6 +265,7 @@ export default function EventsView() {
                                     canEdit={canEdit}
                                     busy={busyId === e._id}
                                     onToggle={() => handleToggle(e)}
+                                    onRefresh={() => handleRefresh(e)}
                                     onDelete={() => requestDelete(e)}
                                 />
                             ))}
@@ -286,12 +293,14 @@ function EventCard({
     canEdit,
     busy,
     onToggle,
+    onRefresh,
     onDelete,
 }: {
     event: FamilyEvent;
     canEdit: boolean;
     busy: boolean;
     onToggle: () => void;
+    onRefresh: () => void;
     onDelete: () => void;
 }) {
     const style = KIND_STYLES[event.sourceType as EventKind] ?? KIND_STYLES.manual;
@@ -302,7 +311,7 @@ function EventCard({
     return (
         <li
             className="flex items-center gap-3 rounded-[16px] border p-3 transition-colors sm:gap-4 sm:p-4"
-            style={{ backgroundColor: '#fffaf0', borderColor: '#e5e5e5', opacity: event.isActive ? 1 : 0.62 }}
+            style={{ backgroundColor: '#fffefb', borderColor: '#e5e5e5', opacity: event.isActive ? 1 : 0.62 }}
         >
             {/* Icon */}
             <div
@@ -348,6 +357,21 @@ function EventCard({
                 )}
                 {canEdit && (
                     <div className="flex items-center gap-1">
+                        {event.sourceType !== 'manual' && (
+                            <button
+                                onClick={onRefresh}
+                                disabled={busy}
+                                title="Cập nhật lại từ hồ sơ thành viên"
+                                aria-label="Cập nhật lại từ hồ sơ"
+                                className="flex h-8 w-8 items-center justify-center rounded-[10px] transition-colors hover:bg-[#eef3f1] disabled:opacity-50"
+                                style={{ color: '#1a3a3a' }}
+                            >
+                                <svg viewBox="0 0 24 24" fill="none" className={`h-4 w-4 ${busy ? 'animate-spin' : ''}`} stroke="currentColor" strokeWidth={1.8}>
+                                    <path d="M4 12a8 8 0 0 1 13.7-5.7L20 8M20 12a8 8 0 0 1-13.7 5.7L4 16" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M20 4v4h-4M4 20v-4h4" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </button>
+                        )}
                         <button
                             onClick={onToggle}
                             disabled={busy}
@@ -396,6 +420,7 @@ function EventForm({ onSaved }: { onSaved: () => void }) {
         try {
             const input: CreateEventInput = { title, calendar, day, month, isLeapMonth: calendar === 'lunar' ? isLeapMonth : false };
             await eventService.createEvent(input);
+            toast.success('Đã thêm sự kiện');
             setTitle('');
             setOpen(false);
             onSaved();

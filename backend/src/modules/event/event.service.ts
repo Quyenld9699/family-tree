@@ -24,6 +24,8 @@ export class EventService {
 
         if (person.isDead && person.death) {
             const parts = solarToLunarParts(new Date(person.death));
+            const honorific = person.gender === 1 ? 'bà' : 'ông';
+            const leap = parts.isLeapMonth ? ' nhuận' : '';
             await this.eventModel.updateOne(
                 { sourceType: EventSourceType.DEATH, sourcePersonId: pid },
                 {
@@ -32,7 +34,7 @@ export class EventService {
                         day: parts.day,
                         month: parts.month,
                         isLeapMonth: parts.isLeapMonth,
-                        title: `Giỗ ${person.name}`,
+                        title: `Giỗ ${honorific} ${person.name} (${parts.day}/${parts.month}${leap})`,
                     },
                     $setOnInsert: { isActive: true },
                 },
@@ -65,6 +67,14 @@ export class EventService {
 
     async removePersonEvents(personId: string): Promise<void> {
         await this.eventModel.deleteMany({ sourcePersonId: personId });
+    }
+
+    async syncOnePerson(personId: string): Promise<{ ok: true }> {
+        if (!Types.ObjectId.isValid(personId)) throw new NotFoundException(`Invalid person ID: ${personId}`);
+        const person = await this.personModel.findById(personId).exec();
+        if (!person) throw new NotFoundException(`Person ${personId} not found`);
+        await this.syncPersonEvents(person);
+        return { ok: true };
     }
 
     async syncAll(): Promise<{ processed: number; deletedOrphans: number }> {
@@ -138,46 +148,47 @@ export class EventService {
         const events = await this.eventModel.find({ isActive: true }).lean().exec();
         const result = [];
         for (const e of events) {
-            const triggers = getActiveTriggers(e as any, today);
-            if (triggers.length === 0) continue;
             const occ = nextOccurrence(e as any, today);
-            result.push({
-                event: e,
-                triggers,
-                occurrenceSolar: occ,
-                daysUntil: occ ? daysUntil(occ, today) : null,
-            });
+            if (!occ) continue;
+            const d = daysUntil(occ, today);
+            if (d < 0 || d > 30) continue;
+            result.push({ event: e, occurrenceSolar: occ, daysUntil: d });
         }
-        result.sort((a, b) => (a.daysUntil ?? 9999) - (b.daysUntil ?? 9999));
+        result.sort((a, b) => a.daysUntil - b.daysUntil);
         return result;
     }
 
     private triggerLabel(t: EventTrigger): string {
         switch (t) {
             case EventTrigger.DAY_OF: return '🔔 HÔM NAY';
+            case EventTrigger.ONE_DAY: return 'Còn 1 ngày';
             case EventTrigger.ONE_WEEK: return 'Còn 1 tuần';
             case EventTrigger.ONE_MONTH: return 'Còn 1 tháng';
-            case EventTrigger.WEEK_START: return 'Đầu tuần';
-            case EventTrigger.MONTH_START: return 'Đầu tháng';
             default: return '';
         }
     }
 
     async runDailyNotify(): Promise<{ events: number; sent: number }> {
-        const notifications = await this.getNotifications();
-        if (notifications.length === 0) return { events: 0, sent: 0 };
-
-        const blocks = notifications.map((n) => {
-            const occ: Date = n.occurrenceSolar;
-            const occStr = occ ? `${occ.getDate()}/${occ.getMonth() + 1}/${occ.getFullYear()}` : '';
-            const labels = n.triggers.map((t: EventTrigger) => this.triggerLabel(t)).filter(Boolean).join(' · ');
-            return `<b>${n.event.title}</b>\nNgày: ${occStr} (còn ${n.daysUntil} ngày)\n${labels}`;
-        });
-
         const today = new Date();
+        const events = await this.eventModel.find({ isActive: true }).lean().exec();
+        const ICON: Record<string, string> = { death: '🕯️', birth: '🎂', manual: '📅' };
+
+        const blocks: string[] = [];
+        for (const e of events) {
+            const triggers = getActiveTriggers(e as any, today);
+            if (triggers.length === 0) continue;
+            const occ = nextOccurrence(e as any, today);
+            const occStr = occ ? `${occ.getDate()}/${occ.getMonth() + 1}/${occ.getFullYear()}` : '';
+            const d = occ ? daysUntil(occ, today) : null;
+            const labels = triggers.map((t) => this.triggerLabel(t)).filter(Boolean).join(' · ');
+            const icon = ICON[(e as any).sourceType] ?? '📅';
+            blocks.push(`${icon} <b>${(e as any).title}</b>\nNgày: ${occStr} (còn ${d} ngày)\n${labels}`);
+        }
+        if (blocks.length === 0) return { events: 0, sent: 0 };
+
         const header = `📅 <b>Lịch sự kiện dòng họ — ${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}</b>`;
         const messages = this.telegram.buildMessages(blocks, header);
         const { sent } = await this.telegram.send(messages);
-        return { events: notifications.length, sent };
+        return { events: blocks.length, sent };
     }
 }

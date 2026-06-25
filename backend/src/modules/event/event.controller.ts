@@ -63,6 +63,15 @@ export class EventController {
         return this.eventService.syncAll();
     }
 
+    @Post('sync-person/:personId')
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
+    @Roles(UserRoles.ADMIN, UserRoles.EDITOR)
+    @ApiOperation({ summary: 'Đồng bộ giỗ & sinh nhật cho 1 người' })
+    syncPerson(@Param('personId') personId: string) {
+        return this.eventService.syncOnePerson(personId);
+    }
+
     @Patch(':id')
     @ApiBearerAuth()
     @UseGuards(AuthGuard('jwt'), RolesGuard)

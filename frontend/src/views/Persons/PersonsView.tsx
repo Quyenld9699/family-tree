@@ -12,6 +12,9 @@ import AddChildModal from 'src/components/AddChildModal/AddChildModal';
 import AddPersonModal from 'src/components/AddPersonModal/AddPersonModal';
 import GuestCodeModal from 'src/components/GuestCodeModal/GuestCodeModal';
 
+import { toast } from 'react-toastify';
+import eventService from 'src/services/eventService';
+
 import Header from './components/Header';
 import Toolbar from './components/Toolbar';
 import PersonList from './components/PersonList';
@@ -161,6 +164,16 @@ export default function PersonsView() {
         setPersonDetailModalOpen(true);
     }, []);
 
+    const handlePushEvent = useCallback(async (person: Person) => {
+        if (!person._id) return;
+        try {
+            await eventService.syncPerson(person._id);
+            toast.success(`Đã cập nhật sự kiện cho ${person.name}`);
+        } catch (e: any) {
+            toast.error('Lỗi: ' + (e?.response?.data?.message || e.message));
+        }
+    }, []);
+
     const handleAddSpouseFromPerson = useCallback((person: Person) => {
         setSelectedPerson(person);
         setPersonDetailModalOpen(false);
@@ -218,6 +231,8 @@ export default function PersonsView() {
                         sortDirection={sortDirection}
                         onSort={handleSort}
                         onPersonClick={handlePersonClick}
+                        canEdit={isAdmin || isEditor}
+                        onPushEvent={handlePushEvent}
                     />
                 </div>
             </div>

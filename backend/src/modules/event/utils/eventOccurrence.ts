@@ -70,10 +70,9 @@ export function getActiveTriggers(ev: OccurrenceInput, today: Date): EventTrigge
 
     const triggers: EventTrigger[] = [];
     if (sameDay(t, occ)) triggers.push(EventTrigger.DAY_OF);
+    if (sameDay(t, addDays(occ, -1))) triggers.push(EventTrigger.ONE_DAY);
     if (sameDay(t, addDays(occ, -7))) triggers.push(EventTrigger.ONE_WEEK);
     if (sameDay(t, monthsBefore(occ, 1))) triggers.push(EventTrigger.ONE_MONTH);
-    if (sameDay(t, new Date(occ.getFullYear(), occ.getMonth(), 1))) triggers.push(EventTrigger.MONTH_START);
-    if (sameDay(t, mondayOf(occ))) triggers.push(EventTrigger.WEEK_START);
     return triggers;
 }
 

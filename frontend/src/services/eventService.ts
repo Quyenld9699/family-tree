@@ -3,7 +3,7 @@ import authService from './authService';
 
 export type EventCalendar = 'lunar' | 'solar';
 export type EventSourceType = 'death' | 'birth' | 'manual';
-export type EventTrigger = '1_month' | '1_week' | 'month_start' | 'week_start' | 'day_of';
+export type EventTrigger = '1_month' | '1_week' | '1_day' | 'day_of';
 
 export interface FamilyEvent {
     _id: string;
@@ -21,7 +21,7 @@ export interface FamilyEvent {
 
 export interface EventNotification {
     event: FamilyEvent;
-    triggers: EventTrigger[];
+    triggers?: EventTrigger[];
     occurrenceSolar: string | null;
     daysUntil: number | null;
 }
@@ -66,6 +66,11 @@ const eventService = {
 
     syncAll: async (): Promise<{ processed: number; deletedOrphans: number }> => {
         const res = await api.post('/event/sync-all');
+        return res.data;
+    },
+
+    syncPerson: async (personId: string): Promise<{ ok: true }> => {
+        const res = await api.post(`/event/sync-person/${personId}`);
         return res.data;
     },
 };
