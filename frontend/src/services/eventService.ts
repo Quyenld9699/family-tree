@@ -3,7 +3,7 @@ import authService from './authService';
 
 export type EventCalendar = 'lunar' | 'solar';
 export type EventSourceType = 'death' | 'birth' | 'manual';
-export type EventTrigger = '1_month' | '1_week' | 'month_start' | 'week_start' | 'day_of';
+export type EventTrigger = '1_month' | '1_week' | '1_day' | 'day_of';
 
 export interface FamilyEvent {
     _id: string;
