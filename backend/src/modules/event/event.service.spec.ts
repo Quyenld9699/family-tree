@@ -140,3 +140,37 @@ describe('EventService.syncAll (orphan cleanup)', () => {
         expect(res.processed).toBe(1);
     });
 });
+
+describe('EventService.syncOnePerson', () => {
+    const validId = '507f1f77bcf86cd799439011';
+
+    const build = async (eventModel: any, personModel: any) => {
+        const { Test } = await import('@nestjs/testing');
+        const { getModelToken } = await import('@nestjs/mongoose');
+        const moduleRef = await Test.createTestingModule({
+            providers: [
+                EventService,
+                { provide: getModelToken(Event.name), useValue: eventModel },
+                { provide: getModelToken(Person.name), useValue: personModel },
+                { provide: TelegramService, useValue: { buildMessages: jest.fn(() => []), send: jest.fn().mockResolvedValue({ sent: 0 }) } },
+            ],
+        }).compile();
+        return moduleRef.get(EventService);
+    };
+
+    it('throws when person not found', async () => {
+        const personModel = { findById: jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(null) }) };
+        const service = await build({}, personModel);
+        await expect(service.syncOnePerson(validId)).rejects.toThrow();
+    });
+
+    it('syncs and returns ok when person found', async () => {
+        const person = { _id: validId, name: 'A', gender: 0, isDead: false, death: null, birth: null };
+        const eventModel = { updateOne: jest.fn().mockResolvedValue({}), deleteOne: jest.fn().mockResolvedValue({}) };
+        const personModel = { findById: jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(person) }) };
+        const service = await build(eventModel, personModel);
+        const res = await service.syncOnePerson(validId);
+        expect(res).toEqual({ ok: true });
+        expect(personModel.findById).toHaveBeenCalledWith(validId);
+    });
+});

@@ -69,6 +69,14 @@ export class EventService {
         await this.eventModel.deleteMany({ sourcePersonId: personId });
     }
 
+    async syncOnePerson(personId: string): Promise<{ ok: true }> {
+        if (!Types.ObjectId.isValid(personId)) throw new NotFoundException(`Invalid person ID: ${personId}`);
+        const person = await this.personModel.findById(personId).exec();
+        if (!person) throw new NotFoundException(`Person ${personId} not found`);
+        await this.syncPersonEvents(person);
+        return { ok: true };
+    }
+
     async syncAll(): Promise<{ processed: number; deletedOrphans: number }> {
         const persons = await this.personModel.find().exec();
         const validIds = new Set(persons.map((p: any) => p._id.toString()));
