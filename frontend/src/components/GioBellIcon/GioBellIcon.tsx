@@ -121,13 +121,12 @@ export default function GioBellIcon({ notifications }: GioBellIconProps) {
                                                 </p>
                                                 {n.occurrenceSolar && (
                                                     <p className="text-[11px] mt-0.5" style={{ color: '#9a9a9a' }}>
+                                                        {n.weekdayOfOccurrence ? `${n.weekdayOfOccurrence}, ` : ''}
                                                         {new Date(n.occurrenceSolar).toLocaleDateString('vi-VN')} dương lịch
                                                     </p>
                                                 )}
                                             </div>
-                                            <div className="flex-shrink-0 sm:mt-0.5">
-                                                {n.daysUntil !== null && <DaysLabel daysUntil={n.daysUntil} />}
-                                            </div>
+                                            <div className="flex-shrink-0 sm:mt-0.5">{n.daysUntil !== null && <DaysLabel daysUntil={n.daysUntil} />}</div>
                                         </div>
                                     </li>
                                 ))}

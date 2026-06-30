@@ -20,9 +20,16 @@ function addDays(d: Date, n: number): Date {
     return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 }
 
-function mondayOf(d: Date): Date {
+/** Ngày thứ Hai của tuần chứa `d`. */
+export function mondayOf(d: Date): Date {
     const offset = (d.getDay() + 6) % 7; // 0=Mon ... 6=Sun
     return addDays(d, -offset);
+}
+
+/** Tên thứ trong tuần (tiếng Việt). */
+export function getWeekdayLabel(d: Date): string {
+    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    return days[d.getDay()];
 }
 
 /** Lùi `n` tháng theo lịch, kẹp ngày về ngày cuối tháng đích nếu tràn. */
@@ -73,6 +80,7 @@ export function getActiveTriggers(ev: OccurrenceInput, today: Date): EventTrigge
     if (sameDay(t, addDays(occ, -1))) triggers.push(EventTrigger.ONE_DAY);
     if (sameDay(t, addDays(occ, -7))) triggers.push(EventTrigger.ONE_WEEK);
     if (sameDay(t, monthsBefore(occ, 1))) triggers.push(EventTrigger.ONE_MONTH);
+    if (sameDay(t, mondayOf(occ))) triggers.push(EventTrigger.WEEK_START);
     return triggers;
 }
 
