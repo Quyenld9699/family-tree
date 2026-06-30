@@ -1,5 +1,5 @@
 import { EventCalendar, EventTrigger } from '../constants';
-import { nextOccurrence, getActiveTriggers, OccurrenceInput } from './eventOccurrence';
+import { nextOccurrence, getActiveTriggers, mondayOf, getWeekdayLabel, OccurrenceInput } from './eventOccurrence';
 
 const solarEvent: OccurrenceInput = { calendar: EventCalendar.SOLAR, day: 15, month: 6 };
 
@@ -36,7 +36,33 @@ describe('getActiveTriggers (solar)', () => {
         expect(t).toContain(EventTrigger.ONE_DAY);
     });
 
-    it('does not fire on the 1st of the month anymore (only 4 triggers exist)', () => {
+    it('fires week_start on the Monday of the occurrence week', () => {
+        const wedEvent: OccurrenceInput = { calendar: EventCalendar.SOLAR, day: 17, month: 6 };
+        const occ = new Date(2026, 5, 17);
+        const offset = (occ.getDay() + 6) % 7; // 0 = Monday
+        const monday = new Date(2026, 5, 17 - offset);
+        const t = getActiveTriggers(wedEvent, monday);
+        expect(t).toContain(EventTrigger.WEEK_START);
+        expect(t).not.toContain(EventTrigger.DAY_OF);
+    });
+
+    it('does NOT fire week_start on a non-Monday of the occurrence week', () => {
+        const wedEvent: OccurrenceInput = { calendar: EventCalendar.SOLAR, day: 17, month: 6 };
+        // Tuesday of the occurrence week — should not fire week_start
+        const tuesday = new Date(2026, 5, 16);
+        const t = getActiveTriggers(wedEvent, tuesday);
+        expect(t).not.toContain(EventTrigger.WEEK_START);
+    });
+
+    it('fires both week_start and day_of when occurrence is on a Monday', () => {
+        const monEvent: OccurrenceInput = { calendar: EventCalendar.SOLAR, day: 15, month: 6 };
+        // 15 Jun 2026 is a Monday
+        const t = getActiveTriggers(monEvent, new Date(2026, 5, 15));
+        expect(t).toContain(EventTrigger.DAY_OF);
+        expect(t).toContain(EventTrigger.WEEK_START);
+    });
+
+    it('returns empty on the 1st of the month (not a trigger day for this event)', () => {
         const t = getActiveTriggers(solarEvent, new Date(2026, 5, 1));
         expect(t).toEqual([]);
     });
@@ -63,5 +89,22 @@ describe('lunar occurrence', () => {
         const occ = nextOccurrence(lunar, new Date(2026, 0, 1));
         expect(occ).toBeInstanceOf(Date);
         expect(occ!.getFullYear()).toBeGreaterThanOrEqual(2026);
+    });
+});
+
+describe('getWeekdayLabel', () => {
+    it('returns correct Vietnamese weekday', () => {
+        expect(getWeekdayLabel(new Date(2026, 5, 15))).toBe('Thứ Hai'); // Monday
+        expect(getWeekdayLabel(new Date(2026, 5, 16))).toBe('Thứ Ba'); // Tuesday
+        expect(getWeekdayLabel(new Date(2026, 5, 20))).toBe('Thứ Bảy'); // Saturday
+        expect(getWeekdayLabel(new Date(2026, 5, 21))).toBe('Chủ Nhật'); // Sunday
+    });
+});
+
+describe('mondayOf', () => {
+    it('returns Monday of the same week', () => {
+        expect(mondayOf(new Date(2026, 5, 17))).toEqual(new Date(2026, 5, 15)); // Wed → Mon
+        expect(mondayOf(new Date(2026, 5, 21))).toEqual(new Date(2026, 5, 15)); // Sun → Mon
+        expect(mondayOf(new Date(2026, 5, 15))).toEqual(new Date(2026, 5, 15)); // Mon → Mon
     });
 });

@@ -64,6 +64,11 @@ function formatSolar(d: Date): string {
     return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
 }
 
+function getWeekdayLabel(d: Date): string {
+    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    return days[d.getDay()];
+}
+
 function daysUntilLabel(days: number): { text: string; bg: string; color: string } {
     if (days <= 0) return { text: 'Hôm nay', bg: '#fde8e8', color: '#c0392b' };
     if (days === 1) return { text: 'Ngày mai', bg: '#fff3e0', color: '#e67e22' };
@@ -175,12 +180,7 @@ export default function EventsView() {
                 {/* Header */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
-                        <Link
-                            href="/"
-                            prefetch
-                            className="inline-flex items-center gap-1.5 text-[13px] font-medium transition-colors"
-                            style={{ color: '#6a6a6a' }}
-                        >
+                        <Link href="/" prefetch className="inline-flex items-center gap-1.5 text-[13px] font-medium transition-colors" style={{ color: '#6a6a6a' }}>
                             <span aria-hidden>←</span> Cây gia phả
                         </Link>
                         <h1 className="mt-1.5 text-[28px] font-semibold leading-tight" style={{ color: '#0a0a0a', letterSpacing: '-0.8px' }}>
@@ -313,10 +313,7 @@ function EventCard({
             style={{ backgroundColor: '#fffefb', borderColor: '#e5e5e5', opacity: event.isActive ? 1 : 0.62 }}
         >
             {/* Icon */}
-            <div
-                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12"
-                style={{ backgroundColor: style.bg, color: style.text }}
-            >
+            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12" style={{ backgroundColor: style.bg, color: style.text }}>
                 {style.icon}
             </div>
 
@@ -342,7 +339,9 @@ function EventCard({
                         {event.isLeapMonth ? ' nhuận' : ''} {event.calendar === 'lunar' ? 'ÂL' : 'DL'}
                     </span>
                     {occ && (
-                        <span style={{ color: '#9a9a9a' }}>· sắp tới {formatSolar(occ)}</span>
+                        <span style={{ color: '#9a9a9a' }}>
+                            · sắp tới {getWeekdayLabel(occ)}, {formatSolar(occ)}
+                        </span>
                     )}
                 </div>
             </div>
@@ -379,10 +378,7 @@ function EventCard({
                             className="relative h-5 w-9 flex-shrink-0 rounded-full transition-colors disabled:opacity-50"
                             style={{ backgroundColor: event.isActive ? '#1a3a3a' : '#d8d2c4' }}
                         >
-                            <span
-                                className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all"
-                                style={{ left: event.isActive ? '18px' : '2px' }}
-                            />
+                            <span className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all" style={{ left: event.isActive ? '18px' : '2px' }} />
                         </button>
                         <button
                             onClick={onDelete}
@@ -435,7 +431,10 @@ function EventForm({ onSaved }: { onSaved: () => void }) {
                 className="inline-flex items-center gap-2 rounded-[12px] border border-dashed px-4 py-2.5 text-sm font-medium transition-colors hover:bg-[#f9f5ec]"
                 style={{ borderColor: '#d8cdb0', color: '#3a3a3a' }}
             >
-                <span className="text-[16px] leading-none" style={{ color: '#e8b94a' }}>+</span> Thêm sự kiện
+                <span className="text-[16px] leading-none" style={{ color: '#e8b94a' }}>
+                    +
+                </span>{' '}
+                Thêm sự kiện
             </button>
         );
     }
@@ -444,7 +443,9 @@ function EventForm({ onSaved }: { onSaved: () => void }) {
 
     return (
         <form onSubmit={submit} className="rounded-[16px] border p-4 sm:p-5" style={{ borderColor: '#e5e5e5', backgroundColor: '#fefdf8' }}>
-            <p className="mb-3 text-[13px] font-semibold" style={{ color: '#0a0a0a' }}>Thêm sự kiện mới</p>
+            <p className="mb-3 text-[13px] font-semibold" style={{ color: '#0a0a0a' }}>
+                Thêm sự kiện mới
+            </p>
             <input
                 required
                 value={title}
@@ -455,22 +456,36 @@ function EventForm({ onSaved }: { onSaved: () => void }) {
             />
             <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
                 <label className="flex flex-col gap-1">
-                    <span className="text-[11px] font-medium" style={{ color: '#6a6a6a' }}>Loại lịch</span>
+                    <span className="text-[11px] font-medium" style={{ color: '#6a6a6a' }}>
+                        Loại lịch
+                    </span>
                     <select value={calendar} onChange={(e) => setCalendar(e.target.value as 'lunar' | 'solar')} className="rounded-[12px] border px-3 py-2.5 text-sm outline-none" style={fieldStyle}>
                         <option value="lunar">Âm lịch</option>
                         <option value="solar">Dương lịch</option>
                     </select>
                 </label>
                 <label className="flex flex-col gap-1">
-                    <span className="text-[11px] font-medium" style={{ color: '#6a6a6a' }}>Ngày</span>
+                    <span className="text-[11px] font-medium" style={{ color: '#6a6a6a' }}>
+                        Ngày
+                    </span>
                     <select value={day} onChange={(e) => setDay(Number(e.target.value))} className="rounded-[12px] border px-3 py-2.5 text-sm outline-none" style={fieldStyle}>
-                        {DAYS.map((d) => <option key={d} value={d}>{d}</option>)}
+                        {DAYS.map((d) => (
+                            <option key={d} value={d}>
+                                {d}
+                            </option>
+                        ))}
                     </select>
                 </label>
                 <label className="flex flex-col gap-1">
-                    <span className="text-[11px] font-medium" style={{ color: '#6a6a6a' }}>Tháng</span>
+                    <span className="text-[11px] font-medium" style={{ color: '#6a6a6a' }}>
+                        Tháng
+                    </span>
                     <select value={month} onChange={(e) => setMonth(Number(e.target.value))} className="rounded-[12px] border px-3 py-2.5 text-sm outline-none" style={fieldStyle}>
-                        {MONTHS.map((m) => <option key={m} value={m}>{m}</option>)}
+                        {MONTHS.map((m) => (
+                            <option key={m} value={m}>
+                                {m}
+                            </option>
+                        ))}
                     </select>
                 </label>
             </div>
@@ -481,10 +496,20 @@ function EventForm({ onSaved }: { onSaved: () => void }) {
                 </label>
             )}
             <div className="mt-4 flex gap-2">
-                <button type="submit" disabled={saving || !title.trim()} className="rounded-[12px] px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.02] disabled:opacity-50" style={{ backgroundColor: '#0a0a0a' }}>
+                <button
+                    type="submit"
+                    disabled={saving || !title.trim()}
+                    className="rounded-[12px] px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.02] disabled:opacity-50"
+                    style={{ backgroundColor: '#0a0a0a' }}
+                >
                     {saving ? 'Đang lưu...' : 'Lưu sự kiện'}
                 </button>
-                <button type="button" onClick={() => setOpen(false)} className="rounded-[12px] border px-4 py-2.5 text-sm transition-colors hover:bg-[#f5f0e5]" style={{ borderColor: '#e5e5e5', color: '#3a3a3a' }}>
+                <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    className="rounded-[12px] border px-4 py-2.5 text-sm transition-colors hover:bg-[#f5f0e5]"
+                    style={{ borderColor: '#e5e5e5', color: '#3a3a3a' }}
+                >
                     Hủy
                 </button>
             </div>

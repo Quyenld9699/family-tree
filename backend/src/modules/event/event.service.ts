@@ -8,7 +8,7 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { EventSourceType, EventCalendar, EventTrigger } from './constants';
 import { TelegramService } from './telegram.service';
 import { solarToLunarParts } from './utils/lunarParts';
-import { nextOccurrence, getActiveTriggers, daysUntil } from './utils/eventOccurrence';
+import { nextOccurrence, getActiveTriggers, daysUntil, getWeekdayLabel } from './utils/eventOccurrence';
 
 @Injectable()
 export class EventService {
@@ -112,9 +112,7 @@ export class EventService {
             await this.syncPersonEvents(p);
         }
 
-        const autoEvents = await this.eventModel
-            .find({ sourceType: { $in: [EventSourceType.DEATH, EventSourceType.BIRTH] } })
-            .exec();
+        const autoEvents = await this.eventModel.find({ sourceType: { $in: [EventSourceType.DEATH, EventSourceType.BIRTH] } }).exec();
         const orphanIds = autoEvents
             .filter((e) => {
                 const sid = e.sourcePersonId ? e.sourcePersonId.toString() : null;
@@ -179,7 +177,7 @@ export class EventService {
             if (!occ) continue;
             const d = daysUntil(occ, today);
             if (d < 0 || d > 30) continue;
-            result.push({ event: e, occurrenceSolar: occ, daysUntil: d });
+            result.push({ event: e, occurrenceSolar: occ, daysUntil: d, weekdayOfOccurrence: getWeekdayLabel(occ) });
         }
         result.sort((a, b) => a.daysUntil - b.daysUntil);
         return result;
@@ -187,11 +185,18 @@ export class EventService {
 
     private triggerLabel(t: EventTrigger): string {
         switch (t) {
-            case EventTrigger.DAY_OF: return '🔔 HÔM NAY';
-            case EventTrigger.ONE_DAY: return 'Còn 1 ngày';
-            case EventTrigger.ONE_WEEK: return 'Còn 1 tuần';
-            case EventTrigger.ONE_MONTH: return 'Còn 1 tháng';
-            default: return '';
+            case EventTrigger.DAY_OF:
+                return '🔔 HÔM NAY';
+            case EventTrigger.ONE_DAY:
+                return 'Còn 1 ngày';
+            case EventTrigger.ONE_WEEK:
+                return 'Còn 1 tuần';
+            case EventTrigger.ONE_MONTH:
+                return 'Còn 1 tháng';
+            case EventTrigger.WEEK_START:
+                return 'Đầu tuần có sự kiện';
+            default:
+                return '';
         }
     }
 
@@ -206,10 +211,14 @@ export class EventService {
             if (triggers.length === 0) continue;
             const occ = nextOccurrence(e as any, today);
             const occStr = occ ? `${occ.getDate()}/${occ.getMonth() + 1}/${occ.getFullYear()}` : '';
+            const weekday = occ ? getWeekdayLabel(occ) : '';
             const d = occ ? daysUntil(occ, today) : null;
-            const labels = triggers.map((t) => this.triggerLabel(t)).filter(Boolean).join(' · ');
+            const labels = triggers
+                .map((t) => this.triggerLabel(t))
+                .filter(Boolean)
+                .join(' · ');
             const icon = ICON[(e as any).sourceType] ?? '📅';
-            blocks.push(`${icon} <b>${(e as any).title}</b>\nNgày: ${occStr} (còn ${d} ngày)\n${labels}`);
+            blocks.push(`${icon} <b>${(e as any).title}</b>\nNgày: ${occStr} (${weekday}) — còn ${d} ngày\n${labels}`);
         }
         if (blocks.length === 0) return { events: 0, sent: 0 };
 
