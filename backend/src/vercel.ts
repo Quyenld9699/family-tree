@@ -25,7 +25,7 @@ const bootstrap = async () => {
         app.setGlobalPrefix('api/v1', { exclude: [''] });
 
         app.enableCors({
-            origin: ['https://dong-ho-le-dinh.vercel.app', 'http://localhost:3000'],
+            origin: ['https://dong-ho-le-dinh.vercel.app', 'https://family-tree-eight-goal.vercel.app', 'http://localhost:3000'],
             methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
             credentials: true,
         });
