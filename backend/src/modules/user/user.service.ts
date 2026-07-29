@@ -16,7 +16,9 @@ export class UserService {
             ...createUserDto,
             password: hashedPassword,
         });
-        return createdUser.save();
+        const user = await createdUser.save();
+        const { password, ...result } = user.toObject();
+        return result;
     }
 
     async findByUsername(username: string): Promise<UserDocument | undefined> {
@@ -24,11 +26,11 @@ export class UserService {
     }
 
     async findOne(id: string) {
-        return this.userModel.findById(id).exec();
+        return this.userModel.findById(id).select('-password').exec();
     }
 
     async update(id: string, updateUserDto: UpdateUserDto) {
-        return this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true }).exec();
+        return this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true }).select('-password').exec();
     }
 
     async remove(id: string) {
@@ -36,6 +38,6 @@ export class UserService {
     }
 
     async findAll() {
-        return this.userModel.find().exec();
+        return this.userModel.find().select('-password').exec();
     }
 }

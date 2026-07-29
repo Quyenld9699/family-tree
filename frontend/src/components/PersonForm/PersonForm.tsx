@@ -18,7 +18,7 @@ export default function PersonForm({ isOpen, onClose, onSuccess, person }: Perso
     const queryClient = useQueryClient();
     const [formData, setFormData] = useState<Omit<Person, '_id'>>({
         name: '',
-        gender: 'MALE',
+        gender: Gender.MALE,
         cccd: '',
         avatar: '',
         birth: undefined,
@@ -44,7 +44,7 @@ export default function PersonForm({ isOpen, onClose, onSuccess, person }: Perso
         } else {
             setFormData({
                 name: '',
-                gender: 'MALE',
+                gender: Gender.MALE,
                 cccd: '',
                 avatar: '',
                 birth: undefined,
@@ -97,13 +97,17 @@ export default function PersonForm({ isOpen, onClose, onSuccess, person }: Perso
         <Modal isOpen={isOpen} onClose={onClose} title={person ? 'Cập nhật thông tin người' : 'Thêm người mới'}>
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                    <label className="clay-label">Họ và tên <span style={{ color: '#ef4444' }}>*</span></label>
+                    <label className="clay-label">
+                        Họ và tên <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
                     <input type="text" name="name" value={formData.name} onChange={handleChange} required className="clay-input" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="clay-label">Giới tính <span style={{ color: '#ef4444' }}>*</span></label>
+                        <label className="clay-label">
+                            Giới tính <span style={{ color: '#ef4444' }}>*</span>
+                        </label>
                         <select name="gender" value={formData.gender} onChange={handleChange} required className="clay-select">
                             <option value="MALE">Nam</option>
                             <option value="FEMALE">Nữ</option>
@@ -127,13 +131,22 @@ export default function PersonForm({ isOpen, onClose, onSuccess, person }: Perso
                     </div>
                     <div>
                         <label className="clay-label">Ngày mất</label>
-                        <input type="date" name="death" value={formData.death ? new Date(formData.death).toISOString().split('T')[0] : ''} onChange={handleChange} disabled={!formData.isDead} className="clay-input" />
+                        <input
+                            type="date"
+                            name="death"
+                            value={formData.death ? new Date(formData.death).toISOString().split('T')[0] : ''}
+                            onChange={handleChange}
+                            disabled={!formData.isDead}
+                            className="clay-input"
+                        />
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                     <input type="checkbox" name="isDead" id="pf-isDead" checked={formData.isDead} onChange={handleChange} className="rounded" />
-                    <label htmlFor="pf-isDead" className="text-[13px]" style={{ color: '#3a3a3a' }}>Đã mất</label>
+                    <label htmlFor="pf-isDead" className="text-[13px]" style={{ color: '#3a3a3a' }}>
+                        Đã mất
+                    </label>
                 </div>
 
                 <div>
@@ -147,8 +160,12 @@ export default function PersonForm({ isOpen, onClose, onSuccess, person }: Perso
                 </div>
 
                 <div className="flex justify-end gap-3 pt-2">
-                    <button type="button" onClick={onClose} disabled={mutation.isPending} className="clay-btn-secondary">Hủy</button>
-                    <button type="submit" disabled={mutation.isPending} className="clay-btn-primary">{mutation.isPending ? 'Đang xử lý...' : person ? 'Cập nhật' : 'Thêm mới'}</button>
+                    <button type="button" onClick={onClose} disabled={mutation.isPending} className="clay-btn-secondary">
+                        Hủy
+                    </button>
+                    <button type="submit" disabled={mutation.isPending} className="clay-btn-primary">
+                        {mutation.isPending ? 'Đang xử lý...' : person ? 'Cập nhật' : 'Thêm mới'}
+                    </button>
                 </div>
             </form>
         </Modal>
