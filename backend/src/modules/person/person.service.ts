@@ -18,8 +18,6 @@ export class PersonService {
     ) {}
 
     async create(createPersonDto: CreatePersonDto) {
-        console.log(createPersonDto);
-
         // Check if CCCD already exists
         const existingPerson = await this.personModel.findOne({ cccd: createPersonDto.cccd }).exec();
         if (existingPerson) {

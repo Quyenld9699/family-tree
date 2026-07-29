@@ -11,9 +11,12 @@ async function bootstrap() {
 
     app.useGlobalPipes(
         new ValidationPipe({
-            //! setup global validation pipe
-            whitelist: true, //TODO: remove any other fields that are not in the DTO
-            forbidNonWhitelisted: true, //TODO: throw an error when any other fields that are not in the DTO
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true,
+            transformOptions: {
+                enableImplicitConversion: true,
+            },
         }),
     );
     app.setGlobalPrefix('api/v1', { exclude: [''] });

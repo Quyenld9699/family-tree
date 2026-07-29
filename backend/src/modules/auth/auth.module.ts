@@ -17,10 +17,16 @@ import { GuestCode, GuestCodeSchema } from './schemas/guest-code.schema';
         MongooseModule.forFeature([{ name: GuestCode.name, schema: GuestCodeSchema }]),
         JwtModule.registerAsync({
             imports: [ConfigModule],
-            useFactory: async (configService: ConfigService) => ({
-                secret: configService.get<string>('JWT_SECRET') || 'secretKey',
-                signOptions: { expiresIn: '7d' },
-            }),
+            useFactory: async (configService: ConfigService) => {
+                const secret = configService.get<string>('JWT_SECRET');
+                if (!secret) {
+                    throw new Error('JWT_SECRET is not configured in environment variables');
+                }
+                return {
+                    secret,
+                    signOptions: { expiresIn: '7d' },
+                };
+            },
             inject: [ConfigService],
         }),
     ],

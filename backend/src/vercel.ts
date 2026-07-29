@@ -16,6 +16,10 @@ const bootstrap = async () => {
             new ValidationPipe({
                 whitelist: true,
                 forbidNonWhitelisted: true,
+                transform: true,
+                transformOptions: {
+                    enableImplicitConversion: true,
+                },
             }),
         );
         app.setGlobalPrefix('api/v1', { exclude: [''] });
