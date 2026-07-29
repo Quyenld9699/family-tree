@@ -25,14 +25,14 @@ const bootstrap = async () => {
         app.setGlobalPrefix('api/v1', { exclude: [''] });
 
         app.enableCors({
-            origin: ['https://dong-ho-le-dinh.vercel.app', 'https://family-tree-eight-goal.vercel.app', 'http://localhost:3000'],
+            origin: ['https://dong-ho-le-dinh.vercel.app', 'http://localhost:3000'],
             methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
             credentials: true,
         });
 
         const config = new DocumentBuilder().setTitle('API Documentation').setDescription('Documentation for the API').setVersion('1.0').build();
         const document = SwaggerModule.createDocument(app, config);
-        SwaggerModule.setup('api', app, document);
+        SwaggerModule.setup('docs', app, document);
 
         await app.init();
         return expressApp;

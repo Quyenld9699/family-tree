@@ -18,9 +18,9 @@ import { GuestCode, GuestCodeSchema } from './schemas/guest-code.schema';
         JwtModule.registerAsync({
             imports: [ConfigModule],
             useFactory: async (configService: ConfigService) => {
-                const secret = configService.get<string>('JWT_SECRET');
+                const secret = configService.get<string>('JWT_SECRET_KEY');
                 if (!secret) {
-                    throw new Error('JWT_SECRET is not configured in environment variables');
+                    throw new Error('JWT_SECRET_KEY is not configured in environment variables');
                 }
                 return {
                     secret,

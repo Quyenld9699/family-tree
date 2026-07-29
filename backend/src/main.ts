@@ -23,7 +23,7 @@ async function bootstrap() {
 
     //Config Cors
     app.enableCors({
-        origin: ['https://dong-ho-le-dinh.vercel.app', 'https://family-tree-eight-goal.vercel.app', 'http://localhost:3000'],
+        origin: ['https://dong-ho-le-dinh.vercel.app', 'http://localhost:3000'],
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
     });
@@ -31,7 +31,7 @@ async function bootstrap() {
     // Swagger setup
     const config = new DocumentBuilder().setTitle('API Documentation').setDescription('Documentation for the API').setVersion('1.0').build();
     const document = SwaggerModule.createDocument(app as any, config);
-    SwaggerModule.setup('api/docs', app as any, document);
+    SwaggerModule.setup('docs', app as any, document);
 
     await app.listen(port);
 }
