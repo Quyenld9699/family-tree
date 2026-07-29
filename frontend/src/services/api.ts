@@ -22,4 +22,16 @@ api.interceptors.request.use(
     },
 );
 
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            Cookies.remove('token');
+            // Dispatch custom event để AuthProvider bắt và redirect
+            window.dispatchEvent(new CustomEvent('auth:logout'));
+        }
+        return Promise.reject(error);
+    },
+);
+
 export default api;

@@ -336,3 +336,59 @@ Dự án tuân theo design system Clay-inspired được mô tả đầy đủ t
 ### `vercel-optimize`
 
 - Dùng khi deploy lên Vercel để phân tích performance theo route thực tế.
+
+---
+
+## Deployment (Vercel)
+
+### URLs
+
+| Component         | URL                                                     |
+| ----------------- | ------------------------------------------------------- |
+| **Frontend**      | `https://dong-ho-le-dinh.vercel.app/`                   |
+| **Backend API**   | `https://family-tree-eight-opal.vercel.app/`            |
+| **Swagger Docs**  | `https://family-tree-eight-opal.vercel.app/api/v1/docs` |
+| **API Base Path** | `/api/v1` (global prefix)                               |
+
+### Backend
+
+- **Entry point**: `backend/src/vercel.ts` (Vercel serverless, ExpressAdapter) | `backend/src/main.ts` (local dev)
+- **Route config**: `backend/vercel.json` routes all methods to `src/vercel.ts`
+- **CORS**: configured in both `main.ts` and `vercel.ts` — **must keep in sync**. Allowed origins: `dong-ho-le-dinh.vercel.app` + `localhost:3000`
+- **Swagger path**: `docs` → full URL: `<backend>/api/v1/docs`
+- **Cron**: `0 0 * * *` → `GET /api/v1/event/cron/daily-notify` (protected by `CRON_SECRET` header)
+
+#### Environment Variables on Vercel
+
+| Variable                | Purpose                                                                   |
+| ----------------------- | ------------------------------------------------------------------------- |
+| `JWT_SECRET_KEY`        | JWT signing secret (**⚠️ code reads `JWT_SECRET_KEY`, not `JWT_SECRET`**) |
+| `MONGODB_URI`           | MongoDB connection string                                                 |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name                                                     |
+| `CLOUDINARY_API_KEY`    | Cloudinary API key                                                        |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret                                                     |
+| `ADMIN_PASSWORD`        | Static admin password (plain text, compared with `===`)                   |
+| `CRON_SECRET`           | Protects cron endpoint                                                    |
+| `TELEGRAM_BOT_TOKEN`    | Telegram bot token                                                        |
+| `TELEGRAM_CHAT_ID`      | Telegram group chat ID                                                    |
+
+#### Gotchas
+
+- **`JWT_SECRET_KEY`**: Nếu thiếu → app crash (đã bỏ fallback `'secretKey'` vì bảo mật).
+- **`main.ts` ↔ `vercel.ts`**: CORS, ValidationPipe, Swagger path phải sync giữa 2 file.
+- **ValidationPipe**: `whitelist: true, forbidNonWhitelisted: true, transform: true`.
+- **CORS**: khi thêm domain frontend mới → update cả `main.ts` và `vercel.ts`.
+
+### Frontend
+
+- **API base URL**: `NEXT_PUBLIC_API_URL` env var. Trên Vercel cần set: `NEXT_PUBLIC_API_URL=https://family-tree-eight-opal.vercel.app/api/v1`
+- Fallback local: `http://localhost:9999/api/v1`
+
+### Sync giữa `main.ts` và `vercel.ts`
+
+Khi sửa 1 trong các config sau ở 1 file, **phải sửa cả file còn lại**:
+
+- `enableCors({ origin: [...] })`
+- `new ValidationPipe({...})`
+- `SwaggerModule.setup('docs', ...)`
+- `setGlobalPrefix('api/v1', ...)`

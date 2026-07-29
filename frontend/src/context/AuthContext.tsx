@@ -31,6 +31,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(false);
     }, []);
 
+    // Listen for 401-triggered logout from axios interceptor
+    useEffect(() => {
+        const handleAuthLogout = () => {
+            // Chỉ logout nếu không đang ở trang login (tránh redirect loop)
+            if (pathname !== '/login' && pathname !== '/guest-login') {
+                authService.logout();
+                setUser(null);
+                queryClient.clear();
+                router.push('/login');
+            }
+        };
+
+        window.addEventListener('auth:logout', handleAuthLogout);
+        return () => window.removeEventListener('auth:logout', handleAuthLogout);
+    }, [pathname, router, queryClient]);
+
     // Removed automatic redirect to login
     // useEffect(() => {
     //     if (!loading) {
