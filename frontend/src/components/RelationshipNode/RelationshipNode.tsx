@@ -1,6 +1,6 @@
 'use client';
 import { Handle, Node, NodeProps, Position } from '@xyflow/react';
-import React from 'react';
+import React, { memo } from 'react';
 import { Gender, RelationshipNodeSize } from 'src/constants';
 import { SpouseInfo } from 'src/schema/Spouse';
 
@@ -13,7 +13,7 @@ export type RelationshipNodeProps = Omit<NodeProps, 'data'> & {
     data: SpouseInfo;
     onClick?: (data: SpouseInfo) => void;
 };
-export default function RelationshipNode(props: RelationshipNodeProps) {
+const RelationshipNode = memo(function RelationshipNode(props: RelationshipNodeProps) {
     // Format marriage date
     const marriageDate = props.data.marriageDate ? (typeof props.data.marriageDate === 'string' ? new Date(props.data.marriageDate) : props.data.marriageDate) : null;
     const marriageDateStr = marriageDate ? marriageDate.toLocaleDateString() : '';
@@ -60,4 +60,6 @@ export default function RelationshipNode(props: RelationshipNodeProps) {
             </div>
         </div>
     );
-}
+});
+
+export default RelationshipNode;

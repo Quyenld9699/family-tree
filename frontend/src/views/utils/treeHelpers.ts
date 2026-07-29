@@ -1,5 +1,7 @@
 import { Gender } from 'src/constants';
-import { Person, SpouseWithDetails, ParentChildWithDetails } from 'src/services';
+import type { Person } from 'src/services/personService';
+import type { SpouseWithDetails } from 'src/services/spouseService';
+import type { ParentChildWithDetails } from 'src/services/parentChildService';
 
 /**
  * Map gender value to Gender enum

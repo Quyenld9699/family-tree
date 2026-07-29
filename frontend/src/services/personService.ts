@@ -1,10 +1,7 @@
 import api from './api';
 import authService from './authService';
 import personsData from '../data/persons.json';
-
-// Định nghĩa các interface
-// Gender enum from backend: MALE = 0, FEMALE = 1
-export type Gender = 0 | 1 | 'MALE' | 'FEMALE';
+import type { Gender } from 'src/constants';
 
 export interface Person {
     _id?: string;
