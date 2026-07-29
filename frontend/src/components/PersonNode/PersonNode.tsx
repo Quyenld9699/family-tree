@@ -2,7 +2,7 @@
 
 import { Handle, Node, NodeProps, Position } from '@xyflow/react';
 import Image from 'next/image';
-import React from 'react';
+import React, { memo } from 'react';
 import { Gender, PersonNodeHeight, PersonNodeWidth } from 'src/constants';
 import { Avatar_Female, Avatar_Male } from 'src/constants/imagePaths';
 import { PersonInfo } from 'src/schema/PersonInfo';
@@ -18,7 +18,7 @@ export type PersonNodeProps = Omit<NodeProps, 'data'> & {
     data: PersonInfo & { _id?: string };
     onClick?: (personData: PersonInfo & { _id?: string }) => void;
 };
-export default function PersonNode(props: PersonNodeProps) {
+const PersonNode = memo(function PersonNode(props: PersonNodeProps) {
     const handleClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (props.onClick) {
@@ -100,4 +100,6 @@ export default function PersonNode(props: PersonNodeProps) {
             <Handle type="source" position={Position.Bottom} id={'sb'} style={{ opacity: 0 }} />
         </div>
     );
-}
+});
+
+export default PersonNode;

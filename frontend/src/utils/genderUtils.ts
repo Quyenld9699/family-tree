@@ -1,10 +1,8 @@
-// Gender enum from backend: MALE = 0, FEMALE = 1
-export const Gender = {
-    MALE: 0,
-    FEMALE: 1,
-} as const;
+import { Gender } from 'src/constants';
 
-export type GenderValue = 0 | 1 | 'MALE' | 'FEMALE';
+export { Gender };
+
+export type GenderValue = Gender | 'MALE' | 'FEMALE';
 
 /**
  * Check if gender is MALE (handles both number and string)

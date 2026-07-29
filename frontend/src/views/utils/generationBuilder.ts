@@ -1,4 +1,6 @@
-import { Person, SpouseWithDetails, ParentChildWithDetails } from 'src/services';
+import type { Person } from 'src/services/personService';
+import type { SpouseWithDetails } from 'src/services/spouseService';
+import type { ParentChildWithDetails } from 'src/services/parentChildService';
 import { sortSpouses, sortChildrenByBirthDate, getChildId } from '../utils/treeHelpers';
 
 /**
